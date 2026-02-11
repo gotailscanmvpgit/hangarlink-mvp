@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Aircraft Parking Rental Agreement</title>
+    <style>
+        @page {
+            size: letter;
+            margin: 1in;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        h1 {
+            color: #001F3F;
+            border-bottom: 3px solid #003366;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            color: #003366;
+            margin-top: 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .signature-line {
+            border-top: 1px solid #333;
+            width: 300px;
+            margin-top: 50px;
+            padding-top: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        td {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .label {
+            font-weight: bold;
+            background: #f5f5f5;
+            width: 40%;
+        }
+
+        ul {
+            margin-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>AIRCRAFT PARKING RENTAL AGREEMENT</h1>
+        <p><strong>Generated:</strong> {{ generated_date }}</p>
+    </div>
+
+    <div class="section">
+        <h2>1. PARTIES</h2>
+        <p>This Agreement is entered into between:</p>
+        <table>
+            <tr>
+                <td class="label">Owner (Lessor)</td>
+                <td>{{ owner.email }}</td>
+            </tr>
+            <tr>
+                <td class="label">Renter (Lessee)</td>
+                <td>{{ renter.email }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>2. PROPERTY DESCRIPTION</h2>
+        <table>
+            <tr>
+                <td class="label">Airport</td>
+                <td>{{ listing.airport_icao }}</td>
+            </tr>
+            <tr>
+                <td class="label">Size</td>
+                <td>{{ listing.size_sqft }} square feet</td>
+            </tr>
+            <tr>
+                <td class="label">Type</td>
+                <td>{% if listing.covered %}Covered/Enclosed Hangar{% else %}Outdoor Tie-Down{% endif %}</td>
+            </tr>
+            <tr>
+                <td class="label">Monthly Rent</td>
+                <td><strong>${{ listing.price_month }}</strong></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>3. TERM</h2>
+        <p>This agreement shall commence on _____________ and continue on a month-to-month basis until terminated by
+            either party with 30 days written notice.</p>
+    </div>
+
+    <div class="section">
+        <h2>4. PAYMENT TERMS</h2>
+        <p>Rent is due on the 1st day of each month. Payment shall be made to the Owner via the method agreed upon by
+            both parties.</p>
+    </div>
+
+    <div class="section">
+        <h2>5. USE OF PREMISES</h2>
+        <p>The premises shall be used solely for the parking and storage of the Renter's aircraft. The Renter agrees to:
+        </p>
+        <ul>
+            <li>Maintain current aircraft insurance with minimum liability coverage</li>
+            <li>Keep the aircraft in airworthy condition per FAA/Transport Canada regulations</li>
+            <li>Not sublease the space without prior written consent from Owner</li>
+            <li>Comply with all airport rules, regulations, and security procedures</li>
+            <li>Provide Owner with current aircraft registration and insurance information</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>6. MAINTENANCE AND CONDITION</h2>
+        <p>The Renter agrees to:</p>
+        <ul>
+            <li>Keep the parking space clean and free of debris</li>
+            <li>Report any damage to the premises immediately</li>
+            <li>Not make any modifications to the premises without written consent</li>
+            <li>Properly secure the aircraft when not in use</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>7. LIABILITY WAIVER</h2>
+        <p><strong>IMPORTANT:</strong> The Owner is not responsible for any damage to the aircraft, theft, vandalism,
+            weather damage, or loss of any kind while parked on the premises. The Renter assumes all risk and agrees to
+            maintain comprehensive aircraft insurance naming the Owner as an additional insured party.</p>
+        <p>The Renter agrees to indemnify and hold harmless the Owner from any claims, damages, or liabilities arising
+            from the Renter's use of the premises.</p>
+    </div>
+
+    <div class="section">
+        <h2>8. TERMINATION</h2>
+        <p>Either party may terminate this agreement with 30 days written notice. Upon termination, the Renter shall:
+        </p>
+        <ul>
+            <li>Remove the aircraft and all personal property from the premises</li>
+            <li>Leave the space in clean condition</li>
+            <li>Pay all outstanding rent and fees</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>9. GOVERNING LAW</h2>
+        <p>This agreement shall be governed by the laws of the jurisdiction where the property is located.</p>
+    </div>
+
+    <div class="section">
+        <h2>10. SIGNATURES</h2>
+        <p>By signing below, both parties acknowledge that they have read, understood, and agree to be bound by the
+            terms and conditions outlined in this agreement.</p>
+
+        <div style="display: flex; justify-content: space-between; margin-top: 60px;">
+            <div>
+                <div class="signature-line">Owner Signature</div>
+                <p style="margin-top: 10px;"><strong>Print Name:</strong> _______________________</p>
+                <p>{{ owner.email }}</p>
+                <p><strong>Date:</strong> _________________</p>
+            </div>
+            <div>
+                <div class="signature-line">Renter Signature</div>
+                <p style="margin-top: 10px;"><strong>Print Name:</strong> _______________________</p>
+                <p>{{ renter.email }}</p>
+                <p><strong>Date:</strong> _________________</p>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: 60px; padding: 20px; background: #f5f5f5; border-left: 4px solid #003366;">
+        <p style="margin: 0; font-size: 12px; color: #666;">
+            <strong>Disclaimer:</strong> This is a basic template generated by HangarLink for convenience purposes only.
+            Both parties should review this agreement with qualified legal counsel before signing. HangarLink is not
+            responsible for the legal validity, enforceability, or completeness of this document. This template does not
+            constitute legal advice.
+        </p>
+    </div>
+
+    <div style="margin-top: 20px; text-align: center; font-size: 10px; color: #999;">
+        <p>Generated by HangarLink • {{ generated_date }} • Document ID: {{ listing.id }}-{{ renter.id }}</p>
+    </div>
+</body>
+
+</html>

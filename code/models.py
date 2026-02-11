@@ -1,0 +1,136 @@
+from extensions import db
+from flask_login import UserMixin
+from datetime import datetime
+
+class User(UserMixin, db.Model):
+    __tablename__ = 'users'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(200), nullable=False)
+    role = db.Column(db.String(20), nullable=False)  # 'owner' or 'renter'
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Alert Preferences (for Smart Availability Alerts)
+    alert_enabled = db.Column(db.Boolean, default=False)
+    alert_airport = db.Column(db.String(4), nullable=True)
+    alert_max_price = db.Column(db.Float, nullable=True)
+    alert_min_size = db.Column(db.Integer, nullable=True)
+    alert_covered_only = db.Column(db.Boolean, default=False)
+    
+    # Relationships
+    listings = db.relationship('Listing', backref='owner', lazy=True)
+    
+    # New Features
+    reputation_score = db.Column(db.Float, default=5.0)
+    rentals_count = db.Column(db.Integer, default=0)
+    is_premium = db.Column(db.Boolean, default=False)
+    
+    # Feature 5 & 6: Rewards & Referrals
+    points = db.Column(db.Integer, default=0)
+    referral_code = db.Column(db.String(20), unique=True, nullable=True)
+    referred_by_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    
+    # Feature 7: Certified Owner
+    is_certified = db.Column(db.Boolean, default=False)
+    seasonal_alerts = db.Column(db.Boolean, default=True) # Feature 4
+    
+    def __repr__(self):
+        return f'<User {self.email}>'
+
+class Listing(db.Model):
+    __tablename__ = 'listings'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    airport_icao = db.Column(db.String(4), nullable=False)
+    size_sqft = db.Column(db.Integer, nullable=False)
+    covered = db.Column(db.Boolean, default=False)
+    price_month = db.Column(db.Float, nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    photos = db.Column(db.Text, nullable=True)  # Comma-separated filenames
+    owner_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    status = db.Column(db.String(20), default='Active')  # 'Active', 'Inactive', 'Rented'
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # New Features
+    condition_verified = db.Column(db.Boolean, default=False)
+    likes = db.Column(db.Integer, default=0)
+    video_url = db.Column(db.String(255), nullable=True) # For verified hangar program
+    virtual_tour_url = db.Column(db.String(255), nullable=True) # Feature 2: 360/Video Tour
+    insurance_active = db.Column(db.Boolean, default=False) # For liability protection
+    health_score = db.Column(db.Integer, default=0)
+    checklist_completed = db.Column(db.Boolean, default=False)
+    availability_start = db.Column(db.Date, nullable=True)
+    availability_end = db.Column(db.Date, nullable=True)
+    
+    # Relationships
+    bookings = db.relationship('Booking', backref='listing', lazy=True)
+
+    def get_price_intelligence(self):
+        """Get average price range for similar listings at this airport"""
+        similar_listings = Listing.query.filter(
+            Listing.airport_icao == self.airport_icao,
+            Listing.status == 'Active',
+            Listing.id != self.id 
+        ).all()
+        
+        if not similar_listings:
+            return None
+            
+        prices = [l.price_month for l in similar_listings]
+        return {
+            'min': min(prices),
+            'max': max(prices),
+            'avg': sum(prices) / len(prices),
+            'count': len(prices)
+        }
+
+class Booking(db.Model):
+    __tablename__ = 'bookings'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    listing_id = db.Column(db.Integer, db.ForeignKey('listings.id'), nullable=False)
+    renter_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    
+    start_date = db.Column(db.DateTime, nullable=False)
+    end_date = db.Column(db.DateTime, nullable=False)
+    total_price = db.Column(db.Float, nullable=False)
+    status = db.Column(db.String(20), default='Pending') # Pending, Confirmed, Cancelled, Completed
+    stripe_payment_id = db.Column(db.String(100), nullable=True)
+    
+    # Reviews
+    owner_rating = db.Column(db.Integer, nullable=True)
+    renter_rating = db.Column(db.Integer, nullable=True)
+    owner_review = db.Column(db.Text, nullable=True)
+    renter_review = db.Column(db.Text, nullable=True)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationship to renter
+    renter = db.relationship('User', backref='bookings')
+
+    def __repr__(self):
+        return f'<Booking {self.id}>'
+
+class Message(db.Model):
+    __tablename__ = 'messages'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True) # Nullable for guest
+    receiver_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    listing_id = db.Column(db.Integer, db.ForeignKey('listings.id'), nullable=True)
+    content = db.Column(db.Text, nullable=False)
+    read = db.Column(db.Boolean, default=False)
+    is_guest = db.Column(db.Boolean, default=False)
+    guest_email = db.Column(db.String(120), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    sender = db.relationship('User', foreign_keys=[sender_id], backref='sent_messages')
+    receiver = db.relationship('User', foreign_keys=[receiver_id], backref='received_messages')
+    listing = db.relationship('Listing', backref='messages')
+    
+    def __repr__(self):
+        return f'<Message from {self.sender_id} to {self.receiver_id}>'

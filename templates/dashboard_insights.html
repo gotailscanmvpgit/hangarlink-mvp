@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <div class="mb-10 animate-fade-in-down">
+        <h1 class="text-4xl font-bold text-gray-900 dark:text-platinum-100 mb-2">HangarLink Insights</h1>
+        <p class="text-gray-600 dark:text-platinum-300">Data-driven analytics to optimize your hangar experience.</p>
+    </div>
+
+    <!-- Key Metrics Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 animate-fade-in">
+        <!-- Market Trend -->
+        <div
+            class="bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 hover-lift transition-all">
+            <div class="flex items-center justify-between mb-4">
+                <div
+                    class="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-600 dark:text-green-300">
+                    <i class="fas fa-chart-line text-xl"></i>
+                </div>
+                <span
+                    class="text-sm font-semibold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-3 py-1 rounded-full">
+                    {{ market_trend }}
+                </span>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-900 dark:text-platinum-100 mb-1">{{ avg_price_area }}</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Avg. Market Price (local)</p>
+        </div>
+
+        {% if current_user.role == 'owner' %}
+        <!-- Total Revenue -->
+        <div class="bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 hover-lift transition-all"
+            style="animation-delay: 100ms">
+            <div class="flex items-center justify-between mb-4">
+                <div
+                    class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300">
+                    <i class="fas fa-wallet text-xl"></i>
+                </div>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-900 dark:text-platinum-100 mb-1">${{ "{:,.2f}".format(total_revenue)
+                }}</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Total Revenue Earned</p>
+        </div>
+
+        <!-- Avg Rental Time (Static for MVP) -->
+        <div class="bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 hover-lift transition-all"
+            style="animation-delay: 200ms">
+            <div class="flex items-center justify-between mb-4">
+                <div
+                    class="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center text-purple-600 dark:text-purple-300">
+                    <i class="fas fa-clock text-xl"></i>
+                </div>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-900 dark:text-platinum-100 mb-1">4.2 Mo</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Avg. Occupancy Duration</p>
+        </div>
+
+        {% else %}
+        <!-- Total Spent -->
+        <div class="bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 hover-lift transition-all"
+            style="animation-delay: 100ms">
+            <div class="flex items-center justify-between mb-4">
+                <div
+                    class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center text-red-600 dark:text-red-300">
+                    <i class="fas fa-receipt text-xl"></i>
+                </div>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-900 dark:text-platinum-100 mb-1">${{ "{:,.2f}".format(total_spent)
+                }}</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Total Spent on Parking</p>
+        </div>
+
+        <!-- Savings (Placeholder) -->
+        <div class="bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 hover-lift transition-all"
+            style="animation-delay: 200ms">
+            <div class="flex items-center justify-between mb-4">
+                <div
+                    class="w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-900 flex items-center justify-center text-yellow-600 dark:text-yellow-300">
+                    <i class="fas fa-piggy-bank text-xl"></i>
+                </div>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-900 dark:text-platinum-100 mb-1">~15%</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Market Value Saved</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in" style="animation-delay: 300ms">
+        <div class="bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-platinum-100 mb-6">Price Trend (Local Market)</h3>
+            <div class="relative h-64 w-full">
+                <canvas id="marketChart"></canvas>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-platinum-100 mb-6">Activity & Views</h3>
+            <div class="relative h-64 w-full">
+                <canvas id="viewsChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Market Trend Chart
+    const ctx = document.getElementById('marketChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Avg Price / SqFt',
+                data: [0.45, 0.46, 0.48, 0.52, 0.51, 0.54],
+                borderColor: '#3B82F6',
+                tension: 0.4,
+                fill: true,
+                backgroundColor: 'rgba(59, 130, 246, 0.1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { grid: { color: 'rgba(128,128,128,0.1)' }, ticks: { color: '#9CA3AF' } },
+                x: { grid: { display: false }, ticks: { color: '#9CA3AF' } }
+            }
+        }
+    });
+
+    // Views Chart
+    const ctx2 = document.getElementById('viewsChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'Profile Views',
+                data: [12, 19, 3, 5, 2, 3, 10],
+                backgroundColor: '#10B981',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { grid: { color: 'rgba(128,128,128,0.1)' }, ticks: { color: '#9CA3AF' } },
+                x: { grid: { display: false }, ticks: { color: '#9CA3AF' } }
+            }
+        }
+    });
+</script>
+{% endblock %}

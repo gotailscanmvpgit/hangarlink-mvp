@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-6 lg:px-8 py-12">
+    <div class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8">
+        <h1 class="text-4xl font-bold text-gray-900 dark:text-platinum-100 mb-2">Edit Listing</h1>
+        <p class="text-gray-600 dark:text-platinum-300 mb-8">Update your parking space details</p>
+
+        <form method="POST" class="space-y-6">
+            <!-- Airport ICAO -->
+            <div>
+                <label for="airport_icao" class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
+                    <i class="fas fa-plane-departure mr-2 text-blue-600"></i>Airport ICAO Code *
+                </label>
+                <input type="text" id="airport_icao" name="airport_icao" required maxlength="4"
+                    value="{{ listing.airport_icao }}"
+                    class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-4">
+            </div>
+
+            <!-- Size -->
+            <div>
+                <label for="size_sqft" class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
+                    <i class="fas fa-ruler-combined mr-2 text-blue-600"></i>Size (sq ft) *
+                </label>
+                <input type="number" id="size_sqft" name="size_sqft" required min="100" step="1"
+                    value="{{ listing.size_sqft }}"
+                    class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-4">
+            </div>
+
+            <!-- Covered -->
+            <div>
+                <label class="flex items-center cursor-pointer">
+                    <input type="checkbox" name="covered" {% if listing.covered %}checked{% endif %}
+                        class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                    <span class="ml-3 text-sm font-semibold text-gray-700 dark:text-platinum-200">
+                        <i class="fas fa-warehouse mr-2 text-blue-600"></i>Covered / Enclosed Hangar
+                    </span>
+                </label>
+            </div>
+
+            <!-- Price -->
+            <div>
+                <label for="price_month" class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
+                    <i class="fas fa-dollar-sign mr-2 text-blue-600"></i>Monthly Price (USD) *
+                </label>
+                <input type="number" id="price_month" name="price_month" required min="0" step="0.01"
+                    value="{{ listing.price_month }}"
+                    class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-4">
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label for="description" class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
+                    <i class="fas fa-align-left mr-2 text-blue-600"></i>Description
+                </label>
+                <textarea id="description" name="description" rows="5"
+                    class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-4">{{ listing.description }}</textarea>
+            </div>
+
+            <!-- Status -->
+            <div>
+                <label for="status" class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
+                    <i class="fas fa-toggle-on mr-2 text-blue-600"></i>Status
+                </label>
+                <select id="status" name="status"
+                    class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 rounded-xl focus:ring-2 focus:ring-blue-500 block w-full p-4">
+                    <option value="Active" {% if listing.status=='Active' %}selected{% endif %}>Active</option>
+                    <option value="Rented" {% if listing.status=='Rented' %}selected{% endif %}>Rented</option>
+                    <option value="Inactive" {% if listing.status=='Inactive' %}selected{% endif %}>Inactive</option>
+                </select>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="flex gap-4 pt-4">
+                <button type="submit"
+                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl text-lg shadow-lg hover:shadow-2xl transition-all hover-lift">
+                    <i class="fas fa-save mr-2"></i>Save Changes
+                </button>
+                <a href="{{ url_for('listing_detail', id=listing.id) }}"
+                    class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-4 px-8 rounded-xl text-lg text-center shadow-lg hover:shadow-2xl transition-all hover-lift">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

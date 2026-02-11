@@ -1,0 +1,714 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- ═══════════════════════════════════════════════════════════════
+     CINEMATIC HERO SECTION — Luxury Aviation Experience
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="hero relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+    <!-- Background Image -->
+    <div class="absolute inset-0 z-0">
+        <div class="w-full h-full bg-cover bg-center bg-no-repeat"
+            style="background-image: url('{{ url_for('static', filename='images/hero_hangar.png') }}');"></div>
+    </div>
+    <!-- Cinematic Gradient Overlay -->
+    <div class="absolute inset-0 z-10 bg-gradient-to-b from-navy-900/80 via-navy-900/50 to-navy-900/90"></div>
+    <!-- Warm golden glow accent -->
+    <div class="absolute inset-0 z-10 bg-gradient-to-tr from-transparent via-amber-500/5 to-transparent"></div>
+
+    <!-- Hero Content -->
+    <div class="relative z-20 text-center max-w-5xl mx-auto px-6 lg:px-8 py-20">
+        <!-- Micro-badge -->
+        <div
+            class="inline-flex items-center bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-5 py-2 mb-8 animate-fade-in">
+            <span class="relative flex h-2.5 w-2.5 mr-3">
+                <span
+                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+            </span>
+            <span class="text-white/90 text-sm font-medium tracking-wide">Trusted by pilots across North America</span>
+        </div>
+
+        {% if current_user.is_authenticated %}
+        <!-- Authenticated: Personalized Welcome -->
+        <h1
+            class="text-4xl sm:text-5xl lg:text-7xl font-extrabold text-white mb-6 leading-[1.1] tracking-tight animate-fade-in-up">
+            Welcome back,<br>
+            <span class="bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent">{{
+                current_user.username }}</span>
+        </h1>
+        <p class="text-lg sm:text-xl text-white/70 mb-10 max-w-2xl mx-auto font-light leading-relaxed animate-fade-in-up"
+            style="animation-delay: 0.1s;">
+            Your aviation hub — manage spaces, discover parking, and connect with the pilot community.
+        </p>
+
+        <!-- Quick Stats -->
+        <div class="flex flex-wrap justify-center gap-4 sm:gap-6 mb-12 animate-fade-in-up"
+            style="animation-delay: 0.15s;">
+            <a href="{{ url_for('my_listings') }}"
+                class="group bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-5 min-w-[130px] sm:min-w-[150px] hover:bg-white/20 hover:border-white/30 transition-all duration-300 hover:-translate-y-1">
+                <div
+                    class="text-3xl sm:text-4xl font-bold text-blue-400 mb-1 group-hover:scale-110 transition-transform">
+                    {{ listings_count }}</div>
+                <div class="text-xs font-semibold text-white/60 uppercase tracking-wider">My Listings</div>
+            </a>
+            <a href="{{ url_for('messages') }}"
+                class="group bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-5 min-w-[130px] sm:min-w-[150px] hover:bg-white/20 hover:border-white/30 transition-all duration-300 hover:-translate-y-1">
+                <div
+                    class="text-3xl sm:text-4xl font-bold text-green-400 mb-1 group-hover:scale-110 transition-transform">
+                    {{ messages_count }}</div>
+                <div class="text-xs font-semibold text-white/60 uppercase tracking-wider">Messages</div>
+            </a>
+            <div class="group bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-5 min-w-[130px] sm:min-w-[150px] cursor-help"
+                title="Coming Soon">
+                <div
+                    class="text-3xl sm:text-4xl font-bold text-purple-400 mb-1 group-hover:scale-110 transition-transform">
+                    {{ saved_searches_count }}</div>
+                <div class="text-xs font-semibold text-white/60 uppercase tracking-wider">Saved</div>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- Guest: Aspirational Emotional Hook -->
+        <h1
+            class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-[1.1] tracking-tight animate-fade-in-up">
+            Unlock Your Hangar.<br>
+            <span class="bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent">Find
+                Your Spot.</span><br>
+            Fly More.
+        </h1>
+        <p class="text-lg sm:text-xl text-white/70 mb-12 max-w-2xl mx-auto font-light leading-relaxed animate-fade-in-up"
+            style="animation-delay: 0.1s;">
+            Rent out unused space. Discover parking at any airport. All in one trusted place.
+        </p>
+        {% endif %}
+
+        <!-- ═══ Premium Search Bar ═══ -->
+        <div class="max-w-3xl mx-auto animate-fade-in-up" style="animation-delay: 0.2s;">
+            <form action="{{ url_for('listings') }}" method="GET"
+                class="bg-white/10 backdrop-blur-xl rounded-2xl p-6 sm:p-8 shadow-2xl border border-white/20 hover:border-white/30 transition-all duration-500">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                    <div>
+                        <label for="airport"
+                            class="block text-xs font-bold text-white/80 mb-2 text-left uppercase tracking-wider">
+                            <i class="fas fa-plane-departure mr-1.5 text-blue-400"></i>Airport ICAO
+                        </label>
+                        <input type="text" id="airport" name="airport"
+                            class="bg-white/10 backdrop-blur border border-white/20 text-white placeholder-white/40 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-4 transition-all"
+                            placeholder="KJFK" maxlength="4" required>
+                    </div>
+                    <div>
+                        <label for="radius"
+                            class="block text-xs font-bold text-white/80 mb-2 text-left uppercase tracking-wider">
+                            <i class="fas fa-map-marker-alt mr-1.5 text-blue-400"></i>Radius: <span id="radius-value"
+                                class="text-blue-400">250</span> km
+                        </label>
+                        <input type="range" id="radius" name="radius" min="50" max="500" value="250" step="50"
+                            class="w-full h-3 bg-white/20 rounded-lg appearance-none cursor-pointer accent-blue-500 mt-5"
+                            oninput="document.getElementById('radius-value').textContent = this.value">
+                    </div>
+                </div>
+                <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 sm:py-5 px-8 rounded-xl text-lg shadow-lg shadow-blue-600/30 hover:shadow-blue-500/50 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0">
+                    <i class="fas fa-search mr-2"></i>Search Available Parking
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 animate-bounce hidden sm:block">
+        <i class="fas fa-chevron-down text-white/40 text-xl"></i>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     ONBOARDING TOUR MODAL (Flowbite Carousel — shown after signup)
+     ═══════════════════════════════════════════════════════════════ -->
+{% if current_user.is_authenticated and show_onboarding %}
+<div id="onboarding-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+    <div
+        class="bg-white dark:bg-dark-800 rounded-3xl shadow-2xl max-w-lg w-full mx-4 overflow-hidden border border-gray-200 dark:border-gray-700">
+        <!-- Tour Content -->
+        <div id="tour-carousel" class="relative">
+            <!-- Slide 1 -->
+            <div class="tour-slide" data-slide="0">
+                <div class="bg-gradient-to-br from-blue-600 to-blue-800 p-8 text-center">
+                    <div
+                        class="w-20 h-20 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-search-location text-white text-4xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-2">Find parking in seconds</h3>
+                    <p class="text-blue-100 text-sm leading-relaxed">Search any airport code and instantly see available
+                        hangars, tie-downs, and ramp spaces near you.</p>
+                </div>
+                <div class="flex items-center justify-between p-6">
+                    <div class="flex space-x-2">
+                        <div class="w-8 h-1.5 bg-blue-600 rounded-full"></div>
+                        <div class="w-8 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                        <div class="w-8 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                    </div>
+                    <button onclick="showTourSlide(1)"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl transition-all">
+                        Next <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="tour-slide hidden" data-slide="1">
+                <div class="bg-gradient-to-br from-green-600 to-emerald-700 p-8 text-center">
+                    <div
+                        class="w-20 h-20 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-hand-holding-usd text-white text-4xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-2">List your space & earn</h3>
+                    <p class="text-green-100 text-sm leading-relaxed">Turn unused hangar space into revenue. Set your
+                        own price, manage availability, and get paid securely.</p>
+                </div>
+                <div class="flex items-center justify-between p-6">
+                    <div class="flex space-x-2">
+                        <div class="w-8 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                        <div class="w-8 h-1.5 bg-green-600 rounded-full"></div>
+                        <div class="w-8 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                    </div>
+                    <button onclick="showTourSlide(2)"
+                        class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded-xl transition-all">
+                        Next <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Slide 3 -->
+            <div class="tour-slide hidden" data-slide="2">
+                <div class="bg-gradient-to-br from-purple-600 to-indigo-700 p-8 text-center">
+                    <div
+                        class="w-20 h-20 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-shield-alt text-white text-4xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-2">Join the trusted network</h3>
+                    <p class="text-purple-100 text-sm leading-relaxed">Verified owners, secure payments, and a growing
+                        community of pilots who trust HangarLink.</p>
+                </div>
+                <div class="flex items-center justify-between p-6">
+                    <div class="flex space-x-2">
+                        <div class="w-8 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                        <div class="w-8 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                        <div class="w-8 h-1.5 bg-purple-600 rounded-full"></div>
+                    </div>
+                    <button onclick="dismissOnboarding()"
+                        class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 px-6 rounded-xl transition-all">
+                        <i class="fas fa-check mr-2"></i>Get Started
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Skip -->
+        <div class="text-center pb-4">
+            <button onclick="dismissOnboarding()"
+                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-xs font-medium transition-colors">
+                Skip tour
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showTourSlide(n) {
+        document.querySelectorAll('.tour-slide').forEach(s => s.classList.add('hidden'));
+        document.querySelector(`.tour-slide[data-slide="${n}"]`).classList.remove('hidden');
+    }
+    function dismissOnboarding() {
+        document.getElementById('onboarding-modal').remove();
+        // Mark as seen
+        fetch('/api/dismiss-onboarding', { method: 'POST' });
+    }
+</script>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MARKET INTELLIGENCE WIDGET (Feature 4)
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="bg-gray-50 dark:bg-dark-900 py-8 border-b border-gray-200 dark:border-gray-800" id="forecast-section">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div
+            class="bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-lg flex flex-col md:flex-row items-center justify-between border border-blue-100 dark:border-blue-900/30 relative overflow-hidden transform hover:scale-[1.01] transition-transform duration-300">
+            <!-- Loading State -->
+            <div id="forecast-loading"
+                class="absolute inset-0 bg-white dark:bg-dark-800 z-10 flex items-center justify-center">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+
+            <div class="flex items-center mb-4 md:mb-0 relative z-0">
+                <div
+                    class="bg-blue-100 dark:bg-blue-900/50 p-4 rounded-full mr-4 text-blue-600 dark:text-blue-400 shadow-sm">
+                    <i class="fas fa-chart-line text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">Market Intelligence</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 font-mono" id="forecast-season">...</p>
+                </div>
+            </div>
+
+            <div class="flex-grow md:mx-12 relative z-0 text-center md:text-left">
+                <p class="text-xl font-medium text-gray-800 dark:text-gray-200" id="forecast-message">Analyzing regional
+                    demand...</p>
+            </div>
+
+            <div class="text-right relative z-0 mt-4 md:mt-0">
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('profile') }}"
+                    class="inline-flex items-center justify-center px-4 py-2 border border-blue-600 rounded-lg text-blue-600 font-bold hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors text-sm">
+                    <i class="fas fa-bell mr-2"></i> Set Alerts
+                </a>
+                {% else %}
+                <a href="{{ url_for('register') }}" class="text-blue-600 font-bold hover:underline text-sm">Sign up for
+                    alerts <i class="fas fa-arrow-right ml-1"></i></a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('/api/forecast')
+            .then(response => response.json())
+            .then(data => {
+                const trendColor = data.trend === 'rising' ? 'text-red-500' : 'text-green-500';
+                const icon = data.trend === 'rising' ? '<i class="fas fa-arrow-up mr-2 text-red-500"></i>' : '<i class="fas fa-minus mr-2 text-gray-400"></i>';
+                document.getElementById('forecast-message').innerHTML =
+                    `<span class="font-bold ${trendColor}">${icon}${data.percentage}% Demand Increase</span> predicted for this region.`;
+                document.getElementById('forecast-season').textContent = data.season.toUpperCase();
+                setTimeout(() => {
+                    document.getElementById('forecast-loading').style.opacity = '0';
+                    setTimeout(() => { document.getElementById('forecast-loading').style.display = 'none'; }, 500);
+                }, 500);
+            });
+    });
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     QUICK ACTIONS — Three Pillars
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="max-w-7xl mx-auto px-6 lg:px-8 py-20 sm:py-24">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+        <!-- Rent Out Your Hangar -->
+        <div
+            class="bg-white dark:bg-dark-800 rounded-2xl p-8 sm:p-10 shadow-lg hover:shadow-2xl border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:scale-[1.02] group">
+            <div
+                class="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg">
+                <i class="fas fa-warehouse text-white text-xl sm:text-2xl"></i>
+            </div>
+            <h3 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-platinum-100 mb-3">Rent Out Your Hangar
+            </h3>
+            <p class="text-gray-600 dark:text-platinum-300 mb-6 leading-relaxed text-sm sm:text-base">
+                Turn unused space into revenue. List your hangar, tie-down, or ramp space in minutes.
+            </p>
+            <a href="{{ url_for('register') }}"
+                class="inline-flex items-center text-blue-600 dark:text-blue-400 font-semibold hover:text-blue-700 transition-colors">
+                Get Started <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+            </a>
+        </div>
+
+        <!-- Find Parking -->
+        <div
+            class="bg-white dark:bg-dark-800 rounded-2xl p-8 sm:p-10 shadow-lg hover:shadow-2xl border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:scale-[1.02] group">
+            <div
+                class="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-green-500 to-green-700 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg">
+                <i class="fas fa-search-location text-white text-xl sm:text-2xl"></i>
+            </div>
+            <h3 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-platinum-100 mb-3">Find Parking Now</h3>
+            <p class="text-gray-600 dark:text-platinum-300 mb-6 leading-relaxed text-sm sm:text-base">
+                Browse verified spaces at airports across North America. Compare prices and book instantly.
+            </p>
+            <a href="{{ url_for('listings') }}"
+                class="inline-flex items-center text-blue-600 dark:text-blue-400 font-semibold hover:text-blue-700 transition-colors">
+                Browse Listings <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+            </a>
+        </div>
+
+        <!-- Go Premium -->
+        <div
+            class="bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl p-8 sm:p-10 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] group relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
+            <div class="relative">
+                <div
+                    class="w-14 h-14 sm:w-16 sm:h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-crown text-white text-xl sm:text-2xl"></i>
+                </div>
+                <h3 class="text-xl sm:text-2xl font-bold text-white mb-3">Go Premium</h3>
+                <p class="text-amber-50 mb-6 leading-relaxed text-sm sm:text-base">
+                    Priority listings, advanced analytics, direct messaging, and exclusive features.
+                </p>
+                <button
+                    class="inline-flex items-center bg-white text-amber-600 font-bold px-6 py-3 rounded-xl hover:bg-amber-50 transition-all shadow-lg text-sm sm:text-base">
+                    Learn More <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     FEATURED LISTINGS
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="bg-gray-50 dark:bg-dark-800 py-20 sm:py-24">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="text-center mb-12 sm:mb-16">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-platinum-100 mb-4">Featured
+                Parking Spaces</h2>
+            <p class="text-lg sm:text-xl text-gray-600 dark:text-platinum-300 font-light">Verified, premium locations
+                available now</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            <!-- Sample Card 1 -->
+            <div
+                class="bg-white dark:bg-dark-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-200 dark:border-gray-700 group">
+                <div class="h-48 bg-gradient-to-br from-blue-400 to-blue-600 relative overflow-hidden">
+                    <div class="absolute top-3 left-3 z-10">
+                        <span
+                            class="inline-flex items-center bg-green-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-lg">
+                            <span class="w-1.5 h-1.5 bg-white rounded-full mr-1.5 animate-pulse"></span>Available Now
+                        </span>
+                    </div>
+                    <div class="absolute top-3 right-3 z-10">
+                        <span
+                            class="inline-flex items-center bg-white/90 backdrop-blur text-green-700 text-xs font-bold px-2.5 py-1 rounded-full shadow"
+                            title="This owner has been identity-verified by HangarLink">
+                            <i class="fas fa-check-circle mr-1"></i>Verified
+                        </span>
+                    </div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <i
+                            class="fas fa-plane text-white text-6xl opacity-30 group-hover:scale-110 transition-transform duration-500"></i>
+                    </div>
+                </div>
+                <div class="p-5 sm:p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-platinum-100">KJFK — New York
+                        </h3>
+                        <span class="text-xl sm:text-2xl font-bold text-blue-600">$850<span
+                                class="text-xs font-normal text-gray-500">/mo</span></span>
+                    </div>
+                    <p class="text-gray-600 dark:text-platinum-300 text-sm mb-3">Covered hangar • 2,500 sq ft • 24/7
+                        access</p>
+                    <div class="flex items-center text-gray-400 text-xs">
+                        <i class="fas fa-map-marker-alt mr-1.5"></i>1.2 km from terminal
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sample Card 2 -->
+            <div
+                class="bg-white dark:bg-dark-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-200 dark:border-gray-700 group">
+                <div class="h-48 bg-gradient-to-br from-indigo-400 to-purple-600 relative overflow-hidden">
+                    <div class="absolute top-3 left-3 z-10">
+                        <span
+                            class="inline-flex items-center bg-green-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-lg">
+                            <span class="w-1.5 h-1.5 bg-white rounded-full mr-1.5 animate-pulse"></span>Available Now
+                        </span>
+                    </div>
+                    <div class="absolute top-3 right-3 z-10">
+                        <span
+                            class="inline-flex items-center bg-white/90 backdrop-blur text-green-700 text-xs font-bold px-2.5 py-1 rounded-full shadow"
+                            title="This owner has been identity-verified by HangarLink">
+                            <i class="fas fa-check-circle mr-1"></i>Verified
+                        </span>
+                    </div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <i
+                            class="fas fa-plane text-white text-6xl opacity-30 group-hover:scale-110 transition-transform duration-500"></i>
+                    </div>
+                </div>
+                <div class="p-5 sm:p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-platinum-100">KLAX — Los Angeles
+                        </h3>
+                        <span class="text-xl sm:text-2xl font-bold text-blue-600">$1,200<span
+                                class="text-xs font-normal text-gray-500">/mo</span></span>
+                    </div>
+                    <p class="text-gray-600 dark:text-platinum-300 text-sm mb-3">Premium hangar • 3,000 sq ft • Climate
+                        controlled</p>
+                    <div class="flex items-center text-gray-400 text-xs">
+                        <i class="fas fa-map-marker-alt mr-1.5"></i>0.8 km from terminal
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sample Card 3 -->
+            <div
+                class="bg-white dark:bg-dark-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-200 dark:border-gray-700 group">
+                <div class="h-48 bg-gradient-to-br from-sky-400 to-cyan-600 relative overflow-hidden">
+                    <div class="absolute top-3 left-3 z-10">
+                        <span
+                            class="inline-flex items-center bg-yellow-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-lg">
+                            <i class="fas fa-clock mr-1"></i>Pending
+                        </span>
+                    </div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <i
+                            class="fas fa-plane text-white text-6xl opacity-30 group-hover:scale-110 transition-transform duration-500"></i>
+                    </div>
+                </div>
+                <div class="p-5 sm:p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-platinum-100">KORD — Chicago
+                        </h3>
+                        <span class="text-xl sm:text-2xl font-bold text-blue-600">$650<span
+                                class="text-xs font-normal text-gray-500">/mo</span></span>
+                    </div>
+                    <p class="text-gray-600 dark:text-platinum-300 text-sm mb-3">Tie-down • Outdoor • Secure facility
+                    </p>
+                    <div class="flex items-center text-gray-400 text-xs">
+                        <i class="fas fa-map-marker-alt mr-1.5"></i>2.5 km from terminal
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-10 sm:mt-12">
+            <a href="{{ url_for('listings') }}"
+                class="inline-flex items-center bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 py-4 rounded-xl shadow-lg shadow-blue-600/20 hover:shadow-blue-500/40 transition-all duration-300 hover:-translate-y-0.5">
+                View All Listings <i class="fas fa-arrow-right ml-3"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TRUST SECTION
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="max-w-7xl mx-auto px-6 lg:px-8 py-20 sm:py-24">
+    <div class="text-center mb-12 sm:mb-16">
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-platinum-100 mb-4">Why Pilots
+            Choose HangarLink</h2>
+        <p class="text-lg sm:text-xl text-gray-600 dark:text-platinum-300 font-light">Trusted by aviation professionals
+            worldwide</p>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+        <div class="text-center group">
+            <div
+                class="w-16 h-16 sm:w-20 sm:h-20 bg-blue-100 dark:bg-blue-900 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
+                <i class="fas fa-shield-alt text-blue-600 dark:text-blue-400 text-2xl sm:text-3xl"></i>
+            </div>
+            <h3 class="text-base sm:text-xl font-bold text-gray-900 dark:text-platinum-100 mb-2">Verified Owners</h3>
+            <p class="text-gray-600 dark:text-platinum-300 text-xs sm:text-sm leading-relaxed">All listings verified for
+                authenticity</p>
+        </div>
+        <div class="text-center group">
+            <div
+                class="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 dark:bg-green-900 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
+                <i class="fas fa-lock text-green-600 dark:text-green-400 text-2xl sm:text-3xl"></i>
+            </div>
+            <h3 class="text-base sm:text-xl font-bold text-gray-900 dark:text-platinum-100 mb-2">Secure Platform</h3>
+            <p class="text-gray-600 dark:text-platinum-300 text-xs sm:text-sm leading-relaxed">Bank-level encryption
+                protects your data</p>
+        </div>
+        <div class="text-center group">
+            <div
+                class="w-16 h-16 sm:w-20 sm:h-20 bg-purple-100 dark:bg-purple-900 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
+                <i class="fas fa-bolt text-purple-600 dark:text-purple-400 text-2xl sm:text-3xl"></i>
+            </div>
+            <h3 class="text-base sm:text-xl font-bold text-gray-900 dark:text-platinum-100 mb-2">Instant Booking</h3>
+            <p class="text-gray-600 dark:text-platinum-300 text-xs sm:text-sm leading-relaxed">Find and secure parking
+                in minutes</p>
+        </div>
+        <div class="text-center group">
+            <div
+                class="w-16 h-16 sm:w-20 sm:h-20 bg-amber-100 dark:bg-amber-900 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
+                <i class="fas fa-hand-holding-usd text-amber-600 dark:text-amber-400 text-2xl sm:text-3xl"></i>
+            </div>
+            <h3 class="text-base sm:text-xl font-bold text-gray-900 dark:text-platinum-100 mb-2">Transparent Pricing
+            </h3>
+            <p class="text-gray-600 dark:text-platinum-300 text-xs sm:text-sm leading-relaxed">No hidden fees or
+                surprise charges</p>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MAP SECTION
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="bg-white dark:bg-dark-800 py-20 sm:py-24">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="text-center mb-10 sm:mb-12">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-platinum-100 mb-4">Explore
+                Nearby Opportunities</h2>
+            <p class="text-lg sm:text-xl text-gray-600 dark:text-platinum-300 max-w-3xl mx-auto">
+                Discover available parking spaces across the region with our interactive map.
+            </p>
+        </div>
+
+        <div
+            class="bg-white dark:bg-dark-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
+            <div id="map" style="height: 400px; width: 100%;" class="rounded-xl sm:h-[500px]"></div>
+            <div class="mt-6 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm">
+                <div class="flex items-center">
+                    <div class="w-3 h-3 sm:w-4 sm:h-4 bg-blue-600 rounded-full mr-2"></div><span
+                        class="text-gray-700 dark:text-platinum-200 text-xs sm:text-sm">Available</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-3 h-3 sm:w-4 sm:h-4 bg-green-600 rounded-full mr-2"></div><span
+                        class="text-gray-700 dark:text-platinum-200 text-xs sm:text-sm">Verified</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-3 h-3 sm:w-4 sm:h-4 bg-amber-500 rounded-full mr-2"></div><span
+                        class="text-gray-700 dark:text-platinum-200 text-xs sm:text-sm">Premium</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-6 sm:gap-8 mt-10 sm:mt-12">
+            <div class="text-center">
+                <div class="text-3xl sm:text-4xl font-bold text-blue-600 mb-1 sm:mb-2">50+</div>
+                <div class="text-gray-600 dark:text-platinum-300 text-xs sm:text-base">Active Listings</div>
+            </div>
+            <div class="text-center">
+                <div class="text-3xl sm:text-4xl font-bold text-blue-600 mb-1 sm:mb-2">25+</div>
+                <div class="text-gray-600 dark:text-platinum-300 text-xs sm:text-base">Airports</div>
+            </div>
+            <div class="text-center">
+                <div class="text-3xl sm:text-4xl font-bold text-blue-600 mb-1 sm:mb-2">100%</div>
+                <div class="text-gray-600 dark:text-platinum-300 text-xs sm:text-base">Verified</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SUCCESS STORIES CAROUSEL
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="bg-gray-50 dark:bg-dark-900 py-20 sm:py-24 border-t border-gray-200 dark:border-gray-800">
+    <div class="max-w-5xl mx-auto px-6 text-center">
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-platinum-100 mb-2">Success Stories
+        </h2>
+        <p class="text-lg sm:text-xl text-gray-600 dark:text-platinum-300 font-light mb-10 sm:mb-12">Hear from the
+            HangarLink community</p>
+
+        <div class="relative min-h-[250px] sm:min-h-[300px] flex items-center justify-center">
+            <div class="testimonial-slide absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-1000 opacity-100"
+                data-index="0">
+                <i class="fas fa-quote-left text-3xl sm:text-4xl text-blue-200 dark:text-blue-900 mb-4 sm:mb-6"></i>
+                <p
+                    class="text-lg sm:text-2xl text-gray-700 dark:text-platinum-200 font-light italic mb-6 sm:mb-8 max-w-3xl leading-relaxed px-4">
+                    "I found a perfect hangar at CYHM within 2 days. The condition badges gave me total peace of mind."
+                </p>
+                <div>
+                    <div class="font-bold text-base sm:text-lg text-gray-900 dark:text-white">Capt. James R.</div>
+                    <div class="text-sm text-blue-600 font-semibold">Citation CJ3 Owner</div>
+                </div>
+            </div>
+            <div class="testimonial-slide absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-1000 opacity-0 pointer-events-none"
+                data-index="1">
+                <i class="fas fa-quote-left text-3xl sm:text-4xl text-blue-200 dark:text-blue-900 mb-4 sm:mb-6"></i>
+                <p
+                    class="text-lg sm:text-2xl text-gray-700 dark:text-platinum-200 font-light italic mb-6 sm:mb-8 max-w-3xl leading-relaxed px-4">
+                    "Listing my empty space was effortless. I'm now covering 60% of my own hangar lease costs."
+                </p>
+                <div>
+                    <div class="font-bold text-base sm:text-lg text-gray-900 dark:text-white">Sarah M.</div>
+                    <div class="text-sm text-blue-600 font-semibold">Cirrus SR22 Owner</div>
+                </div>
+            </div>
+            <div class="testimonial-slide absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-1000 opacity-0 pointer-events-none"
+                data-index="2">
+                <i class="fas fa-quote-left text-3xl sm:text-4xl text-blue-200 dark:text-blue-900 mb-4 sm:mb-6"></i>
+                <p
+                    class="text-lg sm:text-2xl text-gray-700 dark:text-platinum-200 font-light italic mb-6 sm:mb-8 max-w-3xl leading-relaxed px-4">
+                    "The price intelligence tool helped me set the right rate immediately. Completely transformed my
+                    FBO."
+                </p>
+                <div>
+                    <div class="font-bold text-base sm:text-lg text-gray-900 dark:text-white">Mike T.</div>
+                    <div class="text-sm text-blue-600 font-semibold">FBO Manager</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-center space-x-3 mt-6 sm:mt-8">
+            <button
+                class="w-3 h-3 rounded-full bg-blue-600 transition-all duration-300 hover:scale-125 focus:outline-none"
+                onclick="setSlide(0)"></button>
+            <button
+                class="w-3 h-3 rounded-full bg-gray-300 dark:bg-gray-700 transition-all duration-300 hover:scale-125 focus:outline-none"
+                onclick="setSlide(1)"></button>
+            <button
+                class="w-3 h-3 rounded-full bg-gray-300 dark:bg-gray-700 transition-all duration-300 hover:scale-125 focus:outline-none"
+                onclick="setSlide(2)"></button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentTestimonial = 0;
+    const slides = document.querySelectorAll('.testimonial-slide');
+    const buttons = document.querySelectorAll('.flex.justify-center button');
+    function showTestimonial(n) {
+        slides.forEach(s => { s.classList.remove('opacity-100'); s.classList.add('opacity-0', 'pointer-events-none'); });
+        buttons.forEach(b => { b.classList.remove('bg-blue-600'); b.classList.add('bg-gray-300', 'dark:bg-gray-700'); });
+        slides[n].classList.remove('opacity-0', 'pointer-events-none'); slides[n].classList.add('opacity-100');
+        buttons[n].classList.remove('bg-gray-300', 'dark:bg-gray-700'); buttons[n].classList.add('bg-blue-600');
+        currentTestimonial = n;
+    }
+    function nextTestimonial() { showTestimonial((currentTestimonial + 1) % slides.length); }
+    function setSlide(n) { showTestimonial(n); }
+    setInterval(nextTestimonial, 6000);
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     FINAL CTA
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="bg-gradient-to-br from-navy-900 via-navy-800 to-black py-20 sm:py-24">
+    <div class="max-w-4xl mx-auto px-6 lg:px-8 text-center">
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">Ready to get started?</h2>
+        <p class="text-lg sm:text-xl text-platinum-200 mb-10 sm:mb-12 font-light">Join thousands of pilots and aircraft
+            owners on HangarLink</p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <a href="{{ url_for('register') }}"
+                class="bg-white text-navy-900 hover:bg-platinum-100 font-bold py-4 px-10 rounded-xl text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-0.5">
+                Sign Up Free
+            </a>
+            <a href="{{ url_for('listings') }}"
+                class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-10 rounded-xl text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-0.5 border-2 border-blue-500">
+                Browse Listings
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Animations -->
+<style>
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    .animate-fade-in-up {
+        animation: fadeInUp 0.8s ease-out both;
+    }
+</style>
+{% endblock %}
