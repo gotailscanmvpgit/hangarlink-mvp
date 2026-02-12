@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to Premium — HangarLink{% endblock %}
+
+{% block content %}
+<section class="relative min-h-[80vh] flex items-center justify-center py-20">
+    <!-- Background -->
+    <div class="absolute inset-0 bg-gradient-to-b from-navy-900 via-navy-800 to-navy-900"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(251,191,36,0.08),transparent_60%)]"></div>
+
+    <!-- Confetti-like orbs -->
+    <div class="absolute top-1/4 left-1/4 w-32 h-32 bg-amber-500/20 rounded-full blur-2xl animate-pulse"></div>
+    <div class="absolute bottom-1/3 right-1/4 w-40 h-40 bg-purple-500/20 rounded-full blur-2xl animate-pulse"
+        style="animation-delay: 0.5s"></div>
+    <div class="absolute top-1/3 right-1/3 w-24 h-24 bg-green-500/20 rounded-full blur-2xl animate-pulse"
+        style="animation-delay: 1s"></div>
+
+    <div class="relative z-10 max-w-2xl mx-auto px-6 text-center">
+        <!-- Success Icon -->
+        <div
+            class="w-24 h-24 mx-auto mb-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-2xl shadow-amber-500/30">
+            <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+            </svg>
+        </div>
+
+        <!-- Title -->
+        <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-4">
+            Welcome to <span
+                class="bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">Premium!</span>
+        </h1>
+
+        <p class="text-lg text-slate-300 mb-8">
+            Your <strong class="text-amber-300">{{ plan.name }}</strong> subscription is now active.
+            You've unlocked the full power of HangarLink.
+        </p>
+
+        <!-- Features Unlocked Card -->
+        <div class="bg-white/5 backdrop-blur-xl border border-amber-400/20 rounded-2xl p-8 mb-8 text-left">
+            <h3 class="text-amber-300 font-semibold mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                Features Unlocked
+            </h3>
+            <ul class="space-y-3">
+                {% for feature in plan.features %}
+                <li class="flex items-center text-slate-200">
+                    <svg class="w-5 h-5 mr-3 text-green-400 shrink-0" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    {{ feature }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Premium Badge Preview -->
+        <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 mb-8">
+            <p class="text-slate-400 text-sm mb-3">Your profile now displays</p>
+            <div
+                class="inline-flex items-center bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/30 rounded-full px-4 py-2">
+                <svg class="w-4 h-4 mr-2 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                <span class="text-amber-300 font-semibold text-sm">PREMIUM MEMBER</span>
+            </div>
+        </div>
+
+        <!-- CTAs -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            {% if plan_type == 'owner' %}
+            <a href="{{ url_for('post_listing') }}"
+                class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/25">
+                Post Unlimited Listings →
+            </a>
+            {% else %}
+            <a href="{{ url_for('listings') }}"
+                class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-400 hover:to-violet-400 text-white font-bold transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/25">
+                Search Hangars →
+            </a>
+            {% endif %}
+            <a href="{{ url_for('index') }}"
+                class="px-8 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-medium transition-all duration-300">
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

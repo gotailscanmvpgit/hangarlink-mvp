@@ -51,6 +51,11 @@ def index():
 @app.route('/listings')
 def listings():
     """Search and browse all listings"""
+    # Check search limit for free-tier renters
+    search_limited = False
+    if not check_search_limit():
+        search_limited = True
+    
     airport = request.args.get('airport', '').strip().upper()
     radius = request.args.get('radius', 250, type=int)
     covered = request.args.get('covered', '')
@@ -74,7 +79,8 @@ def listings():
     if max_price:
         query = query.filter(Listing.price_month <= max_price)
     
-    listings = query.order_by(Listing.created_at.desc()).all()
+    # Premium listings first, then by date
+    listings = query.order_by(Listing.is_premium_listing.desc(), Listing.created_at.desc()).all()
     
     return render_template('listings.html', 
                          listings=listings, 
@@ -82,7 +88,8 @@ def listings():
                          radius=radius,
                          covered=covered,
                          min_price=min_price,
-                         max_price=max_price)
+                         max_price=max_price,
+                         search_limited=search_limited)
 
 @app.route('/listing/<int:id>')
 def listing_detail(id):
@@ -95,6 +102,11 @@ def listing_detail(id):
 def post_listing():
     """Create a new listing"""
     price_intel = None
+    
+    # Check listing limit for free tier
+    if not check_listing_limit():
+        flash('Free accounts can have 1 active listing. Upgrade to Premium for unlimited listings!', 'warning')
+        return redirect(url_for('pricing'))
     
     if request.method == 'POST':
         # Handle file upload
@@ -489,8 +501,10 @@ def owner_dashboard():
 def book_listing(listing_id):
     listing = Listing.query.get_or_404(listing_id)
     
-    # Calculate price/duration (simplified: 1 month)
-    amount = int(listing.price_month * 100) # Stripe uses cents
+    # Calculate price with transaction fee
+    platform_fee = listing.price_month * (TRANSACTION_FEE_PERCENT / 100)
+    total_with_fee = listing.price_month + platform_fee
+    amount = int(total_with_fee * 100)  # Stripe uses cents
     
     try:
         # Mock Stripe session for MVP if no key present
@@ -504,7 +518,7 @@ def book_listing(listing_id):
                     'price_data': {
                         'currency': 'usd',
                         'product_data': {
-                            'name': f'Hangar Rental at {listing.airport_icao}',
+                            'name': f'Hangar Rental at {listing.airport_icao} (includes {TRANSACTION_FEE_PERCENT}% platform fee)',
                         },
                         'unit_amount': amount,
                     },
@@ -790,3 +804,227 @@ def complete_booking(booking_id):
     flash('Rental completed and reviewed!', 'success')
     return redirect(url_for('index'))
 
+
+# ========== MONETIZATION & SUBSCRIPTIONS ==========
+
+OWNER_PLAN = {
+    'name': 'Owner Premium',
+    'price': 999,           # $9.99 in cents
+    'price_display': '9.99',
+    'interval': 'month',
+    'features': [
+        'Unlimited active listings',
+        'Priority placement in search results',
+        'Analytics dashboard with insights',
+        'Premium badge on profile & listings',
+        'Verified Owner fast-track',
+        'Export booking reports'
+    ]
+}
+
+RENTER_PLAN = {
+    'name': 'Renter Premium',
+    'price': 699,           # $6.99 in cents
+    'price_display': '6.99',
+    'interval': 'month',
+    'features': [
+        'Unlimited searches per day',
+        'Saved search alerts',
+        'Priority support from owners',
+        'Premium badge on profile',
+        'Early access to new listings',
+        'Advanced filters & map view'
+    ]
+}
+
+TRANSACTION_FEE_PERCENT = 8  # 8% platform fee
+
+@app.route('/pricing')
+def pricing():
+    return render_template('pricing.html',
+                           owner_plan=OWNER_PLAN,
+                           renter_plan=RENTER_PLAN,
+                           fee_percent=TRANSACTION_FEE_PERCENT)
+
+
+@app.route('/create-checkout-session', methods=['POST'])
+@login_required
+def create_checkout_session():
+    """Create a Stripe Checkout Session for subscription"""
+    if not stripe:
+        flash('Stripe is not configured. Please set STRIPE_SECRET_KEY.', 'warning')
+        return redirect(url_for('pricing'))
+    
+    plan_type = request.form.get('plan_type', 'owner')
+    plan = OWNER_PLAN if plan_type == 'owner' else RENTER_PLAN
+    
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'usd',
+                    'product_data': {
+                        'name': plan['name'],
+                        'description': f"HangarLink {plan['name']} - Monthly Subscription",
+                    },
+                    'unit_amount': plan['price'],
+                    'recurring': {'interval': plan['interval']},
+                },
+                'quantity': 1,
+            }],
+            mode='subscription',
+            success_url=request.host_url + f'subscription/success?session_id={{CHECKOUT_SESSION_ID}}&plan={plan_type}',
+            cancel_url=request.host_url + 'subscription/cancel',
+            client_reference_id=str(current_user.id),
+            customer_email=current_user.email,
+            metadata={
+                'user_id': current_user.id,
+                'plan_type': plan_type
+            }
+        )
+        return redirect(checkout_session.url, code=303)
+    except Exception as e:
+        flash(f'Payment error: {str(e)}', 'danger')
+        return redirect(url_for('pricing'))
+
+
+@app.route('/subscription/success')
+@login_required
+def subscription_success():
+    """Handle successful subscription checkout"""
+    session_id = request.args.get('session_id')
+    plan_type = request.args.get('plan', 'owner')
+    
+    if stripe and session_id:
+        try:
+            checkout = stripe.checkout.Session.retrieve(session_id)
+            current_user.stripe_customer_id = checkout.customer
+            current_user.stripe_subscription_id = checkout.subscription
+            current_user.subscription_tier = 'premium'
+            current_user.is_premium = True
+            current_user.subscription_expires = datetime.utcnow() + timedelta(days=30)
+            db.session.commit()
+        except Exception as e:
+            print(f"Stripe session retrieve error: {e}")
+    else:
+        # Demo mode: activate immediately
+        current_user.subscription_tier = 'premium'
+        current_user.is_premium = True
+        current_user.subscription_expires = datetime.utcnow() + timedelta(days=30)
+        db.session.commit()
+    
+    flash('🎉 Welcome to Premium! Your subscription is active.', 'success')
+    return render_template('subscription_success.html', plan_type=plan_type,
+                           plan=OWNER_PLAN if plan_type == 'owner' else RENTER_PLAN)
+
+
+@app.route('/subscription/cancel')
+def subscription_cancel():
+    """Handle cancelled checkout"""
+    flash('Subscription checkout was cancelled. You can try again anytime.', 'info')
+    return redirect(url_for('pricing'))
+
+
+@app.route('/webhook/stripe', methods=['POST'])
+def stripe_webhook():
+    """Handle Stripe webhook events for subscription management"""
+    if not stripe:
+        return jsonify({'error': 'Stripe not configured'}), 400
+    
+    payload = request.get_data(as_text=True)
+    sig_header = request.headers.get('Stripe-Signature')
+    webhook_secret = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
+    
+    try:
+        if webhook_secret:
+            event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
+        else:
+            event = stripe.Event.construct_from(
+                __import__('json').loads(payload), stripe.api_key
+            )
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+    
+    # Handle subscription events
+    if event['type'] == 'customer.subscription.deleted':
+        sub = event['data']['object']
+        user = User.query.filter_by(stripe_subscription_id=sub['id']).first()
+        if user:
+            user.subscription_tier = 'free'
+            user.is_premium = False
+            user.stripe_subscription_id = None
+            db.session.commit()
+    
+    elif event['type'] == 'invoice.payment_succeeded':
+        invoice = event['data']['object']
+        user = User.query.filter_by(stripe_customer_id=invoice['customer']).first()
+        if user:
+            user.subscription_expires = datetime.utcnow() + timedelta(days=30)
+            db.session.commit()
+    
+    return jsonify({'status': 'success'}), 200
+
+
+@app.route('/manage-subscription')
+@login_required
+def manage_subscription():
+    """Manage or cancel subscription"""
+    return render_template('manage_subscription.html',
+                           owner_plan=OWNER_PLAN,
+                           renter_plan=RENTER_PLAN)
+
+
+@app.route('/cancel-subscription', methods=['POST'])
+@login_required
+def cancel_subscription():
+    """Cancel a subscription"""
+    if stripe and current_user.stripe_subscription_id:
+        try:
+            stripe.Subscription.delete(current_user.stripe_subscription_id)
+        except Exception as e:
+            flash(f'Error cancelling: {str(e)}', 'danger')
+            return redirect(url_for('manage_subscription'))
+    
+    current_user.subscription_tier = 'free'
+    current_user.is_premium = False
+    current_user.stripe_subscription_id = None
+    current_user.subscription_expires = None
+    db.session.commit()
+    
+    flash('Subscription cancelled. You can re-subscribe anytime.', 'info')
+    return redirect(url_for('pricing'))
+
+
+def check_search_limit():
+    """Check if free-tier renter has exceeded daily search limit"""
+    if not current_user.is_authenticated:
+        return True  # Allow guests
+    if current_user.subscription_tier == 'premium':
+        return True  # Unlimited for premium
+    if current_user.role != 'renter':
+        return True  # No limit for owners searching
+    
+    today = date.today()
+    if current_user.search_reset_date != today:
+        current_user.search_count_today = 0
+        current_user.search_reset_date = today
+        db.session.commit()
+    
+    if current_user.search_count_today >= 5:
+        return False
+    
+    current_user.search_count_today += 1
+    db.session.commit()
+    return True
+
+
+def check_listing_limit():
+    """Check if free-tier owner can post more listings"""
+    if current_user.subscription_tier == 'premium':
+        return True  # Unlimited for premium
+    active_count = Listing.query.filter_by(
+        owner_id=current_user.id,
+        status='Active'
+    ).count()
+    return active_count < 1  # Free tier: max 1 active listing

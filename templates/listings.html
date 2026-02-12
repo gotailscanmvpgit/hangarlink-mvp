@@ -62,6 +62,29 @@
     </div>
 </div>
 
+<!-- Search Limit Banner -->
+{% if search_limited %}
+<div class="max-w-7xl mx-auto px-6 lg:px-8 mt-8">
+    <div
+        class="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-400/30 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+            <div
+                class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shrink-0">
+                <i class="fas fa-lock text-white text-lg"></i>
+            </div>
+            <div>
+                <h3 class="text-white font-bold">Daily Search Limit Reached</h3>
+                <p class="text-slate-400 text-sm">Free accounts get 5 searches per day. Upgrade for unlimited.</p>
+            </div>
+        </div>
+        <a href="{{ url_for('pricing') }}"
+            class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold transition-all whitespace-nowrap">
+            Upgrade to Premium
+        </a>
+    </div>
+</div>
+{% endif %}
+
 <!-- Listings Results -->
 <div class="max-w-7xl mx-auto px-6 lg:px-8 py-12">
     {% if listings %}
@@ -133,6 +156,13 @@
                             class="inline-flex items-center bg-white/90 backdrop-blur text-blue-700 text-xs font-bold px-2 py-1 rounded-full shadow"
                             title="This listing has a 360° virtual tour available">
                             <i class="fas fa-vr-cardboard mr-1"></i>360°
+                        </span>
+                        {% endif %}
+                        {% if listing.owner.is_premium %}
+                        <span
+                            class="inline-flex items-center bg-amber-100/90 backdrop-blur text-amber-700 text-xs font-bold px-2 py-1 rounded-full shadow"
+                            title="Premium owner listing">
+                            <i class="fas fa-star mr-1"></i>Premium
                         </span>
                         {% endif %}
                     </div>

@@ -282,8 +282,14 @@
                                 }}</span>
                             <span class="block text-sm text-gray-500 truncate dark:text-gray-400 font-mono">{{
                                 current_user.email }}</span>
-                            <div class="mt-2 text-xs font-bold text-blue-600 dark:text-blue-400">
-                                {{ current_user.points|default(0) }} PTS
+                            <div class="mt-2 flex items-center gap-2">
+                                <span class="text-xs font-bold text-blue-600 dark:text-blue-400">{{
+                                    current_user.points|default(0) }} PTS</span>
+                                {% if current_user.subscription_tier == 'premium' %}
+                                <span
+                                    class="inline-flex items-center bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/30 rounded-full px-2 py-0.5 text-xs font-bold text-amber-400">★
+                                    PREMIUM</span>
+                                {% endif %}
                             </div>
                         </div>
                         <ul class="py-2" aria-labelledby="user-menu-button">
@@ -323,6 +329,14 @@
                                 <a href="{{ url_for('rewards') }}"
                                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200">
                                     <i class="fas fa-gift mr-2 text-pink-500 w-5"></i>Rewards
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ url_for('pricing') }}"
+                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200">
+                                    <i class="fas fa-star mr-2 text-amber-500 w-5"></i>{% if
+                                    current_user.subscription_tier == 'premium' %}Manage Plan{% else %}Go Premium{%
+                                    endif %}
                                 </a>
                             </li>
                             <li>
@@ -380,6 +394,12 @@
                             <a href="{{ url_for('listings') }}"
                                 class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700 font-bold">Find
                                 Parking</a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('pricing') }}"
+                                class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-amber-500 md:p-0 dark:text-amber-400 md:dark:hover:text-amber-300 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700 font-bold">
+                                <i class="fas fa-star text-amber-500 mr-1 md:hidden lg:inline"></i>Premium
+                            </a>
                         </li>
 
                         {% if current_user.is_authenticated %}

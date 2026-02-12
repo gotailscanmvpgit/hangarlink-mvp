@@ -122,6 +122,111 @@
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════════
+     GO PREMIUM CTA SECTION
+     ═══════════════════════════════════════════════════════════════ -->
+{% if not current_user.is_authenticated or (current_user.is_authenticated and current_user.subscription_tier !=
+'premium') %}
+<section class="relative py-16 overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-navy-900/95 to-navy-900"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(251,191,36,0.05),transparent_60%)]"></div>
+
+    <div class="relative z-10 max-w-6xl mx-auto px-6">
+        <!-- Section Header -->
+        <div class="text-center mb-10">
+            <div
+                class="inline-flex items-center bg-gradient-to-r from-amber-500/15 to-purple-500/15 border border-amber-400/20 rounded-full px-4 py-1.5 mb-4">
+                <svg class="w-4 h-4 mr-2 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                <span class="text-amber-300/80 text-sm font-medium">Go Premium</span>
+            </div>
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-3">
+                Unlock the Full <span
+                    class="bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">HangarLink</span>
+                Experience
+            </h2>
+            <p class="text-slate-400 max-w-xl mx-auto">Remove limits, get priority placement, and access powerful
+                analytics.</p>
+        </div>
+
+        <!-- Premium Cards -->
+        <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            <!-- Owner Premium Card -->
+            <div
+                class="group bg-white/5 backdrop-blur-xl border border-amber-400/20 rounded-2xl p-6 hover:border-amber-400/40 transition-all duration-500 hover:shadow-lg hover:shadow-amber-500/10">
+                <div class="flex items-center gap-4 mb-4">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shrink-0">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Owner Premium</h3>
+                        <p class="text-amber-400 font-extrabold">$9.99<span
+                                class="text-slate-400 font-normal text-sm">/mo</span></p>
+                    </div>
+                </div>
+                <p class="text-slate-400 text-sm mb-4">Unlimited listings, priority search, analytics dashboard, and
+                    premium badge.</p>
+                <a href="{{ url_for('pricing') }}"
+                    class="inline-flex items-center text-amber-400 hover:text-amber-300 font-medium text-sm group-hover:translate-x-1 transition-transform">
+                    Learn More <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Renter Premium Card -->
+            <div
+                class="group bg-white/5 backdrop-blur-xl border border-purple-400/20 rounded-2xl p-6 hover:border-purple-400/40 transition-all duration-500 hover:shadow-lg hover:shadow-purple-500/10">
+                <div class="flex items-center gap-4 mb-4">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-violet-500 flex items-center justify-center shrink-0">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Renter Premium</h3>
+                        <p class="text-purple-400 font-extrabold">$6.99<span
+                                class="text-slate-400 font-normal text-sm">/mo</span></p>
+                    </div>
+                </div>
+                <p class="text-slate-400 text-sm mb-4">Unlimited searches, saved alerts, early access to listings, and
+                    premium badge.</p>
+                <a href="{{ url_for('pricing') }}"
+                    class="inline-flex items-center text-purple-400 hover:text-purple-300 font-medium text-sm group-hover:translate-x-1 transition-transform">
+                    Learn More <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% elif current_user.is_authenticated and current_user.subscription_tier == 'premium' %}
+<section class="relative py-8">
+    <div class="max-w-6xl mx-auto px-6">
+        <div
+            class="flex items-center justify-center gap-3 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-400/20 rounded-2xl py-4 px-6">
+            <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+            <span class="text-amber-300 font-semibold">You're on Premium!</span>
+            <span class="text-slate-400">Unlimited listings & searches active</span>
+            <a href="{{ url_for('manage_subscription') }}"
+                class="ml-4 text-amber-400 hover:text-amber-300 text-sm underline">Manage →</a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════════════
      ONBOARDING TOUR MODAL (Flowbite Carousel — shown after signup)
      ═══════════════════════════════════════════════════════════════ -->
 {% if current_user.is_authenticated and show_onboarding %}

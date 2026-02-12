@@ -11,6 +11,8 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-i
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///hangarlink.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['STRIPE_SECRET_KEY'] = os.environ.get('STRIPE_SECRET_KEY', '')
+app.config['STRIPE_PUBLISHABLE_KEY'] = os.environ.get('STRIPE_PUBLISHABLE_KEY', '')
 
 # Initialize extensions
 db.init_app(app)
@@ -18,7 +20,7 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 # Import models
-from models import User, Listing, Message
+from models import User, Listing, Message, Booking
 
 # Context processor for legal disclaimer
 @app.context_processor
@@ -27,7 +29,8 @@ def inject_legal():
         disclaimer = f.read()
     return {
         'legal_disclaimer': disclaimer,
-        'app_version': 'v1.0.0'
+        'app_version': 'v1.0.0',
+        'stripe_publishable_key': app.config['STRIPE_PUBLISHABLE_KEY']
     }
 
 @login_manager.user_loader

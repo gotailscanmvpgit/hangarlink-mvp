@@ -27,6 +27,14 @@ class User(UserMixin, db.Model):
     rentals_count = db.Column(db.Integer, default=0)
     is_premium = db.Column(db.Boolean, default=False)
     
+    # Subscription & Monetization
+    subscription_tier = db.Column(db.String(20), default='free')  # 'free', 'premium'
+    stripe_customer_id = db.Column(db.String(100), nullable=True)
+    stripe_subscription_id = db.Column(db.String(100), nullable=True)
+    subscription_expires = db.Column(db.DateTime, nullable=True)
+    search_count_today = db.Column(db.Integer, default=0)
+    search_reset_date = db.Column(db.Date, nullable=True)
+    
     # Feature 5 & 6: Rewards & Referrals
     points = db.Column(db.Integer, default=0)
     referral_code = db.Column(db.String(20), unique=True, nullable=True)
@@ -64,6 +72,7 @@ class Listing(db.Model):
     checklist_completed = db.Column(db.Boolean, default=False)
     availability_start = db.Column(db.Date, nullable=True)
     availability_end = db.Column(db.Date, nullable=True)
+    is_premium_listing = db.Column(db.Boolean, default=False)  # Premium listings get priority
     
     # Relationships
     bookings = db.relationship('Booking', backref='listing', lazy=True)
