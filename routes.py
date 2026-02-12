@@ -6,11 +6,13 @@ from app import app
 from extensions import db
 from models import User, Listing, Message, Booking
 import os
-import stripe
+try:
+    import stripe
+    # Stripe Config
+    stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
+except ImportError:
+    stripe = None
 from datetime import datetime, date, timedelta
-
-# Stripe Config
-stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
 
 # File upload configuration
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
