@@ -34,6 +34,11 @@ def inject_legal():
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+# Create tables on startup (important for Render deployment)
+with app.app_context():
+    db.create_all()
+    print("✅ Database tables initialized")
+
 # Import routes
 from routes import *
 
