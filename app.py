@@ -23,7 +23,7 @@ from models import User, Listing, Message
 # Context processor for legal disclaimer
 @app.context_processor
 def inject_legal():
-    with open('../planning/legal-disclaimers.txt', 'r') as f:
+    with open('planning/legal-disclaimers.txt', 'r') as f:
         disclaimer = f.read()
     return {
         'legal_disclaimer': disclaimer,
