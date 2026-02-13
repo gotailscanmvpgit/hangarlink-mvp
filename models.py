@@ -32,7 +32,15 @@ class User(UserMixin, db.Model):
     stripe_customer_id = db.Column(db.String(100), nullable=True)
     stripe_subscription_id = db.Column(db.String(100), nullable=True)
     subscription_expires = db.Column(db.DateTime, nullable=True)
+    
+    # Analytics & Insights (Tier 2)
+    has_analytics_access = db.Column(db.Boolean, default=False)
+    analytics_expires_at = db.Column(db.DateTime, nullable=True)
+    is_admin = db.Column(db.Boolean, default=False)
+    
     search_count_today = db.Column(db.Integer, default=0)
+
+
     search_reset_date = db.Column(db.Date, nullable=True)
     
     # Feature 5 & 6: Rewards & Referrals
@@ -62,12 +70,18 @@ class Listing(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
+    # Monetization Tier 2
+    is_featured = db.Column(db.Boolean, default=False)
+    featured_expires_at = db.Column(db.DateTime, nullable=True)
+    featured_tier = db.Column(db.String(20), nullable=True) # 'silver', 'gold', 'platinum'
+    insurance_active = db.Column(db.Boolean, default=False) # Owner purchased/verified insurance
+    
     # New Features
     condition_verified = db.Column(db.Boolean, default=False)
     likes = db.Column(db.Integer, default=0)
     video_url = db.Column(db.String(255), nullable=True) # For verified hangar program
     virtual_tour_url = db.Column(db.String(255), nullable=True) # Feature 2: 360/Video Tour
-    insurance_active = db.Column(db.Boolean, default=False) # For liability protection
+    # insurance_active was here, moving up to group with monetization
     health_score = db.Column(db.Integer, default=0)
     checklist_completed = db.Column(db.Boolean, default=False)
     availability_start = db.Column(db.Date, nullable=True)
@@ -109,6 +123,10 @@ class Booking(db.Model):
     status = db.Column(db.String(20), default='Pending') # Pending, Confirmed, Cancelled, Completed
     stripe_payment_id = db.Column(db.String(100), nullable=True)
     
+    # Tiert 2: Insurance Add-on
+    insurance_opt_in = db.Column(db.Boolean, default=False)
+    insurance_fee = db.Column(db.Float, default=0.0)
+    
     # Reviews
     owner_rating = db.Column(db.Integer, nullable=True)
     renter_rating = db.Column(db.Integer, nullable=True)
@@ -141,5 +159,25 @@ class Message(db.Model):
     receiver = db.relationship('User', foreign_keys=[receiver_id], backref='received_messages')
     listing = db.relationship('Listing', backref='messages')
     
+    
     def __repr__(self):
         return f'<Message from {self.sender_id} to {self.receiver_id}>'
+
+class Ad(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    image_url = db.Column(db.String(500), nullable=False)
+    link_url = db.Column(db.String(500), nullable=False)
+    placement = db.Column(db.String(50), default='home_banner') # home_banner, sidebar, listing_detail
+    impressions = db.Column(db.Integer, default=0)
+    clicks = db.Column(db.Integer, default=0)
+    active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class WhiteLabelRequest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    fbo_name = db.Column(db.String(100), nullable=False)
+    contact_name = db.Column(db.String(100), nullable=False)
+    contact_email = db.Column(db.String(100), nullable=False)
+    status = db.Column(db.String(20), default='Pending') # Pending, Approved, Rejected
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)

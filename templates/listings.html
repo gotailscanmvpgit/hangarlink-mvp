@@ -96,6 +96,26 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
         {% for listing in listings %}
+        <!-- In-Feed Ad (After 2nd listing) -->
+        {% if loop.index == 3 and ads and ads.sidebar %}
+        <a href="{{ ads.sidebar.link_url }}" target="_blank"
+            class="block group relative bg-gray-50 dark:bg-dark-800 rounded-2xl overflow-hidden shadow-lg border-2 border-dashed border-gray-300 dark:border-gray-700 flex flex-col hover:border-blue-400 transition-colors h-full min-h-[350px]">
+            <div class="h-48 bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
+                <img src="{{ ads.sidebar.image_url }}" alt="{{ ads.sidebar.title }}"
+                    class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity">
+                <div
+                    class="absolute top-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded uppercase tracking-wider font-bold backdrop-blur-sm">
+                    Sponsored</div>
+            </div>
+            <div class="p-6 flex-grow flex flex-col justify-center text-center">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ ads.sidebar.title }}</h3>
+                <p class="text-gray-500 text-sm mb-4">Exclusive offer for HangarLink members.</p>
+                <span class="text-blue-600 font-bold hover:underline">View Offer <i
+                        class="fas fa-external-link-alt ml-1"></i></span>
+            </div>
+        </a>
+        {% endif %}
+
         <a href="{{ url_for('listing_detail', id=listing.id) }}" class="block group">
             <div
                 class="bg-white dark:bg-dark-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-200 dark:border-gray-700">
@@ -123,7 +143,14 @@
                     {% endif %}
 
                     <!-- Status Badge (top-left) -->
-                    <div class="absolute top-3 left-3 z-10">
+                    <div class="absolute top-3 left-3 z-10 flex flex-col gap-1 items-start">
+                        {% if listing.is_featured %}
+                        <span
+                            class="inline-flex items-center bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-lg border border-white/20">
+                            <i class="fas fa-bolt mr-1 text-white"></i>Featured
+                        </span>
+                        {% endif %}
+
                         {% if listing.status == 'Active' %}
                         <span
                             class="inline-flex items-center bg-green-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-lg">

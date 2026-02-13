@@ -340,6 +340,28 @@
 
                 {% if listing.status == 'Active' %}
                 <form action="{{ url_for('book_listing', listing_id=listing.id) }}" method="POST" class="mt-3">
+
+                    <!-- Insurance Add-on -->
+                    <div
+                        class="mb-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-xl p-3">
+                        <label class="flex items-start cursor-pointer">
+                            <input type="checkbox" name="add_insurance"
+                                class="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300 dark:border-gray-600">
+                            <div class="ml-3">
+                                <span class="block text-sm font-bold text-gray-900 dark:text-white">Add Liability
+                                    Insurance</span>
+                                <span class="block text-xs text-gray-500 dark:text-gray-400">Short-term coverage via
+                                    <span class="font-bold text-blue-600">Avemco</span>.</span>
+                                <span class="block text-xs font-mono text-gray-500 mt-1">+$45 base + $15/day</span>
+                                <div class="flex gap-2 mt-2 opacity-60 grayscale hover:grayscale-0 transition-all">
+                                    <!-- Placeholder Logos -->
+                                    <div class="h-4 bg-gray-400 w-12 rounded"></div>
+                                    <div class="h-4 bg-gray-400 w-12 rounded"></div>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+
                     <button type="submit"
                         class="block w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-xl text-center shadow-lg hover:shadow-xl transition-all hover-lift">
                         <i class="fas fa-bolt mr-2 text-yellow-300"></i>Reserve Now
@@ -430,6 +452,31 @@
         <a href="#" class="block text-center text-sm text-blue-600 hover:text-blue-800 mt-4 font-medium">View All FBOs
             at {{ listing.airport_icao }}</a>
     </div>
+
+    {% if ads and ads.listing_detail %}
+    <!-- Featured Partner Ad -->
+    <a href="{{ ads.listing_detail.link_url }}" target="_blank"
+        class="block bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 mb-6 overflow-hidden relative group hover:border-blue-400 transition-colors">
+        <div
+            class="absolute top-0 right-0 bg-gray-100 dark:bg-gray-800 text-gray-500 text-[10px] px-2 py-0.5 rounded-bl uppercase tracking-wider font-bold">
+            Sponsored</div>
+        <div class="flex items-start">
+            <div class="flex-shrink-0 mr-4">
+                <img src="{{ ads.listing_detail.image_url }}" alt="{{ ads.listing_detail.title }}"
+                    class="w-16 h-16 object-cover rounded-lg border border-gray-200">
+            </div>
+            <div>
+                <span class="text-blue-600 font-bold uppercase tracking-widest text-xs mb-1 block">Featured
+                    Partner</span>
+                <h4
+                    class="text-base font-bold text-gray-900 dark:text-white mb-1 group-hover:text-blue-600 transition-colors">
+                    {{ ads.listing_detail.title }}</h4>
+                <div class="text-gray-500 text-sm flex items-center group-hover:underline">Visit Website <i
+                        class="fas fa-arrow-right ml-1 text-xs"></i></div>
+            </div>
+        </div>
+    </a>
+    {% endif %}
 
     <!-- Share This Listing -->
     <div class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6">
