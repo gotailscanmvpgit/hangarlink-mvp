@@ -3,9 +3,9 @@ services:
     name: hangarlink-mvp
     env: python
     buildCommand: |
-      pip install -r code/requirements.txt
+      pip install -r requirements.txt
     startCommand: |
-      gunicorn -w 4 -b 0.0.0.0:$PORT code.app:app
+      flask db upgrade && gunicorn -w 4 -b 0.0.0.0:$PORT app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.10.0
