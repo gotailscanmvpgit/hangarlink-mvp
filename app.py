@@ -51,8 +51,8 @@ def load_user(user_id):
 #     db.create_all()
 #     print("✅ Database tables initialized")
 
-# Import routes
-from routes import *
+# Import routes/views (Direct import at end of file)
+from views import *
 
 if __name__ == '__main__':
     # Use 'flask db upgrade' for production migrations instead of create_all()
