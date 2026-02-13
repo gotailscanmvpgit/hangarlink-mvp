@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_migrate import Migrate
 from extensions import db, login_manager
 import os
 
@@ -6,16 +7,16 @@ app = Flask(__name__,
             template_folder='templates',
             static_folder='static')
 
-# Ensure the instance folder exists (Removed: moving DB to root for simplicity on Render)
-# try:
-#     os.makedirs(app.instance_path)
-# except OSError:
-#     pass
-
 # Configuration
 basedir = os.path.abspath(os.path.dirname(__file__))
+
+# Database Configuration (Postgres/SQLite hybrid)
+database_url = os.environ.get('DATABASE_URL')
+if database_url and database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(basedir, 'hangarlink_v3.db'))
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'sqlite:///' + os.path.join(basedir, 'hangarlink_v3.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['STRIPE_SECRET_KEY'] = os.environ.get('STRIPE_SECRET_KEY', '')
@@ -23,6 +24,7 @@ app.config['STRIPE_PUBLISHABLE_KEY'] = os.environ.get('STRIPE_PUBLISHABLE_KEY', 
 
 # Initialize extensions
 db.init_app(app)
+migrate = Migrate(app, db)
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
@@ -44,17 +46,18 @@ def inject_legal():
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# Create tables on startup (important for Render deployment)
-with app.app_context():
-    db.create_all()
-    print("✅ Database tables initialized")
+# Create tables on startup (Disabled: Use Flask-Migrate 'flask db upgrade')
+# with app.app_context():
+#     db.create_all()
+#     print("✅ Database tables initialized")
 
 # Import routes
 from routes import *
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
+    # Use 'flask db upgrade' for production migrations instead of create_all()
+    # with app.app_context():
+    #     db.create_all()
     
     # Run configuration
     port = int(os.environ.get('PORT', 5000))

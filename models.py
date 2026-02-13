@@ -181,3 +181,9 @@ class WhiteLabelRequest(db.Model):
     contact_email = db.Column(db.String(100), nullable=False)
     status = db.Column(db.String(20), default='Pending') # Pending, Approved, Rejected
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+# Optimization Indexes
+db.Index('idx_airport', Listing.airport_icao)
+db.Index('idx_price', Listing.price_month)
+db.Index('idx_status', Listing.status)
+db.Index('idx_created', Listing.created_at)

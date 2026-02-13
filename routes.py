@@ -82,14 +82,17 @@ def listings():
         query = query.filter(Listing.price_month <= max_price)
     
     # Sort: Featured -> Premium Owner -> Newest
-    listings = query.order_by(
+    pagination = query.order_by(
         Listing.is_featured.desc(), 
         Listing.is_premium_listing.desc(), 
         Listing.created_at.desc()
-    ).all()
+    ).paginate(page=request.args.get('page', 1, type=int), per_page=20, error_out=False)
+    
+    listings = pagination.items
     
     return render_template('listings.html', 
                          listings=listings, 
+                         pagination=pagination,
                          airport=airport, 
                          radius=radius,
                          covered=covered,
