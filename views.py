@@ -1261,7 +1261,10 @@ def admin_required(f):
 @app.context_processor
 def inject_ads():
     """Inject active ads into all templates"""
-    active_ads = Ad.query.filter_by(active=True).all()
+    try:
+        active_ads = Ad.query.filter_by(active=True).all()
+    except Exception:
+        active_ads = []
     # Organize by placement
     ads_by_placement = {
         'home_banner': [ad for ad in active_ads if ad.placement == 'home_banner'],

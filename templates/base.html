@@ -318,6 +318,20 @@
                                     <i class="fas fa-tachometer-alt mr-2 text-orange-500 w-5"></i>Owner Dashboard
                                 </a>
                             </li>
+                            <li>
+                                <a href="{{ url_for('pricing_sponsored') }}"
+                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200">
+                                    <i class="fas fa-bolt mr-2 text-yellow-500 w-5"></i>Promote Listing
+                                </a>
+                            </li>
+                            {% endif %}
+                            {% if current_user.is_admin %}
+                            <li>
+                                <a href="{{ url_for('admin_ads') }}"
+                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200">
+                                    <i class="fas fa-ad mr-2 text-purple-500 w-5"></i>Manage Ads
+                                </a>
+                            </li>
                             {% endif %}
                             <li>
                                 <a href="{{ url_for('my_listings') }}"
@@ -486,6 +500,9 @@
                         <li><a href="{{ url_for('privacy') }}"
                                 class="text-gray-600 dark:text-platinum-300 hover:text-blue-600 dark:hover:text-blue-400 text-sm transition-colors">Privacy
                                 Policy</a></li>
+                        <li><a href="{{ url_for('white_label') }}"
+                                class="text-gray-600 dark:text-platinum-300 hover:text-blue-600 dark:hover:text-blue-400 text-sm transition-colors">Partner
+                                Program (FBO)</a></li>
                     </ul>
                 </div>
 

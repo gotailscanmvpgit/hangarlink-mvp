@@ -165,12 +165,10 @@ class Message(db.Model):
 
 class Ad(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    image_url = db.Column(db.String(500), nullable=False)
-    link_url = db.Column(db.String(500), nullable=False)
-    placement = db.Column(db.String(50), default='home_banner') # home_banner, sidebar, listing_detail
-    impressions = db.Column(db.Integer, default=0)
-    clicks = db.Column(db.Integer, default=0)
+    title = db.Column(db.String(200))
+    image_url = db.Column(db.String(500))
+    link_url = db.Column(db.String(500))
+    placement = db.Column(db.String(50))
     active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
