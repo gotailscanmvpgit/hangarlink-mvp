@@ -1,0 +1,534 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Search/Browse Header -->
+<div class="bg-gradient-to-br from-navy-900 via-navy-800 to-black py-16">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <h1 class="text-4xl lg:text-5xl font-bold text-white mb-6">Find Aircraft Parking</h1>
+
+        <!-- Search Filters -->
+        <form method="GET" action="{{ url_for('main.listings') }}"
+            class="bg-white/95 dark:bg-dark-800/95 backdrop-blur-sm rounded-2xl p-6 shadow-2xl">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                <!-- Airport ICAO -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
+                        <i class="fas fa-plane-departure mr-2 text-blue-600"></i>Airport ICAO
+                    </label>
+                    <input type="text" name="airport" value="{{ airport }}"
+                        class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 rounded-xl focus:ring-2 focus:ring-blue-500 block w-full p-3"
+                        placeholder="KJFK" maxlength="4">
+                </div>
+
+                <!-- Covered -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
+                        <i class="fas fa-warehouse mr-2 text-blue-600"></i>Covered
+                    </label>
+                    <select name="covered"
+                        class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 rounded-xl focus:ring-2 focus:ring-blue-500 block w-full p-3">
+                        <option value="">Any</option>
+                        <option value="yes" {% if covered=='yes' %}selected{% endif %}>Yes</option>
+                        <option value="no" {% if covered=='no' %}selected{% endif %}>No</option>
+                    </select>
+                </div>
+
+                <!-- Min Price -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
+                        <i class="fas fa-dollar-sign mr-2 text-blue-600"></i>Min Price/mo
+                    </label>
+                    <input type="number" name="min_price" value="{{ min_price or '' }}"
+                        class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 rounded-xl focus:ring-2 focus:ring-blue-500 block w-full p-3"
+                        placeholder="500">
+                </div>
+
+                <!-- Max Price -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
+                        <i class="fas fa-dollar-sign mr-2 text-blue-600"></i>Max Price/mo
+                    </label>
+                    <input type="number" name="max_price" value="{{ max_price or '' }}"
+                        class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 rounded-xl focus:ring-2 focus:ring-blue-500 block w-full p-3"
+                        placeholder="2000">
+                </div>
+            </div>
+
+            <button type="submit"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all hover-lift">
+                <i class="fas fa-search mr-2"></i>Search Listings
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Search Limit Banner -->
+{% if search_limited %}
+<div class="max-w-7xl mx-auto px-6 lg:px-8 mt-8">
+    <div
+        class="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-400/30 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+            <div
+                class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shrink-0">
+                <i class="fas fa-lock text-white text-lg"></i>
+            </div>
+            <div>
+                <h3 class="text-white font-bold">Daily Search Limit Reached</h3>
+                <p class="text-slate-400 text-sm">Free accounts get 5 searches per day. Upgrade for unlimited.</p>
+            </div>
+        </div>
+        <a href="{{ url_for('main.pricing') }}"
+            class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold transition-all whitespace-nowrap">
+            Upgrade to Premium
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<!-- Listings Results -->
+<div class="max-w-7xl mx-auto px-6 lg:px-8 py-12">
+    {% if listings %}
+    <div class="mb-6">
+        <p class="text-gray-600 dark:text-platinum-300">
+            <span class="font-bold text-gray-900 dark:text-platinum-100">{{ listings|length }}</span> listing(s) found
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+        {% for listing in listings %}
+        <!-- In-Feed Ad (After 2nd listing) -->
+        {% if loop.index == 3 and ads and ads.sidebar %}
+        <a href="{{ ads.sidebar.link_url }}" target="_blank"
+            class="block group relative bg-gray-50 dark:bg-dark-800 rounded-2xl overflow-hidden shadow-lg border-2 border-dashed border-gray-300 dark:border-gray-700 flex flex-col hover:border-blue-400 transition-colors h-full min-h-[350px]">
+            <div class="h-48 bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
+                <img src="{{ ads.sidebar.image_url }}" alt="{{ ads.sidebar.title }}"
+                    class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity">
+                <div
+                    class="absolute top-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded uppercase tracking-wider font-bold backdrop-blur-sm">
+                    Sponsored</div>
+            </div>
+            <div class="p-6 flex-grow flex flex-col justify-center text-center">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ ads.sidebar.title }}</h3>
+                <p class="text-gray-500 text-sm mb-4">Exclusive offer for HangarLink members.</p>
+                <span class="text-blue-600 font-bold hover:underline">View Offer <i
+                        class="fas fa-external-link-alt ml-1"></i></span>
+            </div>
+        </a>
+        {% endif %}
+
+        <a href="{{ url_for('main.listing_detail', id=listing.id) }}" class="block group">
+            <div
+                class="bg-white dark:bg-dark-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-200 dark:border-gray-700">
+
+                <!-- Photo Section with Status Badge + Gallery Preview -->
+                <div class="relative h-48 overflow-hidden group-hover:h-48 transition-all">
+                    {% if listing.photos %}
+                    {% set photos = listing.photos.split(',') %}
+                    <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                        style="background-image: url('{{ url_for('static', filename='uploads/listings/' + photos[0]) }}');">
+                    </div>
+                    
+                    <!-- Thumbnails Overlay on Hover -->
+                    {% if photos|length > 1 %}
+                    <div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 overflow-hidden">
+                         {% for thumb in photos[1:4] %}
+                         <div class="w-12 h-12 rounded-lg bg-cover bg-center border border-white/50 shadow-sm shrink-0"
+                              style="background-image: url('{{ url_for('static', filename='uploads/listings/' + thumb) }}');">
+                         </div>
+                         {% endfor %}
+                         {% if photos|length > 4 %}
+                         <div class="w-12 h-12 rounded-lg bg-black/50 border border-white/50 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                             +{{ photos|length - 4 }}
+                         </div>
+                         {% endif %}
+                    </div>
+                    {% else %}
+                    <!-- Single Photo Indicator -->
+                    {% endif %}
+
+                    {% else %}
+                    <div
+                        class="absolute inset-0 bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                        <i
+                            class="fas fa-plane text-white text-5xl opacity-30 group-hover:scale-110 transition-transform duration-500"></i>
+                    </div>
+                    {% endif %}
+
+                    <!-- Status Badge (top-left) -->
+                    <div class="absolute top-3 left-3 z-10 flex flex-col gap-1 items-start">
+                        {% if listing.is_featured %}
+                        <span
+                            class="inline-flex items-center bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-lg border border-white/20">
+                            <i class="fas fa-bolt mr-1 text-white"></i>Featured
+                        </span>
+                        {% endif %}
+
+                        {% if listing.status == 'Active' %}
+                        <span
+                            class="inline-flex items-center bg-green-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-lg">
+                            <span class="w-1.5 h-1.5 bg-white rounded-full mr-1.5 animate-pulse"></span>Available Now
+                        </span>
+                        {% elif listing.status == 'Pending' %}
+                        <span
+                            class="inline-flex items-center bg-yellow-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-lg">
+                            <i class="fas fa-clock mr-1"></i>Pending
+                        </span>
+                        {% elif listing.status == 'Rented' %}
+                        <span
+                            class="inline-flex items-center bg-gray-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-lg">
+                            <i class="fas fa-lock mr-1"></i>Rented
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Verified Badge (top-right) -->
+                    <div class="absolute top-3 right-3 z-10 flex flex-col gap-1.5">
+                        {% if listing.condition_verified %}
+                        <span
+                            class="inline-flex items-center bg-white/90 backdrop-blur text-green-700 text-xs font-bold px-2 py-1 rounded-full shadow"
+                            title="Owner has guaranteed the condition of this space">
+                            <i class="fas fa-check-circle mr-1"></i>Verified
+                        </span>
+                        {% endif %}
+                        {% if listing.virtual_tour_url %}
+                        <span
+                            class="inline-flex items-center bg-white/90 backdrop-blur text-blue-700 text-xs font-bold px-2 py-1 rounded-full shadow"
+                            title="This listing has a 360° virtual tour available">
+                            <i class="fas fa-vr-cardboard mr-1"></i>360°
+                        </span>
+                        {% endif %}
+                        {% if listing.owner.is_premium %}
+                        <span
+                            class="inline-flex items-center bg-amber-100/90 backdrop-blur text-amber-700 text-xs font-bold px-2 py-1 rounded-full shadow"
+                            title="Premium owner listing">
+                            <i class="fas fa-star mr-1"></i>Premium
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Listing Info -->
+                <div class="p-5 sm:p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-platinum-100">{{
+                            listing.airport_icao }}</h3>
+                        <span class="text-xl sm:text-2xl font-bold text-blue-600">
+                            ${{ listing.price_month|int }}<span class="text-xs font-normal text-gray-500">/mo</span>
+                        </span>
+                    </div>
+                    <p class="text-gray-600 dark:text-platinum-300 text-sm mb-3">
+                        {% if listing.covered %}<i class="fas fa-warehouse text-blue-500 mr-1"></i>Covered{% else %}<i
+                            class="fas fa-cloud-sun text-blue-500 mr-1"></i>Outdoor{% endif %}
+                        • {{ listing.size_sqft|int }} sq ft
+                    </p>
+                    <p class="text-gray-400 dark:text-gray-500 text-xs line-clamp-2 leading-relaxed">
+                        {{ listing.description[:100] }}{% if listing.description|length > 100 %}...{% endif %}
+                    </p>
+
+                    <!-- Health Score micro-bar -->
+                    {% if listing.health_score %}
+                    <div
+                        class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                        <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                            <i
+                                class="fas fa-heartbeat text-{{ 'green' if listing.health_score >= 80 else 'yellow' if listing.health_score >= 60 else 'red' }}-500 mr-1.5"></i>
+                            Health: {{ listing.health_score }}
+                        </div>
+                        <div class="w-16 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-{{ 'green' if listing.health_score >= 80 else 'yellow' if listing.health_score >= 60 else 'red' }}-500 rounded-full"
+                                style="width: {{ listing.health_score }}%"></div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination Controls -->
+    {% if pagination and pagination.pages > 1 %}
+    <div class="flex justify-center mt-12 animate-fade-in-up">
+        <nav class="relative z-0 inline-flex rounded-xl shadow-lg -space-x-px" aria-label="Pagination">
+            <!-- Previous Button -->
+            {% if pagination.has_prev %}
+            <a href="{{ url_for('main.listings', page=pagination.prev_num, airport=airport, radius=radius, covered=covered, min_price=min_price, max_price=max_price) }}"
+                class="relative inline-flex items-center px-4 py-3 rounded-l-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-dark-800 text-sm font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <span class="sr-only">Previous</span>
+                <i class="fas fa-chevron-left mr-2"></i> Prev
+            </a>
+            {% else %}
+            <span
+                class="relative inline-flex items-center px-4 py-3 rounded-l-xl border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-sm font-medium text-gray-400 dark:text-gray-600 cursor-not-allowed">
+                <i class="fas fa-chevron-left mr-2"></i> Prev
+            </span>
+            {% endif %}
+
+            <!-- Page Number -->
+            <span
+                class="relative inline-flex items-center px-6 py-3 border-t border-b border-gray-300 dark:border-gray-700 bg-white dark:bg-dark-800 text-sm font-bold text-gray-700 dark:text-platinum-100">
+                Page {{ pagination.page }} of {{ pagination.pages }}
+            </span>
+
+            <!-- Next Button -->
+            {% if pagination.has_next %}
+            <a href="{{ url_for('main.listings', page=pagination.next_num, airport=airport, radius=radius, covered=covered, min_price=min_price, max_price=max_price) }}"
+                class="relative inline-flex items-center px-4 py-3 rounded-r-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-dark-800 text-sm font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <span class="sr-only">Next</span>
+                Next <i class="fas fa-chevron-right ml-2"></i>
+            </a>
+            {% else %}
+            <span
+                class="relative inline-flex items-center px-4 py-3 rounded-r-xl border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-sm font-medium text-gray-400 dark:text-gray-600 cursor-not-allowed">
+                Next <i class="fas fa-chevron-right ml-2"></i>
+            </span>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+    {% else %}
+    <!-- Premium Empty State - No Listings Yet -->
+    <div class="min-h-screen">
+        <!-- Hero Section with Background -->
+        <div class="relative bg-gradient-to-br from-navy-900 via-navy-800 to-black py-32 overflow-hidden">
+            <!-- Background Image Overlay -->
+            <div class="absolute inset-0 opacity-20">
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/40 to-black"></div>
+                <!-- Placeholder for hangar image - can be replaced with actual image -->
+                <div class="w-full h-full bg-cover bg-center"
+                    style="background-image: linear-gradient(135deg, #001F3F 0%, #003366 100%);"></div>
+            </div>
+
+            <!-- Hero Content -->
+            <div class="relative max-w-5xl mx-auto px-6 lg:px-8 text-center">
+                <!-- Animated Badge -->
+                <div
+                    class="inline-flex items-center bg-blue-600/20 backdrop-blur-sm border border-blue-400/30 rounded-full px-6 py-2 mb-8 animate-fade-in">
+                    <span class="relative flex h-3 w-3 mr-3">
+                        <span
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                    </span>
+                    <span class="text-blue-200 text-sm font-semibold">Building the Future of Aircraft Parking</span>
+                </div>
+
+                <!-- Main Headline -->
+                <h1
+                    class="text-5xl lg:text-7xl font-bold text-white mb-6 leading-tight tracking-tight animate-fade-in-up">
+                    The largest network of<br>
+                    <span class="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">aircraft
+                        parking spaces</span><br>
+                    is starting right here.
+                </h1>
+
+                <!-- Subheadline -->
+                <p class="text-xl lg:text-2xl text-platinum-200 mb-12 max-w-4xl mx-auto leading-relaxed font-light animate-fade-in-up"
+                    style="animation-delay: 0.1s;">
+                    Hangar shortages are real — waitlists are years long, prices are high.
+                    <strong class="font-semibold text-white">Help build the solution:</strong>
+                    post your unused hangar or tie-down space today and get
+                    <span class="text-blue-400 font-semibold">free lifetime premium</span> as an early member.
+                </p>
+
+                <!-- CTA Buttons -->
+                <div class="flex flex-col sm:flex-row justify-center gap-4 mb-16 animate-fade-in-up"
+                    style="animation-delay: 0.2s;">
+                    <a href="{{ url_for('main.post_listing') }}"
+                        class="group bg-blue-600 hover:bg-blue-700 text-white font-bold py-5 px-10 rounded-xl text-lg shadow-2xl hover:shadow-blue-500/50 transition-all hover-lift inline-flex items-center justify-center">
+                        <i class="fas fa-plus mr-3 group-hover:rotate-90 transition-transform"></i>
+                        Post Your Space Now
+                    </a>
+                    <button onclick="document.getElementById('notify-form').scrollIntoView({behavior: 'smooth'})"
+                        class="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white font-bold py-5 px-10 rounded-xl text-lg border-2 border-white/30 hover:border-white/50 transition-all hover-lift inline-flex items-center justify-center">
+                        <i class="fas fa-bell mr-3"></i>
+                        Get Notified
+                    </button>
+                </div>
+
+                <!-- Trust Badges -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto animate-fade-in-up"
+                    style="animation-delay: 0.3s;">
+                    <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 text-center">
+                        <i class="fas fa-shield-check text-green-400 text-2xl mb-2"></i>
+                        <div class="text-white text-sm font-semibold">Verified Owners</div>
+                    </div>
+                    <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 text-center">
+                        <i class="fas fa-lock text-blue-400 text-2xl mb-2"></i>
+                        <div class="text-white text-sm font-semibold">Secure Messaging</div>
+                    </div>
+                    <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 text-center">
+                        <i class="fas fa-gift text-yellow-400 text-2xl mb-2"></i>
+                        <div class="text-white text-sm font-semibold">No Fees for Early Members</div>
+                    </div>
+                    <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 text-center">
+                        <i class="fas fa-globe-americas text-purple-400 text-2xl mb-2"></i>
+                        <div class="text-white text-sm font-semibold">Canada & US Airports</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Why Join Early Section -->
+        <div class="bg-white dark:bg-dark-800 py-24">
+            <div class="max-w-6xl mx-auto px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-platinum-100 mb-4">
+                        Why join early?
+                    </h2>
+                    <p class="text-xl text-gray-600 dark:text-platinum-300 max-w-3xl mx-auto">
+                        Be part of the founding community and unlock exclusive lifetime benefits
+                    </p>
+                </div>
+
+                <!-- Benefits Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                    <!-- Benefit 1 -->
+                    <div
+                        class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-2xl p-8 border-2 border-blue-200 dark:border-blue-700 hover:shadow-2xl transition-all hover-lift">
+                        <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                            <i class="fas fa-crown text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-platinum-100 mb-4">
+                            Lifetime Premium Access
+                        </h3>
+                        <p class="text-gray-700 dark:text-platinum-200 leading-relaxed mb-4">
+                            First 100 posters get <strong>free lifetime premium</strong> — unlimited listings, priority
+                            support, and instant alerts.
+                        </p>
+                        <div class="inline-flex items-center text-blue-600 dark:text-blue-400 font-semibold">
+                            <span class="text-3xl font-bold mr-2">$0</span>
+                            <span class="text-sm line-through text-gray-400">$49/mo</span>
+                        </div>
+                    </div>
+
+                    <!-- Benefit 2 -->
+                    <div
+                        class="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-2xl p-8 border-2 border-green-200 dark:border-green-700 hover:shadow-2xl transition-all hover-lift">
+                        <div class="w-16 h-16 bg-green-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                            <i class="fas fa-users text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-platinum-100 mb-4">
+                            Build the Community
+                        </h3>
+                        <p class="text-gray-700 dark:text-platinum-200 leading-relaxed">
+                            Help create the <strong>go-to platform</strong> for pilots and aircraft owners. Your early
+                            participation shapes the future of aviation parking.
+                        </p>
+                    </div>
+
+                    <!-- Benefit 3 -->
+                    <div
+                        class="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-2xl p-8 border-2 border-purple-200 dark:border-purple-700 hover:shadow-2xl transition-all hover-lift">
+                        <div
+                            class="w-16 h-16 bg-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                            <i class="fas fa-rocket text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-platinum-100 mb-4">
+                            Exclusive Early Access
+                        </h3>
+                        <p class="text-gray-700 dark:text-platinum-200 leading-relaxed">
+                            Get first access to new features like <strong>calendar sync</strong>, smart matching, and
+                            advanced analytics before anyone else.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Email Notification Form -->
+                <div id="notify-form"
+                    class="max-w-2xl mx-auto bg-gradient-to-br from-navy-900 to-navy-800 rounded-2xl shadow-2xl border border-gray-700 p-10">
+                    <div class="text-center mb-8">
+                        <i class="fas fa-envelope text-blue-400 text-4xl mb-4"></i>
+                        <h3 class="text-3xl font-bold text-white mb-3">Stay in the Loop</h3>
+                        <p class="text-platinum-200">
+                            Get notified when new listings are posted in your area
+                        </p>
+                    </div>
+
+                    <form class="space-y-4">
+                        <div>
+                            <input type="email" placeholder="Enter your email"
+                                class="w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-platinum-300 rounded-xl px-6 py-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                required>
+                        </div>
+                        <div>
+                            <input type="text" placeholder="Preferred airport (e.g., KJFK)"
+                                class="w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-platinum-300 rounded-xl px-6 py-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <button type="submit"
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-2xl transition-all hover-lift">
+                            <i class="fas fa-bell mr-2"></i>
+                            Notify Me
+                        </button>
+                    </form>
+
+                    <p class="text-center text-platinum-300 text-sm mt-6">
+                        <i class="fas fa-lock mr-1"></i>
+                        We respect your privacy. Unsubscribe anytime.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Final CTA Section -->
+        <div class="bg-gradient-to-br from-navy-900 via-navy-800 to-black py-24">
+            <div class="max-w-4xl mx-auto px-6 lg:px-8 text-center">
+                <h2 class="text-4xl lg:text-5xl font-bold text-white mb-6">
+                    Ready to be a founding member?
+                </h2>
+                <p class="text-xl text-platinum-200 mb-12 font-light">
+                    Post your first listing and claim your lifetime premium membership
+                </p>
+                <a href="{{ url_for('main.post_listing') }}"
+                    class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-5 px-12 rounded-xl text-lg shadow-2xl hover:shadow-blue-500/50 transition-all hover-lift">
+                    <i class="fas fa-warehouse mr-3"></i>
+                    List Your Space Now
+                    <i class="fas fa-arrow-right ml-3"></i>
+                </a>
+
+                <!-- Counter -->
+                <div
+                    class="mt-12 inline-flex items-center bg-white/5 backdrop-blur-sm border border-white/10 rounded-full px-8 py-4">
+                    <div class="text-center">
+                        <div class="text-4xl font-bold text-blue-400">100</div>
+                        <div class="text-sm text-platinum-300">Lifetime spots remaining</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add fade-in animations -->
+    <style>
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.8s ease-out;
+        }
+    </style>
+    {% endif %}
+</div>
+{% endblock %}

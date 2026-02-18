@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-6 py-20 text-center animate-fade-in-up">
+    <!-- Card -->
+    <div
+        class="bg-white dark:bg-dark-800 rounded-3xl shadow-2xl p-10 border border-gray-100 dark:border-gray-700 relative overflow-hidden">
+
+        <!-- Decoration -->
+        <div
+            class="absolute top-0 left-0 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 -translate-x-1/2 -translate-y-1/2">
+        </div>
+        <div
+            class="absolute bottom-0 right-0 w-64 h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 translate-x-1/2 translate-y-1/2">
+        </div>
+
+        <div class="relative z-10">
+            <div
+                class="w-24 h-24 bg-gradient-to-br from-green-400 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg transform rotate-3 hover:rotate-6 transition-transform duration-500">
+                <i class="fas fa-user-friends text-4xl text-white"></i>
+            </div>
+
+            <h1 class="text-4xl font-black text-gray-900 dark:text-white mb-4 tracking-tight">Pilot Co-Pilot Network
+            </h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300 mb-10 max-w-lg mx-auto leading-relaxed">
+                Invite a fellow pilot or hangar owner to HangarLink.
+                <br>
+                When they complete their first rental, you both get <span
+                    class="font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded ml-1 dark:bg-green-900/30 dark:text-green-400">500
+                    Points</span>.
+            </p>
+
+            <div class="bg-gray-50 dark:bg-dark-900 p-8 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-700 mb-8 mx-auto max-w-sm hover:border-blue-500 transition-colors group cursor-pointer"
+                onclick="copyCode()">
+                <p class="text-xs text-gray-400 uppercase font-bold tracking-widest mb-3">Your Referral Code</p>
+                <div id="referralCode"
+                    class="text-5xl font-mono font-bold text-blue-600 dark:text-blue-400 tracking-widest group-hover:scale-110 transition-transform duration-300">
+                    {{ code }}</div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="copyCode()"
+                    class="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all w-full sm:w-auto">
+                    <i class="far fa-copy mr-2"></i> Copy Code
+                </button>
+                <a href="mailto:?subject=Join me on HangarLink&body=Use my code {{ code }} to get 500 points! Check it out: http://hangarlink.com"
+                    class="flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-bold py-4 px-8 rounded-xl shadow-sm hover:shadow-md transition-all w-full sm:w-auto">
+                    <i class="fas fa-envelope mr-2"></i> Email Invite
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function copyCode() {
+        const code = document.getElementById('referralCode').innerText;
+        navigator.clipboard.writeText(code);
+
+        // Simple visual feedback
+        const el = document.getElementById('referralCode');
+        const original = el.innerText;
+        el.innerText = "COPIED";
+        el.classList.add('text-green-500');
+        setTimeout(() => {
+            el.innerText = original;
+            el.classList.remove('text-green-500');
+        }, 1500);
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-6 lg:px-8 py-12">
+    <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8">
+        <h1 class="text-4xl font-bold text-gray-900 dark:text-platinum-100 mb-2">List Your Parking Space</h1>
+        <p class="text-gray-600 dark:text-platinum-300 mb-8">Fill out the details below to create your listing</p>
+
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            <!-- Airport ICAO -->
+            <div>
+                <label for="airport_icao" class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
+                    <i class="fas fa-plane-departure mr-2 text-blue-600"></i>Airport ICAO Code *
+                </label>
+                <input type="text" id="airport_icao" name="airport_icao" required maxlength="4"
+                    class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-4"
+                    placeholder="KJFK" value="{{ airport or '' }}"
+                    onchange="if(this.value.length >= 3) window.location.href = '{{ url_for('post_listing') }}?airport=' + this.value">
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">4-letter ICAO code (e.g., KJFK, KLAX, KORD)</p>
+            </div>
+
+            <!-- Size -->
+            <div>
+                <label for="size_sqft" class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
+                    <i class="fas fa-ruler-combined mr-2 text-blue-600"></i>Size (sq ft) *
+                </label>
+                <input type="number" id="size_sqft" name="size_sqft" required min="100" step="1"
+                    class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-4"
+                    placeholder="2500">
+            </div>
+
+            <!-- Covered -->
+            <div>
+                <label class="flex items-center cursor-pointer">
+                    <input type="checkbox" name="covered"
+                        class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                    <span class="ml-3 text-sm font-semibold text-gray-700 dark:text-platinum-200">
+                        <i class="fas fa-warehouse mr-2 text-blue-600"></i>Covered / Enclosed Hangar
+                    </span>
+                </label>
+            </div>
+
+            <!-- Price -->
+            <div>
+                <label for="price_month" class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
+                    <i class="fas fa-dollar-sign mr-2 text-blue-600"></i>Monthly Price (USD) *
+                </label>
+                <input type="number" id="price_month" name="price_month" required min="0" step="0.01"
+                    class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-4"
+                    placeholder="850.00">
+
+                {% if price_intel %}
+                <div
+                    class="mt-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800 animate-fade-in">
+                    <h4 class="text-sm font-bold text-blue-800 dark:text-blue-300 mb-2 flex items-center">
+                        <i class="fas fa-chart-line mr-2"></i>Market Intelligence for {{ airport }}
+                    </h4>
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div class="bg-white dark:bg-dark-800 rounded-lg p-2 shadow-sm">
+                            <div class="text-xs text-gray-500 dark:text-gray-400 uppercase">Lowest</div>
+                            <div class="font-bold text-gray-900 dark:text-white">${{ price_intel.min|int }}</div>
+                        </div>
+                        <div
+                            class="bg-white dark:bg-dark-800 rounded-lg p-2 shadow-sm border border-blue-200 dark:border-blue-700">
+                            <div class="text-xs text-blue-600 dark:text-blue-400 uppercase font-bold">Average</div>
+                            <div class="font-bold text-blue-700 dark:text-blue-300">${{ price_intel.avg|int }}</div>
+                        </div>
+                        <div class="bg-white dark:bg-dark-800 rounded-lg p-2 shadow-sm">
+                            <div class="text-xs text-gray-500 dark:text-gray-400 uppercase">Highest</div>
+                            <div class="font-bold text-gray-900 dark:text-white">${{ price_intel.max|int }}</div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
+                        Based on {{ price_intel.count }} active listing{{ 's' if price_intel.count != 1 }}.
+                    </p>
+                </div>
+                {% elif airport %}
+                <div class="mt-2 text-sm text-gray-500 dark:text-gray-400 italic">
+                    <i class="fas fa-info-circle mr-1"></i> No prior listing data available for {{ airport }}. Be the
+                    first!
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label for="description" class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
+                    <i class="fas fa-align-left mr-2 text-blue-600"></i>Description
+                </label>
+                <textarea id="description" name="description" rows="5"
+                    class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-4"
+                    placeholder="Describe your parking space, amenities, access hours, security features, etc."></textarea>
+            </div>
+
+            <!-- Photos -->
+            <div>
+                <label for="photos" class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
+                    <i class="fas fa-camera mr-2 text-blue-600"></i>Photos
+                </label>
+                <input type="file" id="photos" name="photos" multiple accept="image/*"
+                    class="block w-full text-sm text-gray-900 dark:text-platinum-100 border border-gray-300 dark:border-gray-700 rounded-xl cursor-pointer bg-gray-50 dark:bg-dark-900 focus:outline-none p-3">
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Upload up to 5 photos (PNG, JPG, JPEG, GIF,
+                    WEBP)</p>
+            </div>
+
+            <!-- Virtual Tour (Feature 2) -->
+            <div>
+                <label for="virtual_tour_url"
+                    class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
+                    <i class="fas fa-vr-cardboard mr-2 text-blue-600"></i>360° Virtual Tour URL (Optional)
+                </label>
+                <input type="url" id="virtual_tour_url" name="virtual_tour_url"
+                    class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-4 transition-all"
+                    placeholder="https://matterport.com/show/?m=...">
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Paste a link to your Matterport, YouTube 360,
+                    or Vimeo tour to get the "Interactive" badge.</p>
+            </div>
+
+            <!-- Availability & Health Score Section -->
+            <div class="space-y-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+
+                <!-- Availability Dates (New Feature) -->
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-platinum-100 flex items-center mb-6">
+                        <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Availability
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label
+                                class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">Available
+                                From</label>
+                            <input type="date" name="availability_start"
+                                class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 rounded-xl p-3 focus:ring-blue-500 block w-full text-gray-900 dark:text-platinum-100">
+                        </div>
+                        <div>
+                            <label
+                                class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">Available
+                                To (Optional)</label>
+                            <input type="date" name="availability_end"
+                                class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 rounded-xl p-3 focus:ring-blue-500 block w-full text-gray-900 dark:text-platinum-100">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hangar Health Score (Updated Feature) -->
+                <div
+                    class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-dark-800 dark:to-dark-900 rounded-2xl p-8 border border-blue-100 dark:border-gray-700 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10">
+                        <i class="fas fa-shield-alt text-9xl text-blue-900 dark:text-platinum-100"></i>
+                    </div>
+
+                    <div class="relative z-10">
+                        <h3 class="text-xl font-bold text-blue-900 dark:text-platinum-100 mb-2 flex items-center">
+                            <i class="fas fa-heartbeat text-red-500 mr-2"></i>Hangar Health Score
+                        </h3>
+                        <p class="text-sm text-blue-800 dark:text-platinum-300 mb-6 max-w-2xl">
+                            Build trust instantly! Listings with a high Health Score get <span class="font-bold">3x more
+                                views</span> and a distinctive Trust Badge.
+                        </p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <!-- Verification Checklist -->
+                            <div
+                                class="bg-white dark:bg-dark-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
+                                <h4
+                                    class="font-bold text-gray-900 dark:text-platinum-100 mb-3 text-sm uppercase tracking-wide">
+                                    Step 1: Check-in (+30 pts)
+                                </h4>
+                                <label class="flex items-start space-x-3 cursor-pointer group">
+                                    <input type="checkbox" name="checklist_verified"
+                                        class="mt-1 w-5 h-5 text-green-500 rounded border-gray-300 focus:ring-green-500 transition-all">
+                                    <div>
+                                        <span
+                                            class="block text-sm font-medium text-gray-700 dark:text-platinum-200 group-hover:text-blue-600 transition-colors">
+                                            I confirm this space is clean, dry, pest-free, and secure.
+                                        </span>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- Photo Requirement -->
+                            <div
+                                class="bg-white dark:bg-dark-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm flex items-center space-x-4">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 flex-shrink-0">
+                                    <i class="fas fa-camera"></i>
+                                </div>
+                                <div>
+                                    <span class="block text-sm font-medium text-gray-700 dark:text-platinum-200">
+                                        Upload 3+ Photos (+30 pts)
+                                    </span>
+                                    <span class="block text-xs text-gray-500 mt-1">
+                                        Tip: Floor, ceiling, entrance.
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Owner Guarantee -->
+                        <div
+                            class="bg-white/50 dark:bg-dark-800/50 rounded-xl p-4 border border-dashed border-gray-300 dark:border-gray-600 hover:border-green-500 dark:hover:border-green-500 transition-all cursor-pointer">
+                            <label class="flex items-center space-x-3 cursor-pointer w-full h-full">
+                                <input type="checkbox" name="condition_verified"
+                                    class="w-5 h-5 text-green-500 rounded border-gray-300 focus:ring-green-500">
+                                <div class="flex-1">
+                                    <span
+                                        class="block font-bold text-gray-900 dark:text-platinum-100 flex items-center">
+                                        <i class="fas fa-certificate text-yellow-500 mr-2"></i>Condition Guarantee (+20
+                                        pts)
+                                    </span>
+                                    <span class="block text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                        I personally guarantee the condition. (Adds "Verified" badge)
+                                    </span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-4">
+                <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl text-lg shadow-lg hover:shadow-2xl transition-all hover-lift">
+                    <i class="fas fa-check mr-2"></i>Create Listing
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

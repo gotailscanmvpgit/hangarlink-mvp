@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Hangar Rental Agreement</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #001F3F;
+            padding-bottom: 20px;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #001F3F;
+            margin: 0;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            font-size: 18px;
+            color: #001F3F;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .signature-box {
+            margin-top: 50px;
+            border-top: 1px solid #333;
+            width: 40%;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>HANGAR RENTAL AGREEMENT</h1>
+        <p>Generated via HangarLink Platform</p>
+    </div>
+
+    <div class="section">
+        <p>This Hangar Rental Agreement ("Agreement") is entered into on <strong>{{ booking.created_at.strftime('%B %d,
+                %Y') }}</strong> by and between:</p>
+
+        <p><strong>OWNER (Lessor):</strong><br>
+            user_{{ booking.listing.owner_id }}<br>
+            Email: {{ booking.listing.owner.email }}</p>
+
+        <p><strong>RENTER (Lessee):</strong><br>
+            user_{{ booking.renter_id }}<br>
+            Email: {{ booking.renter.email }}</p>
+    </div>
+
+    <div class="section">
+        <h2>1. PREMISES</h2>
+        <p>Lessor agrees to lease to Lessee the hangar space located at:</p>
+        <p><strong>Airport:</strong> {{ booking.listing.airport_icao }}<br>
+            <strong>Size:</strong> {{ booking.listing.size_sqft }} sq ft<br>
+            <strong>Type:</strong> {{ 'Covered' if booking.listing.covered else 'Tie-down' }}
+        </p>
+    </div>
+
+    <div class="section">
+        <h2>2. TERM AND RENT</h2>
+        <p><strong>Start Date:</strong> {{ booking.start_date.strftime('%B %d, %Y') }}<br>
+            <strong>End Date:</strong> {{ booking.end_date.strftime('%B %d, %Y') }}<br>
+            <strong>Monthly Rent:</strong> ${{ "{:,.2f}".format(booking.total_price) }} USD
+        </p>
+    </div>
+
+    <div class="section">
+        <h2>3. USE OF PREMISES</h2>
+        <p>The Premises shall be used solely for the storage of aircraft and related aviation equipment. No commercial
+            maintenance or hazardous activities are permitted without prior written consent.</p>
+    </div>
+
+    <div class="section">
+        <h2>4. INSURANCE</h2>
+        <p>Lessee acknowledges that HangarLink has facilitated short-term liability insurance for this transaction via
+            its partners, providing coverage up to $1,000,000 for premises liability during the rental term.</p>
+    </div>
+
+    <div style="margin-top: 60px; display: flex; justify-content: space-between;">
+        <div style="width: 45%;">
+            <div style="border-bottom: 1px solid black; margin-bottom: 10px;">/s/ {{ booking.listing.owner.email }}
+                (Electronic)</div>
+            <strong>Lessor Signature</strong><br>
+            Date: {{ booking.created_at.strftime('%Y-%m-%d') }}
+        </div>
+        <div style="width: 45%;">
+            <div style="border-bottom: 1px solid black; margin-bottom: 10px;">/s/ {{ booking.renter.email }}
+                (Electronic)</div>
+            <strong>Lessee Signature</strong><br>
+            Date: {{ booking.created_at.strftime('%Y-%m-%d') }}
+        </div>
+    </div>
+
+    <div style="margin-top: 50px; font-size: 10px; text-align: center; color: #999;">
+        Document ID: {{ booking.stripe_payment_id or 'PENDING' }} | HangarLink Inc.
+    </div>
+</body>
+
+</html>

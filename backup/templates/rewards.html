@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-6 py-12 animate-fade-in">
+    <div
+        class="bg-gradient-to-r from-blue-900 to-indigo-900 rounded-3xl p-8 md:p-12 text-white mb-12 shadow-2xl relative overflow-hidden group">
+        <div
+            class="absolute top-0 right-0 opacity-10 transform translate-x-10 -translate-y-10 transition-transform group-hover:scale-110 duration-700">
+            <i class="fas fa-trophy text-[12rem]"></i>
+        </div>
+        <div class="relative z-10">
+            <h1 class="text-4xl font-black mb-2 tracking-tight">HangarLink Rewards</h1>
+            <p class="text-blue-200 mb-8 max-w-lg text-lg">Earn points for every rental, referral, and verified listing.
+                Unlock exclusive premium perks.</p>
+
+            <div class="flex items-center space-x-6">
+                <div
+                    class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 inline-block min-w-[200px]">
+                    <span class="block text-xs text-blue-300 uppercase tracking-widest font-bold mb-1">Current
+                        Balance</span>
+                    <span class="text-5xl font-black">{{ points }} <span
+                            class="text-xl font-bold text-yellow-400">PTS</span></span>
+                </div>
+
+                <a href="{{ url_for('self_certify') }}"
+                    class="bg-yellow-400 hover:bg-yellow-300 text-yellow-900 font-bold py-3 px-6 rounded-xl shadow-lg transition-transform hover-lift flex items-center">
+                    <i class="fas fa-bolt mr-2"></i> Get 500 PTS Bonus
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Redeem Rewards</h2>
+        <span class="text-sm font-bold text-blue-600 dark:text-blue-400 cursor-pointer hover:underline">View
+            History</span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Reward 1 -->
+        <div
+            class="bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-xl border border-gray-100 dark:border-gray-700 flex flex-col h-full hover-lift transition-all">
+            <div
+                class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 text-purple-600 rounded-xl flex items-center justify-center mb-4 text-xl">
+                <i class="fas fa-crown"></i>
+            </div>
+            <h3 class="font-bold text-lg dark:text-platinum-100 mb-2">1 Month Premium</h3>
+            <p class="text-gray-500 dark:text-gray-400 text-sm mb-6 flex-grow">Unlocks priority matching and advanced
+                insights.</p>
+            <div class="mt-auto">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="font-bold text-gray-900 dark:text-white">500 PTS</span>
+                </div>
+                {% if points >= 500 %}
+                <button
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition-colors">Redeem</button>
+                {% else %}
+                <button
+                    class="w-full bg-gray-100 dark:bg-gray-700 text-gray-400 font-bold py-2 rounded-lg cursor-not-allowed">Need
+                    {{ 500 - points }} more</button>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Reward 2 -->
+        <div
+            class="bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-xl border border-gray-100 dark:border-gray-700 flex flex-col h-full hover-lift transition-all">
+            <div
+                class="w-12 h-12 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-xl flex items-center justify-center mb-4 text-xl">
+                <i class="fas fa-gas-pump"></i>
+            </div>
+            <h3 class="font-bold text-lg dark:text-platinum-100 mb-2">$50 Fuel Credit</h3>
+            <p class="text-gray-500 dark:text-gray-400 text-sm mb-6 flex-grow">Valid at Signature Flight Support
+                locations.</p>
+            <div class="mt-auto">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="font-bold text-gray-900 dark:text-white">2,500 PTS</span>
+                </div>
+                <button
+                    class="w-full bg-gray-100 dark:bg-gray-700 text-gray-400 font-bold py-2 rounded-lg cursor-not-allowed">Locked</button>
+            </div>
+        </div>
+
+        <!-- Reward 3 -->
+        <div
+            class="bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-xl border border-gray-100 dark:border-gray-700 flex flex-col h-full hover-lift transition-all">
+            <div
+                class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-xl flex items-center justify-center mb-4 text-xl">
+                <i class="fas fa-plane"></i>
+            </div>
+            <h3 class="font-bold text-lg dark:text-platinum-100 mb-2">HangarLink Swag</h3>
+            <p class="text-gray-500 dark:text-gray-400 text-sm mb-6 flex-grow">Exclusive cap and flight bag tag.</p>
+            <div class="mt-auto">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="font-bold text-gray-900 dark:text-white">1,000 PTS</span>
+                </div>
+                <button
+                    class="w-full bg-gray-100 dark:bg-gray-700 text-gray-400 font-bold py-2 rounded-lg cursor-not-allowed">Locked</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

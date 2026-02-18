@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="relative min-h-screen py-20 overflow-hidden bg-white dark:bg-dark-900">
+    <!-- Background Effects -->
+    <div class="absolute inset-0 bg-gradient-to-br from-indigo-900 to-black opacity-90"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.2),transparent_70%)]"></div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 text-center">
+        <!-- Badge -->
+        <span
+            class="inline-flex items-center px-4 py-1.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-sm font-bold uppercase tracking-wider mb-8">
+            <i class="fas fa-lock mr-2"></i> Premium Feature
+        </span>
+
+        <h1 class="text-4xl md:text-6xl font-extrabold text-[#FAFAFA] mb-6 tracking-tight">
+            Unlock Hangar Intelligence
+        </h1>
+        <p class="text-xl text-[#E0E0E0]/70 max-w-3xl mx-auto mb-16 leading-relaxed font-light">
+            Make data-driven decisions. Access real-time price trends, occupancy rates, and AI-powered investment
+            recommendations for your airport.
+        </p>
+
+        <!-- Blurred Preview -->
+        <div class="relative max-w-5xl mx-auto mb-16 overflow-hidden rounded-2xl border border-white/10 shadow-2xl">
+            <div
+                class="absolute inset-0 bg-black/60 backdrop-blur-sm z-10 flex flex-col items-center justify-center p-8">
+                <i class="fas fa-chart-line text-6xl text-white/50 mb-4"></i>
+                <h3 class="text-2xl font-bold text-white mb-2">Live Market Data Hidden</h3>
+                <p class="text-gray-400 mb-8">Upgrade to reveal full analytics.</p>
+                <div class="flex gap-4">
+                    <!-- Single Report -->
+                    <form action="{{ url_for('buy_insights', type='report') }}" method="POST">
+                        <button
+                            class="bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold py-3 px-8 rounded-xl transition-all">
+                            Unlock Report ($19.99)
+                        </button>
+                    </form>
+                    <!-- Subscription -->
+                    <form action="{{ url_for('buy_insights', type='subscription') }}" method="POST">
+                        <button
+                            class="bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/30 font-bold py-3 px-8 rounded-xl transition-all transform hover:scale-105">
+                            Get Pro Access ($99/yr)
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <!-- Fake Dashboard Background -->
+            <img src="https://ui-avatars.com/api/?name=H&background=random"
+                class="w-full h-96 object-cover opacity-20 filter blur-md" alt="Dashboard Preview">
+        </div>
+
+    </div>
+</div>
+{% endblock %}

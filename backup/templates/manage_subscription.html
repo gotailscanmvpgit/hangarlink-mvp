@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Subscription — HangarLink{% endblock %}
+
+{% block content %}
+<section class="relative pt-32 pb-20">
+    <div class="absolute inset-0 bg-gradient-to-b from-navy-900 via-navy-800 to-navy-900"></div>
+
+    <div class="relative z-10 max-w-3xl mx-auto px-6">
+        <h1 class="text-3xl font-bold text-white mb-2">Manage Subscription</h1>
+        <p class="text-slate-400 mb-10">View your plan details and manage billing.</p>
+
+        <!-- Current Plan Card -->
+        <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <h3 class="text-xl font-bold text-white">
+                            {% if current_user.subscription_tier == 'premium' %}
+                            Premium Plan
+                            {% else %}
+                            Free Plan
+                            {% endif %}
+                        </h3>
+                        {% if current_user.subscription_tier == 'premium' %}
+                        <span
+                            class="inline-flex items-center bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/30 rounded-full px-3 py-1 text-xs font-bold text-amber-300">
+                            ★ ACTIVE
+                        </span>
+                        {% endif %}
+                    </div>
+                    <p class="text-slate-400">
+                        {% if current_user.subscription_tier == 'premium' and current_user.subscription_expires %}
+                        Renews on {{ current_user.subscription_expires.strftime('%B %d, %Y') }}
+                        {% elif current_user.subscription_tier == 'premium' %}
+                        Active subscription
+                        {% else %}
+                        Upgrade to unlock all features
+                        {% endif %}
+                    </p>
+                </div>
+
+                {% if current_user.subscription_tier == 'premium' %}
+                <div class="text-right">
+                    <p class="text-2xl font-bold text-white">
+                        {% if current_user.role == 'owner' %}
+                        ${{ owner_plan.price_display }}
+                        {% else %}
+                        ${{ renter_plan.price_display }}
+                        {% endif %}
+                    </p>
+                    <p class="text-slate-400 text-sm">/month</p>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if current_user.subscription_tier == 'premium' %}
+            <!-- Premium Features -->
+            <div class="border-t border-white/10 pt-6">
+                <h4 class="text-white font-semibold mb-4">Your Premium Benefits</h4>
+                <div class="grid sm:grid-cols-2 gap-3">
+                    {% set plan = owner_plan if current_user.role == 'owner' else renter_plan %}
+                    {% for feature in plan.features %}
+                    <div class="flex items-center text-sm text-slate-300">
+                        <svg class="w-4 h-4 mr-2 text-amber-400 shrink-0" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        {{ feature }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Actions -->
+        {% if current_user.subscription_tier == 'premium' %}
+        <div class="bg-red-500/5 border border-red-400/20 rounded-2xl p-8">
+            <h4 class="text-red-300 font-semibold mb-2">Cancel Subscription</h4>
+            <p class="text-slate-400 text-sm mb-6">
+                Your premium features will remain active until the end of your current billing period.
+                After cancellation, your account will revert to the free tier.
+            </p>
+            <form action="{{ url_for('cancel_subscription') }}" method="POST"
+                onsubmit="return confirm('Are you sure you want to cancel your Premium subscription?')">
+                <button type="submit"
+                    class="px-6 py-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-400/30 text-red-300 font-medium transition-all duration-300">
+                    Cancel Subscription
+                </button>
+            </form>
+        </div>
+        {% else %}
+        <div class="text-center">
+            <a href="{{ url_for('pricing') }}"
+                class="inline-flex px-8 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-lg transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/25">
+                Upgrade to Premium →
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

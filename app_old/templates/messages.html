@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-6 lg:px-8 py-12">
+    <h1 class="text-4xl font-bold text-gray-900 dark:text-platinum-100 mb-8">Messages</h1>
+
+    {% if conversations %}
+    <div
+        class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 divide-y divide-gray-200 dark:divide-gray-700">
+        {% for conv in conversations %}
+        <a href="{{ url_for('main.message_user', user_id=conv.partner.id) }}"
+            class="block p-6 hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center flex-1">
+                    <!-- Avatar -->
+                    <div
+                        class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
+                        {{ conv.partner.email[0].upper() }}
+                    </div>
+
+                    <!-- Message Info -->
+                    <div class="ml-4 flex-1">
+                        <div class="flex items-center justify-between mb-1">
+                            <h3 class="font-bold text-gray-900 dark:text-platinum-100">
+                                {{ conv.partner.email.split('@')[0] }}
+                            </h3>
+                            <span class="text-sm text-gray-500 dark:text-gray-400">
+                                {{ conv.last_message.created_at.strftime('%b %d, %I:%M %p') if conv.last_message else ''
+                                }}
+                            </span>
+                        </div>
+                        <p class="text-gray-600 dark:text-platinum-300 text-sm line-clamp-1">
+                            {% if conv.last_message %}
+                            {% if conv.last_message.sender_id == current_user.id %}
+                            <span class="text-gray-500">You:</span>
+                            {% endif %}
+                            {{ conv.last_message.content }}
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <!-- Unread Badge -->
+                    {% if conv.unread_count > 0 %}
+                    <div class="ml-4">
+                        <span
+                            class="inline-flex items-center justify-center w-6 h-6 bg-blue-600 text-white text-xs font-bold rounded-full">
+                            {{ conv.unread_count }}
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- No Messages -->
+    <div class="text-center py-16">
+        <div class="w-24 h-24 bg-gray-100 dark:bg-dark-800 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-envelope text-gray-400 text-4xl"></i>
+        </div>
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-platinum-100 mb-4">No messages yet</h2>
+        <p class="text-gray-600 dark:text-platinum-300 mb-8">
+            Start a conversation by contacting a listing owner
+        </p>
+        <a href="{{ url_for('main.listings') }}"
+            class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all hover-lift">
+            <i class="fas fa-search mr-2"></i>Browse Listings
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

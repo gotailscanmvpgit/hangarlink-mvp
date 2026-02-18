@@ -1,69 +1,56 @@
-from flask import Flask
-from flask_migrate import Migrate
-from extensions import db, login_manager
+from flask import Flask, render_template
+from config import Config
+from extensions import db, migrate, login_manager, cache
+from models import User, Listing, Message, Booking, Ad, WhiteLabelRequest 
+from routes import bp as main_bp
 import os
 
-app = Flask(__name__, 
-            template_folder='templates',
-            static_folder='static')
+# Define the create_app function for flexibility and testing
+def create_app(config_class=Config):
+    app = Flask(__name__)
+    app.config.from_object(config_class)
 
-# Configuration
-basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+    # Initialize extensions
+    db.init_app(app)
+    migrate.init_app(app, db)
+    login_manager.init_app(app)
+    cache.init_app(app)
+    
+    # Configure Login Manager
+    login_manager.login_view = 'main.login'
+    login_manager.login_message_category = 'info'
 
-# Database Configuration (Postgres Only)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
-# Handle Postgres dialect fix for Render/Railway (postgres:// vs postgresql://)
-if app.config['SQLALCHEMY_DATABASE_URI'] and app.config['SQLALCHEMY_DATABASE_URI'].startswith("postgres://"):
-    app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace("postgres://", "postgresql://", 1)
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
 
-if not app.config['SQLALCHEMY_DATABASE_URI']:
-    print("WARNING: DATABASE_URL not set in environment. App may crash.")
+    # Register blueprints
+    app.register_blueprint(main_bp)
 
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
-app.config['STRIPE_SECRET_KEY'] = os.environ.get('STRIPE_SECRET_KEY', '')
-app.config['STRIPE_PUBLISHABLE_KEY'] = os.environ.get('STRIPE_PUBLISHABLE_KEY', '')
+    # Global Context Processors
+    @app.context_processor
+    def inject_global_data():
+        return {
+            'app_version': 'v2.1.0',
+            'stripe_publishable_key': app.config.get('STRIPE_PUBLISHABLE_KEY', ''),
+            'legal_disclaimer': "HangarLink is a platform connecting hangar owners with aircraft owners. We do not own or operate hangars."
+        }
 
-# Initialize extensions
-db.init_app(app)
-migrate = Migrate(app, db)
-login_manager.init_app(app)
-login_manager.login_view = 'login'
+    # Error handlers
+    @app.errorhandler(404)
+    def not_found_error(error):
+        return render_template('404.html'), 404
 
-# Import models
-from models import User, Listing, Message, Booking
+    @app.errorhandler(500)
+    def internal_error(error):
+        db.session.rollback()
+        return render_template('500.html'), 500
 
-# Context processor for legal disclaimer
-@app.context_processor
-def inject_legal():
-    with open('planning/legal-disclaimers.txt', 'r') as f:
-        disclaimer = f.read()
-    return {
-        'legal_disclaimer': disclaimer,
-        'app_version': 'v1.0.0',
-        'stripe_publishable_key': app.config['STRIPE_PUBLISHABLE_KEY']
-    }
+    return app
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
-
-# Create tables on startup (Disabled: Use Flask-Migrate 'flask db upgrade')
-# with app.app_context():
-#     db.create_all()
-#     print("✅ Database tables initialized")
-
-# Import routes/views (Direct import at end of file)
-from views import *
+# Create the application instance
+app = create_app()
 
 if __name__ == '__main__':
-    # Use 'flask db upgrade' for production migrations instead of create_all()
-    # with app.app_context():
-    #     db.create_all()
-    
-    # Run configuration
-    port = int(os.environ.get('PORT', 5000))
-    debug_mode = os.environ.get('FLASK_DEBUG', '0') == '1'
-    
-    app.run(host='0.0.0.0', port=port, debug=debug_mode)
+    # Run the application
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))

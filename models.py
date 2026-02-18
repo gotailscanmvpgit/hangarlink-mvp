@@ -1,6 +1,9 @@
 from extensions import db
 from flask_login import UserMixin
 from datetime import datetime
+from flask_caching import Cache
+
+# ... User model omitted ... 
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -57,6 +60,14 @@ class User(UserMixin, db.Model):
 
 class Listing(db.Model):
     __tablename__ = 'listings'
+    
+    # Add indexes for scalability
+    __table_args__ = (
+        db.Index('idx_listing_airport', 'airport_icao'),
+        db.Index('idx_listing_price', 'price_month'),
+        db.Index('idx_listing_status', 'status'),
+        db.Index('idx_listing_created', 'created_at'),
+    )
     
     id = db.Column(db.Integer, primary_key=True)
     airport_icao = db.Column(db.String(4), nullable=False)
@@ -185,3 +196,7 @@ db.Index('idx_airport', Listing.airport_icao)
 db.Index('idx_price', Listing.price_month)
 db.Index('idx_status', Listing.status)
 db.Index('idx_created', Listing.created_at)
+db.Index('idx_owner', Listing.owner_id)
+db.Index('idx_covered', Listing.covered)
+db.Index('idx_featured', Listing.is_featured)
+db.Index('idx_premium_listing', Listing.is_premium_listing)

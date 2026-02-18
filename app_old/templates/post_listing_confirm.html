@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-dark-950">
+    <div class="max-w-3xl w-full space-y-8 animate-fade-in-up">
+
+        <!-- Header -->
+        <div class="text-center">
+            <h1 class="text-4xl font-extrabold text-gray-900 dark:text-platinum-100 mb-4">
+                What are you looking to do?
+            </h1>
+            <p class="text-xl text-gray-600 dark:text-platinum-300 max-w-2xl mx-auto">
+                Help us direct you to the right place.
+            </p>
+        </div>
+
+        <!-- Options Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
+
+            <!-- Option 1: Find Parking (Primary for Renters) -->
+            <a href="{{ url_for('main.listings') }}"
+                class="group relative flex flex-col items-center text-center p-8 bg-white dark:bg-dark-900 rounded-3xl shadow-xl border-2 border-blue-100 dark:border-blue-900/30 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 transform cursor-pointer">
+
+                <div
+                    class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 to-blue-600 rounded-t-3xl opacity-0 group-hover:opacity-100 transition-opacity">
+                </div>
+
+                <div
+                    class="w-24 h-24 mb-6 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center group-hover:bg-blue-600 transition-colors duration-300">
+                    <i
+                        class="fas fa-search text-4xl text-blue-600 dark:text-blue-400 group-hover:text-white transition-colors duration-300"></i>
+                </div>
+
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                    I need parking
+                </h3>
+                <p class="text-gray-600 dark:text-platinum-400 mb-8 leading-relaxed">
+                    Browse available hangars and tie-downs at airports near you.
+                </p>
+
+                <span
+                    class="mt-auto inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-bold rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-lg hover:shadow-blue-500/30 w-full">
+                    Find Parking
+                </span>
+            </a>
+
+            <!-- Option 2: Post Space (For Owners) -->
+            <a href="{{ url_for('main.post_listing') }}"
+                class="group relative flex flex-col items-center text-center p-8 bg-white dark:bg-dark-900 rounded-3xl shadow-xl border-2 border-gray-100 dark:border-gray-800 hover:border-navy-500 dark:hover:border-platinum-500 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 transform cursor-pointer">
+
+                <div
+                    class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-navy-700 to-navy-900 rounded-t-3xl opacity-0 group-hover:opacity-100 transition-opacity">
+                </div>
+
+                <div
+                    class="w-24 h-24 mb-6 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center group-hover:bg-navy-700 transition-colors duration-300">
+                    <i
+                        class="fas fa-warehouse text-4xl text-gray-600 dark:text-gray-400 group-hover:text-white transition-colors duration-300"></i>
+                </div>
+
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                    I have space to rent
+                </h3>
+                <p class="text-gray-600 dark:text-platinum-400 mb-8 leading-relaxed">
+                    List your hangar or tie-down and start earning rental income.
+                </p>
+
+                <span
+                    class="mt-auto inline-flex items-center justify-center px-8 py-3 border-2 border-gray-200 dark:border-gray-700 text-base font-bold rounded-xl text-gray-700 dark:text-platinum-200 bg-transparent group-hover:border-navy-600 group-hover:text-navy-700 dark:group-hover:text-white dark:group-hover:border-white transition-all w-full">
+                    Create Listing
+                </span>
+            </a>
+
+        </div>
+
+        {% if user_listings_count == 0 %}
+        <!-- Tip for Renters -->
+        <div class="text-center mt-12 animate-fade-in delay-200">
+            <p
+                class="inline-flex items-center px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-sm font-medium">
+                <i class="fas fa-info-circle mr-2"></i> Only choose "Create Listing" if you own or manage airport
+                property.
+            </p>
+        </div>
+        {% else %}
+        <!-- Welcome back message for Owners -->
+        <div class="text-center mt-12 animate-fade-in delay-200">
+            <p class="text-gray-500 dark:text-gray-400 text-sm">
+                You currently have <strong>{{ user_listings_count }}</strong> active listing{{ 's' if
+                user_listings_count != 1 }}.
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- Cancel Link -->
+        <div class="text-center mt-6">
+            <a href="{{ url_for('main.index') }}"
+                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-sm font-medium transition-colors">
+                Cancel
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in-up {
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .delay-200 {
+        animation-delay: 0.2s;
+    }
+</style>
+{% endblock %}
