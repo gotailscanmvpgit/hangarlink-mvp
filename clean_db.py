@@ -4,6 +4,7 @@ from sqlalchemy import text
 def clean_database():
     with app.app_context():
         print("Cleaning up database migration artifacts...")
+        print(f"Metadata tables: {list(db.metadata.tables.keys())}")
         
         # Drop alembic_version table to reset migration history
         try:
@@ -13,10 +14,11 @@ def clean_database():
             print(f"Error dropping alembic_version: {e}")
             
         # Drop tables that might conflict with new initial migration
-        tables_to_drop = ['ad', 'white_label_request']
+        tables_to_drop = ['users', 'listings', 'bookings', 'messages', 'ad', 'white_label_request']
         for table in tables_to_drop:
             try:
-                db.session.execute(text(f"DROP TABLE IF EXISTS {table} CASCADE"))
+                # Remove CASCADE for SQLite compatibility
+                db.session.execute(text(f"DROP TABLE IF EXISTS {table}"))
                 print(f"Dropped {table} table.")
             except Exception as e:
                 print(f"Error dropping {table}: {e}")
