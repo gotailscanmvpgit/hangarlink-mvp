@@ -176,12 +176,18 @@ class Message(db.Model):
 
 class Ad(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200))
-    image_url = db.Column(db.String(500))
-    link_url = db.Column(db.String(500))
+    title = db.Column(db.String(100), nullable=False)
+    image_url = db.Column(db.String(500), nullable=False)
+    link_url = db.Column(db.String(500), nullable=False)
     placement = db.Column(db.String(50))
-    active = db.Column(db.Boolean, default=True)
+    impressions = db.Column(db.Integer, default=0)
+    clicks = db.Column(db.Integer, default=0)
+    active = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # Valid model now ends at created_at above.
+    def __repr__(self):
+        return f'<Ad {self.title}>'
+
 
 class WhiteLabelRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)

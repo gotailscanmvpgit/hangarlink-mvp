@@ -529,16 +529,17 @@
             at {{ listing.airport_icao }}</a>
     </div>
 
-    {% if ads and ads.listing_detail %}
     <!-- Featured Partner Ad -->
-    <a href="{{ ads.listing_detail.link_url }}" target="_blank"
+    {% set detail_ads = get_ads('listing_detail') %}
+    {% if detail_ads %}
+    <a href="{{ detail_ads[0].link_url }}" target="_blank"
         class="block bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 mb-6 overflow-hidden relative group hover:border-blue-400 transition-colors">
         <div
             class="absolute top-0 right-0 bg-gray-100 dark:bg-gray-800 text-gray-500 text-[10px] px-2 py-0.5 rounded-bl uppercase tracking-wider font-bold">
             Sponsored</div>
         <div class="flex items-start">
             <div class="flex-shrink-0 mr-4">
-                <img src="{{ ads.listing_detail.image_url }}" alt="{{ ads.listing_detail.title }}"
+                <img src="{{ detail_ads[0].image_url }}" alt="{{ detail_ads[0].title }}"
                     class="w-16 h-16 object-cover rounded-lg border border-gray-200">
             </div>
             <div>
@@ -546,7 +547,7 @@
                     Partner</span>
                 <h4
                     class="text-base font-bold text-gray-900 dark:text-white mb-1 group-hover:text-blue-600 transition-colors">
-                    {{ ads.listing_detail.title }}</h4>
+                    {{ detail_ads[0].title }}</h4>
                 <div class="text-gray-500 text-sm flex items-center group-hover:underline">Visit Website <i
                         class="fas fa-arrow-right ml-1 text-xs"></i></div>
             </div>

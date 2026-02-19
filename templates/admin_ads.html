@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Ad Management</h1>
+        <button data-modal-target="create-ad-modal" data-modal-toggle="create-ad-modal"
+            class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700">
+            Create Ad
+        </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6 border-l-4 border-green-500">
+            <h3 class="text-gray-500 text-sm font-medium">Active Ads</h3>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ active_ads_count }}</p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6 border-l-4 border-blue-500">
+            <h3 class="text-gray-500 text-sm font-medium">Total Impressions</h3>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ total_impressions }}</p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6 border-l-4 border-purple-500">
+            <h3 class="text-gray-500 text-sm font-medium">Total Clicks</h3>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ total_clicks }}</p>
+        </div>
+    </div>
+
+    <!-- Ads Table -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">Title</th>
+                        <th scope="col" class="px-6 py-3">Placement</th>
+                        <th scope="col" class="px-6 py-3">Status</th>
+                        <th scope="col" class="px-6 py-3">Impressions</th>
+                        <th scope="col" class="px-6 py-3">Clicks</th>
+                        <th scope="col" class="px-6 py-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ad in ads %}
+                    <tr
+                        class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td class="px-6 py-4 font-medium text-gray-900 dark:text-white flex items-center gap-3">
+                            <img src="{{ ad.image_url }}" alt="{{ ad.title }}" class="w-10 h-10 rounded object-cover">
+                            {{ ad.title }}
+                        </td>
+                        <td class="px-6 py-4">{{ ad.placement }}</td>
+                        <td class="px-6 py-4">
+                            {% if ad.active %}
+                            <span
+                                class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">Active</span>
+                            {% else %}
+                            <span
+                                class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">{{ ad.impressions }}</td>
+                        <td class="px-6 py-4">{{ ad.clicks }}</td>
+                        <td class="px-6 py-4">
+                            <form action="{{ url_for('main.toggle_ad', ad_id=ad.id) }}" method="POST" class="inline">
+                                <button type="submit"
+                                    class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
+                                    {{ 'Disable' if ad.active else 'Enable' }}
+                                </button>
+                            </form>
+                            <form action="{{ url_for('main.delete_ad', ad_id=ad.id) }}" method="POST"
+                                class="inline ml-3" onsubmit="return confirm('Delete this ad?');">
+                                <button type="submit"
+                                    class="font-medium text-red-600 dark:text-red-500 hover:underline">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-4 text-center">No ads found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Create Ad Modal -->
+<div id="create-ad-modal" tabindex="-1" aria-hidden="true"
+    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 w-full md:inset-0 h-modal md:h-full">
+    <div class="relative p-4 w-full max-w-md h-full md:h-auto">
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <button type="button"
+                class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white"
+                data-modal-hide="create-ad-modal">
+                <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        clip-rule="evenodd"></path>
+                </svg>
+                <span class="sr-only">Close modal</span>
+            </button>
+            <div class="py-6 px-6 lg:px-8">
+                <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Create New Ad</h3>
+                <form class="space-y-6" action="{{ url_for('main.admin_ads') }}" method="POST">
+                    <div>
+                        <label for="title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Ad
+                            Title</label>
+                        <input type="text" name="title" id="title"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                            required>
+                    </div>
+                    <div>
+                        <label for="image_url"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Image URL</label>
+                        <input type="url" name="image_url" id="image_url"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                            placeholder="https://example.com/banner.jpg" required>
+                    </div>
+                    <div>
+                        <label for="link_url"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Target Link</label>
+                        <input type="url" name="link_url" id="link_url"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                            placeholder="https://sponsor.com" required>
+                    </div>
+                    <div>
+                        <label for="placement"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Placement</label>
+                        <select name="placement" id="placement"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">
+                            <option value="home_banner">Home Banner</option>
+                            <option value="search_sidebar">Search Sidebar</option>
+                            <option value="listing_detail">Listing Detail</option>
+                        </select>
+                    </div>
+                    <button type="submit"
+                        class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Create
+                        Ad</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

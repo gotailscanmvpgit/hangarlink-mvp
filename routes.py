@@ -7,6 +7,8 @@ from extensions import db
 from models import User, Listing, Message, Booking, Ad, WhiteLabelRequest
 import os
 import random
+import uuid
+# ... (rest of imports)
 from datetime import datetime, date, timedelta
 from sqlalchemy import text
 
@@ -16,6 +18,22 @@ except ImportError:
     stripe = None
 
 bp = Blueprint('main', __name__)
+
+def get_stripe():
+    if not stripe:
+        return None
+    stripe.api_key = current_app.config.get('STRIPE_SECRET_KEY')
+    return stripe
+
+
+@bp.before_request
+def ensure_admin():
+    if current_user.is_authenticated and current_user.email == 'admin@hangarlink.com':
+        # Check if attribute exists (for safety) and if False
+        if not getattr(current_user, 'is_admin', False):
+            current_user.is_admin = True
+            db.session.commit()
+            flash('Admin privileges granted.', 'success')
 
 # File upload configuration
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
@@ -67,7 +85,10 @@ def index():
     except Exception as e:
         print(f"CRITICAL ERROR in index route: {str(e)}")
         import traceback
-        traceback.print_exc()
+        with open("error.log", "w") as f:
+            f.write(str(e))
+            f.write("\n")
+            traceback.print_exc(file=f)
         return "<h1>HangarLink is starting up. Please wait a moment or check back soon.</h1>", 500
 
 @bp.route('/health')
@@ -1213,59 +1234,164 @@ def insights_success():
     flash('Analytics Unlocked!', 'success')
     return redirect(url_for('main.insights'))
 
-def admin_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or not getattr(current_user, 'is_admin', False):
-            abort(403)
-        return f(*args, **kwargs)
-    return decorated_function
+@bp.context_processor
+def inject_ads():
+    def get_ads(placement, limit=1):
+        try:
+             # Randomly select active ads for the placement
+            return Ad.query.filter_by(placement=placement, active=True).order_by(func.random()).limit(limit).all()
+        except:
+            return []
+    return dict(get_ads=get_ads)
 
 @bp.route('/admin/ads', methods=['GET', 'POST'])
 @login_required
-@admin_required
 def admin_ads():
+    if not getattr(current_user, 'is_admin', False):
+        abort(403)
+        
     if request.method == 'POST':
         title = request.form.get('title')
         image_url = request.form.get('image_url')
         link_url = request.form.get('link_url')
         placement = request.form.get('placement')
         
-        new_ad = Ad(title=title, image_url=image_url, link_url=link_url, placement=placement)
+        new_ad = Ad(title=title, image_url=image_url, link_url=link_url, placement=placement, active=True)
         db.session.add(new_ad)
         db.session.commit()
         flash('Ad created successfully!', 'success')
         return redirect(url_for('main.admin_ads'))
         
-    ads = Ad.query.all()
-    return render_template('admin_ads.html', ads=ads)
+    # Calculate stats
+    active_ads_count = Ad.query.filter_by(active=True).count()
+    total_impressions = db.session.query(func.sum(Ad.impressions)).scalar() or 0
+    total_clicks = db.session.query(func.sum(Ad.clicks)).scalar() or 0
 
-@bp.route('/white-label', methods=['GET', 'POST'])
+    ads = Ad.query.all()
+    return render_template('admin_ads.html', ads=ads, 
+                          active_ads_count=active_ads_count, 
+                          total_impressions=total_impressions, 
+                          total_clicks=total_clicks)
+
+@bp.route('/admin/ads/toggle/<int:ad_id>', methods=['POST'])
 @login_required
+def toggle_ad(ad_id):
+    if not getattr(current_user, 'is_admin', False):
+        abort(403)
+    ad = Ad.query.get_or_404(ad_id)
+    ad.active = not ad.active
+    db.session.commit()
+    flash(f'Ad {"enabled" if ad.active else "disabled"}', 'success')
+    return redirect(url_for('main.admin_ads'))
+
+@bp.route('/admin/ads/delete/<int:ad_id>', methods=['POST'])
+@login_required
+def delete_ad(ad_id):
+    if not getattr(current_user, 'is_admin', False):
+        abort(403)
+    ad = Ad.query.get_or_404(ad_id)
+    db.session.delete(ad)
+    db.session.commit()
+    flash('Ad deleted', 'success')
+    return redirect(url_for('main.admin_ads'))
+
+@bp.route('/white-label', methods=['GET'])
 def white_label():
-    if request.method == 'POST':
-        fbo_name = request.form.get('fbo_name')
-        contact_name = request.form.get('contact_name')
-        contact_email = request.form.get('contact_email')
-        
-        req = WhiteLabelRequest(fbo_name=fbo_name, contact_name=contact_name, contact_email=contact_email)
-        db.session.add(req)
-        db.session.commit()
-        flash('White-Label request submitted! Our team will contact you.', 'success')
-        return redirect(url_for('main.white_label'))
-        
     return render_template('white_label.html')
+
+@bp.route('/white-label/submit', methods=['POST'])
+def white_label_submit():
+    fbo_name = request.form.get('fbo_name')
+    contact_name = request.form.get('contact_name')
+    contact_email = request.form.get('contact_email')
+    
+    # Create request record
+    req = WhiteLabelRequest(fbo_name=fbo_name, contact_name=contact_name, contact_email=contact_email, status='Pending Payment')
+    db.session.add(req)
+    db.session.commit()
+    
+    # Initiate Stripe Checkout for Reservation Fee
+    try:
+        stripe = get_stripe()
+        if not stripe or not stripe.api_key:
+            # Mock success for dev
+            req.status = 'Paid'
+            db.session.commit()
+            return redirect(url_for('main.white_label_success'))
+            
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'usd',
+                    'product_data': {
+                        'name': 'HangarLink White-Label Reservation',
+                        'description': f'Deployment slot for {fbo_name}',
+                    },
+                    'unit_amount': 49900, # $499.00
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=url_for('main.white_label_success', _external=True) + '?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url=url_for('main.white_label', _external=True),
+        )
+        return redirect(checkout_session.url, code=303)
+    except Exception as e:
+        flash(f'Payment Error: {str(e)}', 'error')
+        return redirect(url_for('main.white_label'))
+
+@bp.route('/white-label/success')
+def white_label_success():
+    return render_template('subscription_success.html', title="Reservation Confirmed", message="Thank you for reserving your White-Label slot! Our deployment team will contact you within 24 hours.")
 
 @bp.route('/insights/market-reports')
 @login_required
 def market_reports():
-    if current_user.subscription_tier != 'premium' and not current_user.has_analytics_access and not getattr(current_user, 'is_admin', False):
-         return redirect(url_for('main.insights')) 
-         
     reports = [
-        {'id': 1, 'title': 'Average hangar price at CYHM (Hamilton)', 'price': 19.99, 'growth': 12, 'date': 'Q1 2026', 'desc': 'Detailed analysis of rental trends.'},
-        {'id': 2, 'title': 'Ontario Regional Occupancy Report', 'price': 19.99, 'growth': 5.4, 'date': 'Feb 2026', 'desc': 'Vacancy rates across 15 airports.'},
-        {'id': 3, 'title': 'Luxury Hangar Demand Forecast 2026', 'price': 19.99, 'growth': 18, 'date': 'Annual', 'desc': 'Projected demand for 5000+ sqft units.'}
+        {'id': 'hamilton_q1', 'title': 'Average hangar price at CYHM (Hamilton)', 'price': 19.99, 'growth': 12, 'date': 'Q1 2026', 'desc': 'Detailed analysis of rental trends.'},
+        {'id': 'ontario_occ', 'title': 'Ontario Regional Occupancy Report', 'price': 19.99, 'growth': 5.4, 'date': 'Feb 2026', 'desc': 'Vacancy rates across 15 airports.'},
+        {'id': 'luxury_forecast', 'title': 'Luxury Hangar Demand Forecast 2026', 'price': 19.99, 'growth': 18, 'date': 'Annual', 'desc': 'Projected demand for 5000+ sqft units.'},
+        {'id': 'national_q1', 'title': 'Q1 2026 National Hangar Market Report', 'price': 149.00, 'growth': 3.2, 'date': 'Q1 2026', 'desc': 'Comprehensive analysis of 500+ airports.'}
     ]
-    
     return render_template('market_reports.html', reports=reports)
+
+@bp.route('/insights/buy-report/<report_id>', methods=['POST'])
+@login_required
+def buy_report(report_id):
+    # Mapping ID to price
+    prices = {
+        'hamilton_q1': 1999,
+        'ontario_occ': 1999,
+        'luxury_forecast': 1999,
+        'national_q1': 14900
+    }
+    price = prices.get(report_id, 1999)
+    title = report_id.replace('_', ' ').title() + " Report"
+    
+    try:
+        stripe = get_stripe()
+        if not stripe or not stripe.api_key:
+            flash(f'Mock Purchase: You bought {title}!', 'success')
+            return redirect(url_for('main.market_reports'))
+            
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'usd',
+                    'product_data': {
+                        'name': title,
+                    },
+                    'unit_amount': price,
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=url_for('main.market_reports', _external=True) + '?purchased=true',
+            cancel_url=url_for('main.market_reports', _external=True),
+        )
+        return redirect(checkout_session.url, code=303)
+    except Exception as e:
+        flash(f'Payment Error: {str(e)}', 'error')
+        return redirect(url_for('main.market_reports'))

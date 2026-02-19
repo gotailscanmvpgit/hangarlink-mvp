@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="px-4 py-8 mx-auto max-w-7xl lg:px-6">
+    <div class="max-w-screen-md mx-auto mb-8 text-center lg:mb-12">
+        <h2 class="mb-4 text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">Aviation Market
+            Intelligence</h2>
+        <p class="mb-5 font-light text-gray-500 sm:text-xl dark:text-gray-400">Exclusive data-driven insights on hangar
+            pricing, vacancy rates, and market trends.</p>
+    </div>
+
+    <!-- Featured Report -->
+    <div
+        class="bg-gradient-to-r from-blue-900 to-navy-900 rounded-2xl p-8 mb-12 text-white shadow-2xl relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
+        <div class="relative z-10 grid md:grid-cols-2 gap-8 items-center">
+            <div>
+                <span class="bg-blue-500 text-xs font-bold px-2 py-1 rounded-md mb-4 inline-block tracking-widest">NEW
+                    RELEASE</span>
+                <h3 class="text-3xl font-bold mb-4">Q1 2026 National Hangar Market Report</h3>
+                <p class="text-blue-200 mb-6">Comprehensive analysis of 500+ airports. Includes breakdown by state, unit
+                    size, and amenity premiums. Essential for investors and developers.</p>
+                <form action="{{ url_for('main.buy_report', report_id='q1_2026_national') }}" method="POST">
+                    <button type="submit"
+                        class="bg-white text-blue-900 font-bold py-3 px-8 rounded-xl hover:bg-blue-50 transition-colors shadow-lg">
+                        Buy Full Report - $149
+                    </button>
+                </form>
+            </div>
+            <div class="bg-white/10 rounded-xl p-4 backdrop-blur-sm border border-white/20">
+                <!-- Canvas for Chart.js -->
+                <canvas id="marketTrendChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Available Reports Grid -->
+    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Regional Reports</h3>
+    <div class="grid md:grid-cols-3 gap-6">
+        {% for report in reports %}
+        <div
+            class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 hover:-translate-y-1 transition-transform duration-300">
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <span
+                        class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">{{
+                        report.date }}</span>
+                    <span class="text-green-500 text-sm font-bold flex items-center">
+                        <i class="fas fa-arrow-up mr-1"></i> {{ report.growth }}%
+                    </span>
+                </div>
+                <h4 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ report.title }}</h4>
+                <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">{{ report.desc }}</p>
+                <div class="flex items-center justify-between mt-auto">
+                    <span class="text-2xl font-bold text-gray-900 dark:text-white">${{ report.price }}</span>
+                    <form action="{{ url_for('main.buy_report', report_id=report.id) }}" method="POST">
+                        <button type="submit"
+                            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                            Purchase
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('marketTrendChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Avg Price / SqFt ($)',
+                data: [12.5, 13.2, 13.8, 14.1, 14.5, 15.2],
+                borderColor: '#ffffff',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { labels: { color: 'white' } }
+            },
+            scales: {
+                y: { ticks: { color: 'rgba(255,255,255,0.7)' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                x: { ticks: { color: 'rgba(255,255,255,0.7)' }, grid: { display: false } }
+            }
+        }
+    });
+</script>
+{% endblock %}

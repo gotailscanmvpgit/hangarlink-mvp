@@ -36,6 +36,27 @@
             <span class="bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent">{{
                 current_user.username }}</span>
         </h1>
+
+        <!-- Ad Banner for Authenticated Users (Home Banner) -->
+        {% set ads = get_ads('home_banner') %}
+        {% if ads %}
+        <div class="mt-8 mb-12 max-w-4xl mx-auto animate-fade-in-up" style="animation-delay: 0.2s;">
+            <a href="{{ ads[0].link_url }}" target="_blank"
+                class="block group relative overflow-hidden rounded-2xl shadow-2xl border border-white/20 transition-transform hover:scale-[1.02]">
+                <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent z-10 pointer-events-none">
+                </div>
+                <img src="{{ ads[0].image_url }}" alt="{{ ads[0].title }}"
+                    class="w-full h-32 object-cover object-center">
+                <div class="absolute bottom-4 left-6 z-20">
+                    <span
+                        class="bg-white/20 backdrop-blur text-xs font-bold px-2 py-0.5 rounded text-white mb-1 inline-block uppercase tracking-wider">Sponsored</span>
+                    <h3 class="text-xl font-bold text-white group-hover:text-blue-300 transition-colors">{{ ads[0].title
+                        }} <i class="fas fa-external-link-alt ml-1 text-sm opacity-70"></i></h3>
+                </div>
+            </a>
+        </div>
+        {% endif %}
+
         <p class="text-lg sm:text-xl text-white/70 mb-10 max-w-2xl mx-auto font-light leading-relaxed animate-fade-in-up"
             style="animation-delay: 0.1s;">
             Your aviation hub — manage spaces, discover parking, and connect with the pilot community.
@@ -367,7 +388,8 @@
                     <i class="fas fa-bell mr-2"></i> Set Alerts
                 </a>
                 {% else %}
-                <a href="{{ url_for('main.register') }}" class="text-blue-600 font-bold hover:underline text-sm">Sign up for
+                <a href="{{ url_for('main.register') }}" class="text-blue-600 font-bold hover:underline text-sm">Sign up
+                    for
                     alerts <i class="fas fa-arrow-right ml-1"></i></a>
                 {% endif %}
             </div>
