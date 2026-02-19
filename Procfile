@@ -1,1 +1,1 @@
-web: flask db upgrade && gunicorn --bind 0.0.0.0:$PORT app:app
+web: python clean_db.py && flask db upgrade && gunicorn --bind 0.0.0.0:$PORT app:app
