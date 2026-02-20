@@ -17,6 +17,11 @@ try:
 except ImportError:
     stripe = None
 
+try:
+    import openai
+except ImportError:
+    openai = None
+
 bp = Blueprint('main', __name__)
 
 def get_stripe():
@@ -89,7 +94,7 @@ def index():
             f.write(str(e))
             f.write("\n")
             traceback.print_exc(file=f)
-        return "<h1>HangarLink is starting up. Please wait a moment or check back soon.</h1>", 500
+        return "<h1>HangarLinks is starting up. Please wait a moment or check back soon.</h1>", 500
 
 @bp.route('/health')
 def health():
@@ -747,7 +752,7 @@ def concierge_chat():
     data = request.json
     user_msg = data.get('message', '').lower()
     
-    response = "I'm the HangarLink AI. "
+    response = "I'm the HangarLinks AI. "
     if 'price' in user_msg or 'cost' in user_msg:
         response += "Market rates at CYHM are trending up (+12%). I recommend listing around $600/mo for a T-Hangar."
     elif 'availability' in user_msg:
@@ -797,7 +802,7 @@ def self_certify():
     current_user.reputation_score = 5.0
     current_user.points = (current_user.points or 0) + 500 
     db.session.commit()
-    flash('You are now a Certified HangarLink Partner! (+500 pts)', 'success')
+    flash('You are now a Certified HangarLinks Partner! (+500 pts)', 'success')
     return redirect(url_for('main.profile'))
 
 @bp.route('/dashboard/insights')
@@ -945,7 +950,7 @@ def create_checkout_session():
                     'currency': 'usd',
                     'product_data': {
                         'name': plan['name'],
-                        'description': f"HangarLink {plan['name']} - Monthly Subscription",
+                        'description': f"HangarLinks {plan['name']} - Monthly Subscription",
                     },
                     'unit_amount': plan['price'],
                     'recurring': {'interval': plan['interval']},
@@ -1325,7 +1330,7 @@ def white_label_submit():
                 'price_data': {
                     'currency': 'usd',
                     'product_data': {
-                        'name': 'HangarLink White-Label Reservation',
+                        'name': 'HangarLinks White-Label Reservation',
                         'description': f'Deployment slot for {fbo_name}',
                     },
                     'unit_amount': 49900, # $499.00
@@ -1395,3 +1400,169 @@ def buy_report(report_id):
     except Exception as e:
         flash(f'Payment Error: {str(e)}', 'error')
         return redirect(url_for('main.market_reports'))
+
+
+# ─────────────────────────────────────────────
+#  AI CONCIERGE  – /api/concierge
+# ─────────────────────────────────────────────
+
+def _build_db_context(message: str) -> str:
+    """Pull live data from the DB relevant to the user's question."""
+    ctx_parts = []
+    msg_lower = message.lower()
+
+    # Airport ICAO extraction (4-letter codes starting with C or K common in Canada/US)
+    import re
+    airport_hits = re.findall(r'\b([CK][A-Z]{3})\b', message.upper())
+
+    # Price filter extraction
+    price_match = re.search(r'under\s*\$?(\d+)', msg_lower)
+    max_price = int(price_match.group(1)) if price_match else None
+
+    covered_only = any(w in msg_lower for w in ['covered', 'indoor', 'enclosed'])
+
+    # Case 1: listing search
+    if any(w in msg_lower for w in ['show', 'find', 'search', 'available', 'hangar', 'listing', 'price']):
+        q = Listing.query.filter_by(status='Active')
+        if airport_hits:
+            q = q.filter(Listing.airport_icao.in_(airport_hits))
+        if max_price:
+            q = q.filter(Listing.price_month <= max_price)
+        if covered_only:
+            q = q.filter_by(covered=True)
+        results = q.order_by(Listing.health_score.desc()).limit(5).all()
+        if results:
+            lines = ["**Top available hangars matching your query:**"]
+            for l in results:
+                covered_tag = "🏠 Covered" if l.covered else "🌤 Uncovered"
+                lines.append(
+                    f"- **{l.airport_icao}** | {l.size_sqft} sqft | ${l.price_month:.0f}/mo | {covered_tag} | "
+                    f"[View Listing](/listing/{l.id})"
+                )
+            ctx_parts.append("\n".join(lines))
+        else:
+            ctx_parts.append("No active listings match those filters right now.")
+
+    # Case 2: average price query
+    if any(w in msg_lower for w in ['average', 'avg', 'typical', 'market price', 'how much']):
+        from sqlalchemy import func
+        for icao in (airport_hits or []):
+            row = db.session.query(func.avg(Listing.price_month)).filter_by(
+                airport_icao=icao, status='Active'
+            ).scalar()
+            if row:
+                ctx_parts.append(f"Average active listing price at **{icao}**: **${row:.0f}/month**")
+
+    # Case 3: owner asks about their own listings
+    if any(w in msg_lower for w in ['my listing', 'my hangar', 'performing', 'health score', 'views']):
+        if current_user.is_authenticated and current_user.role == 'owner':
+            listings = Listing.query.filter_by(owner_id=current_user.id).all()
+            if listings:
+                lines = ["**Your listings:**"]
+                for l in listings:
+                    lines.append(
+                        f"- {l.airport_icao} | ${l.price_month:.0f}/mo | Status: {l.status} | "
+                        f"Health Score: {l.health_score}/100 | [Manage](/listing/{l.id})"
+                    )
+                ctx_parts.append("\n".join(lines))
+            else:
+                ctx_parts.append("You have no listings yet. [Post one now](/post_listing)")
+
+    return "\n\n".join(ctx_parts) if ctx_parts else ""
+
+
+def _rule_based_response(message: str, user_role: str, db_context: str) -> str:
+    """Fallback smart rule-based responses when no LLM key is configured."""
+    msg = message.lower()
+    if db_context:
+        return db_context
+    if 'hello' in msg or 'hi' in msg:
+        return "👋 Hello! I'm your HangarLinks AI Concierge. Ask me to find hangars, check prices, or manage your listings!"
+    if 'help' in msg:
+        return (
+            "I can help you:\n"
+            "- **Find hangars** – *Show covered hangars at CYHM under $400*\n"
+            "- **Check prices** – *What's the average price at CYTZ?*\n"
+            "- **Manage listings** – *How is my listing performing?*\n"
+            "- **Book a viewing** – *I want to book a viewing of listing #3*"
+        )
+    if user_role == 'owner':
+        return "As an owner, I can help you manage listings, check performance, or promote your hangar. What do you need?"
+    return "I can help you find the perfect hangar. Try asking: *Show me covered hangars at CYYZ under $600*"
+
+
+@bp.route('/api/concierge', methods=['POST'])
+@login_required
+def concierge_api():
+    """Smart AI Concierge endpoint with RAG + optional LLM."""
+    data = request.get_json(silent=True) or {}
+    message = (data.get('message') or '').strip()
+    history = data.get('history', [])  # List of {role, content}
+
+    if not message:
+        return jsonify({'reply': 'Please type a message.'}), 400
+
+    # Build live DB context (RAG layer)
+    db_context = _build_db_context(message)
+
+    # User context
+    user_role = current_user.role if current_user.is_authenticated else 'guest'
+    home_airport = getattr(current_user, 'alert_airport', None) or 'Not set'
+    user_name = current_user.username if current_user.is_authenticated else 'Guest'
+
+    # Try LLM (OpenAI / Grok-compatible endpoint)
+    api_key = os.environ.get('OPENAI_API_KEY') or os.environ.get('GROK_API_KEY')
+    base_url = os.environ.get('OPENAI_BASE_URL')  # Set to https://api.x.ai/v1 for Grok
+
+    if openai and api_key:
+        try:
+            client_kwargs = {'api_key': api_key}
+            if base_url:
+                client_kwargs['base_url'] = base_url
+            client = openai.OpenAI(**client_kwargs)
+
+            system_prompt = f"""You are the HangarLinks AI Concierge — a smart, friendly aviation assistant.
+You help aircraft owners find hangars, and hangar owners manage their listings.
+
+USER CONTEXT:
+- Name: {user_name}
+- Role: {user_role}
+- Home Airport: {home_airport}
+
+LIVE DATABASE CONTEXT (use this to answer):
+{db_context if db_context else "No specific data found for this query."}
+
+INSTRUCTIONS:
+- Use the live data above to answer questions about prices, availability, listings.
+- Be concise and friendly. Use markdown (bold, bullet points) for clarity.
+- If you find matching listings, always include the [View Listing](/listing/ID) link.
+- If asked to message an owner or book a viewing, say you'll facilitate: "I'll connect you — click the listing link."
+- NEVER make up listing data. Only use what's in LIVE DATABASE CONTEXT.
+- Keep replies under 200 words."""
+
+            # Build conversation messages
+            messages = [{'role': 'system', 'content': system_prompt}]
+            # Include last 6 messages of history for context
+            for h in history[-6:]:
+                if h.get('role') in ('user', 'assistant') and h.get('content'):
+                    messages.append({'role': h['role'], 'content': h['content']})
+            messages.append({'role': 'user', 'content': message})
+
+            model = os.environ.get('OPENAI_MODEL', 'gpt-4o-mini')
+            resp = client.chat.completions.create(
+                model=model,
+                messages=messages,
+                max_tokens=400,
+                temperature=0.7,
+            )
+            reply = resp.choices[0].message.content.strip()
+            return jsonify({'reply': reply, 'source': 'llm'})
+
+        except Exception as e:
+            current_app.logger.error(f"Concierge LLM error: {e}")
+            # Fall through to rule-based
+
+    # Rule-based fallback
+    reply = _rule_based_response(message, user_role, db_context)
+    return jsonify({'reply': reply, 'source': 'rules'})
+

@@ -10,3 +10,4 @@ Flask-Migrate
 redis
 Flask-Caching==2.3.0
 sqlalchemy>=2.0.16
+openai>=1.0.0

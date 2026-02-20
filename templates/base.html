@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" class="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}HangarLink - Premium Aircraft Parking{% endblock %}</title>
+    <title>{% block title %}HangarLinks - Premium Aircraft Parking{% endblock %}</title>
     <!-- PWA Manifest & Meta -->
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <meta name="theme-color" content="#001F3F">
@@ -249,7 +249,7 @@
                         <i class="fas fa-warehouse text-white text-lg"></i>
                     </div>
                     <span
-                        class="self-center text-2xl font-bold whitespace-nowrap bg-gradient-to-r from-navy-900 to-blue-700 dark:from-platinum-100 dark:to-platinum-200 bg-clip-text text-transparent">HangarLink</span>
+                        class="self-center text-2xl font-bold whitespace-nowrap bg-gradient-to-r from-navy-900 to-blue-700 dark:from-platinum-100 dark:to-platinum-200 bg-clip-text text-transparent">HangarLinks</span>
                 </a>
 
                 <!-- Right Controls (User Menu + Mobile Toggle) -->
@@ -479,7 +479,7 @@
                         </div>
                         <span
                             class="text-2xl font-bold bg-gradient-to-r from-navy-900 to-blue-700 dark:from-platinum-100 dark:to-platinum-200 bg-clip-text text-transparent">
-                            HangarLink
+                            HangarLinks
                         </span>
                     </div>
                     <p class="text-gray-600 dark:text-platinum-300 text-sm leading-relaxed max-w-md">
@@ -510,7 +510,7 @@
                 <div>
                     <h3 class="text-sm font-bold text-gray-900 dark:text-platinum-100 uppercase tracking-wider mb-4">
                         Contact</h3>
-                    <p class="text-gray-600 dark:text-platinum-300 text-sm">support@hangarlink.com</p>
+                    <p class="text-gray-600 dark:text-platinum-300 text-sm">support@HangarLinks.com</p>
                 </div>
             </div>
 
@@ -575,7 +575,8 @@
             </a>
             <!-- Post (Center — Elevated) -->
             {% if current_user.is_authenticated %}
-            <a href="{{ url_for('main.post_listing_confirm') }}" class="flex flex-col items-center justify-center relative">
+            <a href="{{ url_for('main.post_listing_confirm') }}"
+                class="flex flex-col items-center justify-center relative">
                 <div
                     class="absolute -top-5 w-14 h-14 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/30 hover:shadow-blue-500/50 transition-all active:scale-90">
                     <i class="fas fa-plus text-white text-xl"></i>
@@ -654,9 +655,9 @@
             class="bg-navy-900 border border-blue-500 rounded-xl shadow-2xl p-4 flex items-center justify-between gap-4">
             <div class="flex items-center gap-3">
                 <img src="{{ url_for('static', filename='images/logo-192.png') }}"
-                    class="w-12 h-12 rounded-lg shadow-md" alt="HangarLink Icon">
+                    class="w-12 h-12 rounded-lg shadow-md" alt="HangarLinks Icon">
                 <div>
-                    <h3 class="text-white font-bold text-sm">Install HangarLink</h3>
+                    <h3 class="text-white font-bold text-sm">Install HangarLinks</h3>
                     <p class="text-xs text-blue-200">Faster access & offline mode</p>
                 </div>
             </div>
@@ -712,6 +713,250 @@
             });
         }
     </script>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!--  AI CONCIERGE WIDGET                        -->
+    <!-- ═══════════════════════════════════════════ -->
+
+    <!-- Floating Trigger Button -->
+    <button id="concierge-btn" onclick="toggleConcierge()"
+        class="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-white text-xl transition-all hover:scale-110 active:scale-95"
+        style="background: linear-gradient(135deg, #1a56db 0%, #0e9f6e 100%);" title="HangarLinks AI Concierge">
+        <i class="fas fa-robot" id="concierge-icon"></i>
+    </button>
+
+    <!-- Unread Badge -->
+    <span id="concierge-badge"
+        class="hidden fixed bottom-[74px] right-[14px] z-50 bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5">1</span>
+
+    <!-- Chat Panel -->
+    <div id="concierge-panel"
+        class="hidden fixed bottom-24 right-6 z-50 w-96 max-w-[calc(100vw-2rem)] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+        style="height: 520px; background: #0d1117; border: 1px solid rgba(59,130,246,0.3);">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between px-4 py-3"
+            style="background: linear-gradient(135deg, #1a56db 0%, #0e9f6e 100%);">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                    <i class="fas fa-robot text-white text-sm"></i>
+                </div>
+                <div>
+                    <p class="text-white font-bold text-sm">HangarLinks AI</p>
+                    <p class="text-white/70 text-xs" id="concierge-status">● Online</p>
+                </div>
+            </div>
+            <button onclick="toggleConcierge()" class="text-white/80 hover:text-white transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Messages Area -->
+        <div id="concierge-messages" class="flex-1 overflow-y-auto px-4 py-3 space-y-3"
+            style="scrollbar-width: thin; scrollbar-color: #334155 transparent;">
+
+            <!-- Welcome message -->
+            <div class="flex gap-2">
+                <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i class="fas fa-robot text-white text-xs"></i>
+                </div>
+                <div class="rounded-2xl rounded-tl-sm px-3 py-2 max-w-[80%]"
+                    style="background: #1e293b; color: #e2e8f0;">
+                    <p class="text-sm" id="welcome-msg">
+                        {% if current_user.is_authenticated %}
+                        👋 Hi <strong>{{ current_user.username }}</strong>! I'm your AI Concierge.
+                        {% if current_user.role == 'owner' %}
+                        Ask me how your listings are performing or how to get more renters.
+                        {% else %}
+                        Ask me to find hangars, check prices, or compare airports.
+                        {% endif %}
+                        {% else %}
+                        👋 Hi! I'm the HangarLinks AI Concierge. <a href="/login" class="text-blue-400 underline">Log
+                            in</a> to get personalized help.
+                        {% endif %}
+                    </p>
+                    <!-- Quick suggestions -->
+                    <div class="mt-2 flex flex-wrap gap-1.5">
+                        {% if current_user.is_authenticated %}
+                        {% if current_user.role == 'owner' %}
+                        <button onclick="sendSuggestion('How is my listing performing?')"
+                            class="text-xs px-2 py-1 rounded-full border border-blue-500/40 text-blue-400 hover:bg-blue-500/20 transition-colors">📊
+                            My performance</button>
+                        <button onclick="sendSuggestion('Show me market prices at CYYZ')"
+                            class="text-xs px-2 py-1 rounded-full border border-blue-500/40 text-blue-400 hover:bg-blue-500/20 transition-colors">💰
+                            Market prices</button>
+                        {% else %}
+                        <button onclick="sendSuggestion('Show me covered hangars under $500')"
+                            class="text-xs px-2 py-1 rounded-full border border-blue-500/40 text-blue-400 hover:bg-blue-500/20 transition-colors">🏠
+                            Covered < $500</button>
+                                <button onclick="sendSuggestion('What is the average price at CYTZ?')"
+                                    class="text-xs px-2 py-1 rounded-full border border-blue-500/40 text-blue-400 hover:bg-blue-500/20 transition-colors">📍
+                                    CYTZ prices</button>
+                                {% endif %}
+                                <button onclick="sendSuggestion('help')"
+                                    class="text-xs px-2 py-1 rounded-full border border-green-500/40 text-green-400 hover:bg-green-500/20 transition-colors">❓
+                                    What can you do?</button>
+                                {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Typing Indicator (hidden by default) -->
+        <div id="concierge-typing" class="hidden px-4 pb-1">
+            <div class="flex gap-2 items-center">
+                <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-robot text-white text-xs"></i>
+                </div>
+                <div class="rounded-2xl rounded-tl-sm px-3 py-2" style="background: #1e293b;">
+                    <div class="flex gap-1 items-center h-4">
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce"
+                            style="animation-delay:0s"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce"
+                            style="animation-delay:0.15s"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce"
+                            style="animation-delay:0.3s"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Bar -->
+        <div class="px-3 py-3 flex gap-2 items-end"
+            style="background: #0d1117; border-top: 1px solid rgba(255,255,255,0.07);">
+            <textarea id="concierge-input" rows="1" placeholder="Ask about hangars, prices, availability..."
+                class="flex-1 rounded-xl px-3 py-2.5 text-sm resize-none outline-none transition-all"
+                style="background: #1e293b; color: #e2e8f0; border: 1px solid rgba(59,130,246,0.3); max-height:80px;"
+                onkeydown="handleConciergeKey(event)"
+                oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+            <button onclick="sendConciergeMessage()"
+                class="w-10 h-10 rounded-xl flex items-center justify-center text-white transition-all hover:scale-110 flex-shrink-0"
+                style="background: linear-gradient(135deg, #1a56db, #0e9f6e);">
+                <i class="fas fa-paper-plane text-sm"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ── Concierge State ──────────────────────────
+        let conciergeOpen = false;
+        let conciergeHistory = [];
+
+        function toggleConcierge() {
+            conciergeOpen = !conciergeOpen;
+            const panel = document.getElementById('concierge-panel');
+            const icon = document.getElementById('concierge-icon');
+            const badge = document.getElementById('concierge-badge');
+            panel.classList.toggle('hidden', !conciergeOpen);
+            icon.className = conciergeOpen ? 'fas fa-times' : 'fas fa-robot';
+            badge.classList.add('hidden');
+            if (conciergeOpen) {
+                document.getElementById('concierge-input').focus();
+                scrollConciergeToBottom();
+            }
+        }
+
+        function scrollConciergeToBottom() {
+            const msgs = document.getElementById('concierge-messages');
+            msgs.scrollTop = msgs.scrollHeight;
+        }
+
+        function appendMessage(role, content) {
+            const msgs = document.getElementById('concierge-messages');
+            const isUser = role === 'user';
+            const div = document.createElement('div');
+            div.className = isUser ? 'flex gap-2 justify-end' : 'flex gap-2';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'rounded-2xl px-3 py-2 max-w-[80%] text-sm leading-relaxed';
+            if (isUser) {
+                bubble.style.cssText = 'background: linear-gradient(135deg,#1a56db,#0e9f6e); color:white; border-radius: 1rem 1rem 0.25rem 1rem;';
+                bubble.textContent = content;
+            } else {
+                bubble.style.cssText = 'background:#1e293b; color:#e2e8f0; border-radius: 1rem 1rem 1rem 0.25rem;';
+                bubble.innerHTML = renderMarkdown(content);
+            }
+
+            if (!isUser) {
+                const avatar = document.createElement('div');
+                avatar.className = 'w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 mt-0.5';
+                avatar.innerHTML = '<i class="fas fa-robot text-white text-xs"></i>';
+                div.appendChild(avatar);
+            }
+            div.appendChild(bubble);
+            msgs.appendChild(div);
+            scrollConciergeToBottom();
+        }
+
+        function renderMarkdown(text) {
+            // Simple markdown: bold, links, bullet points, line breaks
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-400 underline hover:text-blue-300">$1</a>')
+                .replace(/^- (.+)$/gm, '• $1')
+                .replace(/\n/g, '<br>');
+        }
+
+        function setTyping(show) {
+            document.getElementById('concierge-typing').classList.toggle('hidden', !show);
+            document.getElementById('concierge-status').textContent = show ? '✦ Thinking...' : '● Online';
+            if (show) scrollConciergeToBottom();
+        }
+
+        async function sendConciergeMessage() {
+            const input = document.getElementById('concierge-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            input.value = '';
+            input.style.height = 'auto';
+            appendMessage('user', message);
+            conciergeHistory.push({ role: 'user', content: message });
+            setTyping(true);
+
+            try {
+                const resp = await fetch('/api/concierge', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message, history: conciergeHistory })
+                });
+                const data = await resp.json();
+                setTyping(false);
+                const reply = data.reply || 'Sorry, I could not process that.';
+                appendMessage('assistant', reply);
+                conciergeHistory.push({ role: 'assistant', content: reply });
+
+                // Show badge if panel closed
+                if (!conciergeOpen) {
+                    document.getElementById('concierge-badge').classList.remove('hidden');
+                }
+            } catch (e) {
+                setTyping(false);
+                appendMessage('assistant', '⚠️ Connection error. Please try again.');
+            }
+        }
+
+        function sendSuggestion(text) {
+            document.getElementById('concierge-input').value = text;
+            sendConciergeMessage();
+        }
+
+        function handleConciergeKey(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendConciergeMessage();
+            }
+        }
+
+        // Show welcome badge after 3s for new users
+        setTimeout(() => {
+            if (!conciergeOpen) {
+                document.getElementById('concierge-badge').classList.remove('hidden');
+            }
+        }, 3000);
+    </script>
+
 </body>
 
 </html>
