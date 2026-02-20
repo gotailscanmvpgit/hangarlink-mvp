@@ -8,55 +8,66 @@
 
         <!-- Search Filters -->
         <form method="GET" action="{{ url_for('main.listings') }}"
-            class="bg-white/95 dark:bg-dark-800/95 backdrop-blur-sm rounded-2xl p-6 shadow-2xl">
+            class="rounded-2xl p-6 shadow-2xl border border-white/20"
+            style="background: rgba(0,31,63,0.85); backdrop-filter: blur(16px);">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                 <!-- Airport ICAO -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
-                        <i class="fas fa-plane-departure mr-2 text-blue-600"></i>Airport ICAO
+                    <label class="block text-xs font-bold text-white/80 mb-2 uppercase tracking-wider">
+                        <i class="fas fa-plane-departure mr-2 text-blue-400"></i>Airport ICAO
                     </label>
                     <input type="text" name="airport" value="{{ airport }}"
-                        class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 rounded-xl focus:ring-2 focus:ring-blue-500 block w-full p-3"
-                        placeholder="KJFK" maxlength="4">
+                        class="block w-full rounded-xl p-3 text-base font-semibold shadow-inner focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                        style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #FAFAFA;"
+                        placeholder="CYTZ" maxlength="4" onfocus="this.style.background='rgba(255,255,255,0.14)'"
+                        onblur="this.style.background='rgba(255,255,255,0.08)'">
                 </div>
 
                 <!-- Covered -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
-                        <i class="fas fa-warehouse mr-2 text-blue-600"></i>Covered
+                    <label class="block text-xs font-bold text-white/80 mb-2 uppercase tracking-wider">
+                        <i class="fas fa-warehouse mr-2 text-blue-400"></i>Covered
                     </label>
                     <select name="covered"
-                        class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 rounded-xl focus:ring-2 focus:ring-blue-500 block w-full p-3">
-                        <option value="">Any</option>
-                        <option value="yes" {% if covered=='yes' %}selected{% endif %}>Yes</option>
-                        <option value="no" {% if covered=='no' %}selected{% endif %}>No</option>
+                        class="block w-full rounded-xl p-3 text-base font-semibold shadow-inner focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                        style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #FAFAFA;">
+                        <option value="" style="background:#001F3F; color:#FAFAFA;">Any</option>
+                        <option value="yes" {% if covered=='yes' %}selected{% endif %}
+                            style="background:#001F3F; color:#FAFAFA;">Yes — Covered</option>
+                        <option value="no" {% if covered=='no' %}selected{% endif %}
+                            style="background:#001F3F; color:#FAFAFA;">No — Outdoor</option>
                     </select>
                 </div>
 
                 <!-- Min Price -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
-                        <i class="fas fa-dollar-sign mr-2 text-blue-600"></i>Min Price/mo
+                    <label class="block text-xs font-bold text-white/80 mb-2 uppercase tracking-wider">
+                        <i class="fas fa-dollar-sign mr-2 text-blue-400"></i>Min Price / mo
                     </label>
                     <input type="number" name="min_price" value="{{ min_price or '' }}"
-                        class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 rounded-xl focus:ring-2 focus:ring-blue-500 block w-full p-3"
-                        placeholder="500">
+                        class="block w-full rounded-xl p-3 text-base font-semibold shadow-inner focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                        style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #FAFAFA;"
+                        placeholder="200" onfocus="this.style.background='rgba(255,255,255,0.14)'"
+                        onblur="this.style.background='rgba(255,255,255,0.08)'">
                 </div>
 
                 <!-- Max Price -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
-                        <i class="fas fa-dollar-sign mr-2 text-blue-600"></i>Max Price/mo
+                    <label class="block text-xs font-bold text-white/80 mb-2 uppercase tracking-wider">
+                        <i class="fas fa-dollar-sign mr-2 text-blue-400"></i>Max Price / mo
                     </label>
                     <input type="number" name="max_price" value="{{ max_price or '' }}"
-                        class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 rounded-xl focus:ring-2 focus:ring-blue-500 block w-full p-3"
-                        placeholder="2000">
+                        class="block w-full rounded-xl p-3 text-base font-semibold shadow-inner focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                        style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #FAFAFA;"
+                        placeholder="800" onfocus="this.style.background='rgba(255,255,255,0.14)'"
+                        onblur="this.style.background='rgba(255,255,255,0.08)'">
                 </div>
             </div>
 
             <button type="submit"
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all hover-lift">
-                <i class="fas fa-search mr-2"></i>Search Listings
+                class="w-full font-bold py-3.5 px-6 rounded-xl shadow-lg transition-all hover:-translate-y-0.5 active:translate-y-0"
+                style="background: linear-gradient(135deg, #1a56db 0%, #0e9f6e 100%); color: white;">
+                <i class="fas fa-search mr-2"></i>Search Available Hangars
             </button>
         </form>
     </div>
