@@ -15,6 +15,11 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     login_manager.init_app(app)
     cache.init_app(app)
+
+    # Ensure all tables exist on startup (bypasses Alembic migration issues)
+    with app.app_context():
+        db.create_all()
+
     
     # Configure Login Manager
     login_manager.login_view = 'main.login'
