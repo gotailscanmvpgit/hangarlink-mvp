@@ -478,52 +478,68 @@ def message_user(user_id):
 def login():
     """User login"""
     if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        user = User.query.filter_by(email=email).first()
-        
-        if user and check_password_hash(user.password_hash, password):
-            login_user(user)
-            flash('Logged in successfully!', 'success')
-            next_page = request.args.get('next')
-            return redirect(next_page or url_for('main.index'))
-        else:
-            flash('Invalid email or password', 'error')
-    
+        email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '')
+        try:
+            user = User.query.filter_by(email=email).first()
+            current_app.logger.debug(f"[LOGIN] Attempt for email='{email}' found={user is not None}")
+
+            if user and check_password_hash(user.password_hash, password):
+                login_user(user)
+                current_app.logger.info(f"[LOGIN] Success: user_id={user.id} role={user.role}")
+                flash('Logged in successfully!', 'success')
+                next_page = request.args.get('next')
+                return redirect(next_page or url_for('main.index'))
+            else:
+                current_app.logger.warning(f"[LOGIN] Failed credentials for email='{email}'")
+                flash('Invalid email or password', 'error')
+        except Exception as exc:
+            import traceback
+            current_app.logger.error(f"[LOGIN] Exception: {exc}\n{traceback.format_exc()}")
+            db.session.rollback()
+            flash('A server error occurred. Please try again.', 'error')
+
     return render_template('login.html')
 
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
     """User registration"""
     if request.method == 'POST':
-        username = request.form.get('username')
-        email = request.form.get('email')
-        password = request.form.get('password')
+        username = request.form.get('username', '').strip()
+        email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '')
         role = request.form.get('role', 'renter')
-        
-        if User.query.filter_by(email=email).first():
-            flash('Email already registered', 'error')
-            return redirect(url_for('main.register'))
-            
-        if User.query.filter_by(username=username).first():
-            flash('Callsign/Username already taken', 'error')
-            return redirect(url_for('main.register'))
-        
-        user = User(
-            username=username,
-            email=email,
-            password_hash=generate_password_hash(password),
-            role=role
-        )
-        db.session.add(user)
-        db.session.commit()
-        
-        login_user(user)
-        session['show_onboarding'] = True
-        flash('Account created successfully!', 'success')
-        return redirect(url_for('main.index'))
-    
+        try:
+            if User.query.filter_by(email=email).first():
+                flash('Email already registered', 'error')
+                return redirect(url_for('main.register'))
+
+            if User.query.filter_by(username=username).first():
+                flash('Callsign/Username already taken', 'error')
+                return redirect(url_for('main.register'))
+
+            user = User(
+                username=username,
+                email=email,
+                password_hash=generate_password_hash(password),
+                role=role
+            )
+            db.session.add(user)
+            db.session.commit()
+
+            login_user(user)
+            session['show_onboarding'] = True
+            current_app.logger.info(f"[REGISTER] New user: id={user.id} email='{email}' role={role}")
+            flash('Account created successfully!', 'success')
+            return redirect(url_for('main.index'))
+        except Exception as exc:
+            import traceback
+            current_app.logger.error(f"[REGISTER] Exception: {exc}\n{traceback.format_exc()}")
+            db.session.rollback()
+            flash('A server error occurred during registration. Please try again.', 'error')
+
     return render_template('register.html')
+
 
 @bp.route('/api/dismiss-onboarding', methods=['POST'])
 @login_required

@@ -5,8 +5,61 @@ from models import User, Listing, Message, Booking, Ad, WhiteLabelRequest
 from routes import bp as main_bp
 import os
 
+import logging
+logger = logging.getLogger(__name__)
+
+# ── Safe startup DDL patcher ──────────────────────────────────────────────────
+def _safe_migrate(db):
+    """
+    Apply any missing columns to existing tables without Alembic.
+    Uses ADD COLUMN IF NOT EXISTS (Postgres) or silently swallows errors (SQLite).
+    Call this once after db.create_all() on every boot.
+    """
+    from sqlalchemy import text
+    migrations = [
+        # users table — password-reset columns added in Feb 2026
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token VARCHAR(256)",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_expires TIMESTAMP",
+        # users table — subscription/gamification columns
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_tier VARCHAR(20) DEFAULT 'free'",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_expires TIMESTAMP",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS points INTEGER DEFAULT 0",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS referral_code VARCHAR(20)",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS referred_by INTEGER",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE",
+        # listings table
+        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT FALSE",
+        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS featured_expires_at TIMESTAMP",
+        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS featured_tier VARCHAR(20)",
+        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS insurance_active BOOLEAN DEFAULT FALSE",
+        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS condition_verified BOOLEAN DEFAULT FALSE",
+        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS likes INTEGER DEFAULT 0",
+        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS video_url VARCHAR(255)",
+        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS virtual_tour_url VARCHAR(255)",
+        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS health_score INTEGER DEFAULT 0",
+        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS checklist_completed BOOLEAN DEFAULT FALSE",
+        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS availability_start DATE",
+        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS availability_end DATE",
+        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS is_premium_listing BOOLEAN DEFAULT FALSE",
+    ]
+    with db.engine.connect() as conn:
+        for ddl in migrations:
+            try:
+                conn.execute(text(ddl))
+                conn.commit()
+            except Exception as exc:
+                # IF NOT EXISTS isn't supported in old SQLite — silently skip
+                logger.debug(f"[migrate] skipped: {ddl[:60]}... ({exc})")
+                try:
+                    conn.rollback()
+                except Exception:
+                    pass
+
+# ─────────────────────────────────────────────────────────────────────────────
+
 # Define the create_app function for flexibility and testing
 def create_app(config_class=Config):
+
     app = Flask(__name__)
     app.config.from_object(config_class)
 
@@ -28,6 +81,8 @@ def create_app(config_class=Config):
     # Ensure all tables exist on startup (bypasses Alembic migration issues)
     with app.app_context():
         db.create_all()
+        _safe_migrate(db)
+
 
     
     # Configure Login Manager
