@@ -591,3 +591,101 @@ class TestEdgeCases:
     def test_subscription_cancel_page(self, client):
         r = client.get('/subscription/cancel', follow_redirects=True)
         assert r.status_code == 200
+
+
+# ════════════════════════════════════════════════════════════════
+#  12. LOGIN / SIGNUP FLOW — POST-AUTH REDIRECT TESTS
+#      These specifically guard against the "500 after login" bug
+# ════════════════════════════════════════════════════════════════
+
+class TestLoginSignupFlow:
+    """
+    End-to-end tests for the full registration → login → homepage flow.
+    These are the specific tests for the post-auth 500 regression.
+    """
+
+    def test_register_then_homepage(self, client, app):
+        """Register a new user and verify homepage loads (no 500)."""
+        with app.app_context():
+            r = register(client, 'flowpilot', 'flowpilot@test.com', 'SecurePass1!')
+            assert r.status_code == 200, f"Expected 200, got {r.status_code}"
+            # Verify in DB
+            u = User.query.filter_by(email='flowpilot@test.com').first()
+            assert u is not None, "User not created in DB"
+            assert u.username == 'flowpilot'
+            logout(client)
+            db.session.delete(u)
+            db.session.commit()
+
+    def test_login_then_homepage_no_500(self, client, app):
+        """Log in and confirm the homepage returns 200, not 500."""
+        with app.app_context():
+            u = make_user(db, username='auth500test', email='auth500@test.com',
+                          password='TestPass1!')
+            r = login(client, 'auth500@test.com', 'TestPass1!')
+            # Status 200 is the only correct answer — 500 would mean a server error
+            assert r.status_code == 200, f"Post-login redirect got {r.status_code}"
+            assert b'Hangar' in r.data, "Homepage content missing after login"
+            logout(client)
+            db.session.delete(u)
+            db.session.commit()
+
+    def test_wrong_password_stays_on_login(self, client, app):
+        """Wrong password keeps user on login page, no redirect to 500."""
+        with app.app_context():
+            u = make_user(db, username='wrongpwtest', email='wrongpw@test.com',
+                          password='CorrectPass1!')
+            r = login(client, 'wrongpw@test.com', 'WrongPassword!')
+            # Must be 200, never 500
+            assert r.status_code == 200
+            # Should still see login form elements
+            assert b'email' in r.data or b'Email' in r.data
+            db.session.delete(u)
+            db.session.commit()
+
+    def test_duplicate_email_on_register(self, client, app):
+        """Registering with existing email shows error, no 500."""
+        with app.app_context():
+            u = make_user(db, username='existuser', email='exist@test.com')
+            r = register(client, 'newname', 'exist@test.com', 'AnyPass1!')
+            # Must be 200, never 500
+            assert r.status_code == 200
+            db.session.delete(u)
+            db.session.commit()
+
+    def test_owner_register_then_homepage(self, client, app):
+        """Owner role registration ends on homepage, not 500."""
+        with app.app_context():
+            r = register(client, 'ownerflow', 'ownerflow@test.com',
+                         'SecurePass1!', role='owner')
+            assert r.status_code == 200
+            u = User.query.filter_by(email='ownerflow@test.com').first()
+            assert u is not None
+            assert u.role == 'owner'
+            logout(client)
+            db.session.delete(u)
+            db.session.commit()
+
+    def test_login_then_profile_accessible(self, client, app):
+        """After login, /profile must return 200 (not 500)."""
+        with app.app_context():
+            u = make_user(db, username='profiletest', email='profiletest@test.com',
+                          password='TestPass1!')
+            login(client, 'profiletest@test.com', 'TestPass1!')
+            r = client.get('/profile')
+            assert r.status_code == 200, f"/profile returned {r.status_code} after login"
+            logout(client)
+            db.session.delete(u)
+            db.session.commit()
+
+    def test_login_then_my_listings_accessible(self, client, app):
+        """After login as owner, /my-listings must return 200 (not 500)."""
+        with app.app_context():
+            u = make_owner(db, username='mylisttest', email='mylisttest@test.com')
+            login(client, 'mylisttest@test.com', 'Password1!')
+            r = client.get('/my-listings')
+            assert r.status_code == 200, f"/my-listings returned {r.status_code} after login"
+            logout(client)
+            db.session.delete(u)
+            db.session.commit()
+

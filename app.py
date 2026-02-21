@@ -11,49 +11,86 @@ logger = logging.getLogger(__name__)
 # ── Safe startup DDL patcher ──────────────────────────────────────────────────
 def _safe_migrate(db):
     """
-    Apply any missing columns to existing tables without Alembic.
-    Uses ADD COLUMN IF NOT EXISTS (Postgres) or silently swallows errors (SQLite).
-    Call this once after db.create_all() on every boot.
+    Apply every missing column to existing production tables.
+    Logs at WARNING level so output is visible in Railway/Gunicorn.
+    Uses ADD COLUMN IF NOT EXISTS (Postgres 9.6+).
+    SQLite silently swallows the IF NOT EXISTS on older versions.
     """
     from sqlalchemy import text
+
+    # ALL columns across all model classes — add to this list whenever
+    # you add a new db.Column to any model.
     migrations = [
-        # users table — password-reset columns added in Feb 2026
-        "ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token VARCHAR(256)",
-        "ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_expires TIMESTAMP",
-        # users table — subscription/gamification columns
-        "ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_tier VARCHAR(20) DEFAULT 'free'",
-        "ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_expires TIMESTAMP",
-        "ALTER TABLE users ADD COLUMN IF NOT EXISTS points INTEGER DEFAULT 0",
-        "ALTER TABLE users ADD COLUMN IF NOT EXISTS referral_code VARCHAR(20)",
-        "ALTER TABLE users ADD COLUMN IF NOT EXISTS referred_by INTEGER",
-        "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE",
-        # listings table
-        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT FALSE",
-        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS featured_expires_at TIMESTAMP",
-        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS featured_tier VARCHAR(20)",
-        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS insurance_active BOOLEAN DEFAULT FALSE",
-        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS condition_verified BOOLEAN DEFAULT FALSE",
-        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS likes INTEGER DEFAULT 0",
-        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS video_url VARCHAR(255)",
-        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS virtual_tour_url VARCHAR(255)",
-        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS health_score INTEGER DEFAULT 0",
-        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS checklist_completed BOOLEAN DEFAULT FALSE",
-        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS availability_start DATE",
-        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS availability_end DATE",
-        "ALTER TABLE listings ADD COLUMN IF NOT EXISTS is_premium_listing BOOLEAN DEFAULT FALSE",
+        # ── users ──────────────────────────────────────────────────────
+        ("users", "alert_enabled",          "BOOLEAN DEFAULT FALSE"),
+        ("users", "alert_airport",          "VARCHAR(4)"),
+        ("users", "alert_max_price",        "FLOAT"),
+        ("users", "alert_min_size",         "INTEGER"),
+        ("users", "alert_covered_only",     "BOOLEAN DEFAULT FALSE"),
+        ("users", "reputation_score",       "FLOAT DEFAULT 5.0"),
+        ("users", "rentals_count",          "INTEGER DEFAULT 0"),
+        ("users", "is_premium",             "BOOLEAN DEFAULT FALSE"),
+        ("users", "subscription_tier",      "VARCHAR(20) DEFAULT 'free'"),
+        ("users", "stripe_customer_id",     "VARCHAR(100)"),
+        ("users", "stripe_subscription_id", "VARCHAR(100)"),
+        ("users", "subscription_expires",   "TIMESTAMP"),
+        ("users", "has_analytics_access",   "BOOLEAN DEFAULT FALSE"),
+        ("users", "analytics_expires_at",   "TIMESTAMP"),
+        ("users", "is_admin",               "BOOLEAN DEFAULT FALSE"),
+        ("users", "search_count_today",     "INTEGER DEFAULT 0"),
+        ("users", "search_reset_date",      "DATE"),
+        ("users", "points",                 "INTEGER DEFAULT 0"),
+        ("users", "referral_code",          "VARCHAR(20)"),
+        ("users", "referred_by_id",         "INTEGER"),
+        ("users", "is_certified",           "BOOLEAN DEFAULT FALSE"),
+        ("users", "seasonal_alerts",        "BOOLEAN DEFAULT TRUE"),
+        ("users", "reset_token",            "VARCHAR(256)"),
+        ("users", "reset_token_expires",    "TIMESTAMP"),
+        # ── listings ───────────────────────────────────────────────────
+        ("listings", "updated_at",           "TIMESTAMP"),
+        ("listings", "is_featured",          "BOOLEAN DEFAULT FALSE"),
+        ("listings", "featured_expires_at",  "TIMESTAMP"),
+        ("listings", "featured_tier",        "VARCHAR(20)"),
+        ("listings", "insurance_active",     "BOOLEAN DEFAULT FALSE"),
+        ("listings", "condition_verified",   "BOOLEAN DEFAULT FALSE"),
+        ("listings", "likes",                "INTEGER DEFAULT 0"),
+        ("listings", "video_url",            "VARCHAR(255)"),
+        ("listings", "virtual_tour_url",     "VARCHAR(255)"),
+        ("listings", "health_score",         "INTEGER DEFAULT 0"),
+        ("listings", "checklist_completed",  "BOOLEAN DEFAULT FALSE"),
+        ("listings", "availability_start",   "DATE"),
+        ("listings", "availability_end",     "DATE"),
+        ("listings", "is_premium_listing",   "BOOLEAN DEFAULT FALSE"),
+        # ── bookings ───────────────────────────────────────────────────
+        ("bookings", "insurance_opt_in",     "BOOLEAN DEFAULT FALSE"),
+        ("bookings", "insurance_fee",        "FLOAT DEFAULT 0.0"),
+        ("bookings", "owner_rating",         "INTEGER"),
+        ("bookings", "renter_rating",        "INTEGER"),
+        ("bookings", "owner_review",         "TEXT"),
+        ("bookings", "renter_review",        "TEXT"),
+        # ── messages ───────────────────────────────────────────────────
+        ("messages", "is_guest",             "BOOLEAN DEFAULT FALSE"),
+        ("messages", "guest_email",          "VARCHAR(120)"),
     ]
+
+    applied, skipped = 0, 0
     with db.engine.connect() as conn:
-        for ddl in migrations:
+        for table, column, col_type in migrations:
+            ddl = f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {column} {col_type}"
             try:
                 conn.execute(text(ddl))
                 conn.commit()
+                applied += 1
             except Exception as exc:
-                # IF NOT EXISTS isn't supported in old SQLite — silently skip
-                logger.debug(f"[migrate] skipped: {ddl[:60]}... ({exc})")
+                skipped += 1
+                logger.warning(f"[DB-MIGRATE] skipped {table}.{column}: {exc!s:.120}")
                 try:
                     conn.rollback()
                 except Exception:
                     pass
+
+    logger.warning(f"[DB-MIGRATE] done — {applied} applied / {skipped} skipped out of {len(migrations)} checks")
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -91,7 +128,15 @@ def create_app(config_class=Config):
 
     @login_manager.user_loader
     def load_user(user_id):
-        return User.query.get(int(user_id))
+        try:
+            return User.query.get(int(user_id))
+        except Exception as exc:
+            logger.error(f"[user_loader] FAILED for user_id={user_id}: {exc}")
+            try:
+                db.session.rollback()
+            except Exception:
+                pass
+            return None
 
     # Register blueprints
     app.register_blueprint(main_bp)
@@ -105,17 +150,49 @@ def create_app(config_class=Config):
             'legal_disclaimer': "HangarLinks is a platform connecting hangar owners with aircraft owners. We do not own or operate hangars."
         }
 
+    # ── Debug DB schema — admin-only, exposes column names for each table ──────
+    @app.route('/debug-db')
+    def debug_db():
+        """Inspect live DB schema. Remove after confirming columns are correct."""
+        from flask import request as freq, jsonify
+        secret = freq.args.get('key', '')
+        if secret != app.config.get('SECRET_KEY', 'no-key'):
+            return 'Forbidden', 403
+        from sqlalchemy import text, inspect as sa_inspect
+        result = {}
+        try:
+            insp = sa_inspect(db.engine)
+            for table in ['users', 'listings', 'bookings', 'messages', 'ad']:
+                try:
+                    cols = [c['name'] for c in insp.get_columns(table)]
+                    result[table] = cols
+                except Exception as e:
+                    result[table] = f'ERROR: {e}'
+            return jsonify({'schema': result, 'status': 'ok'})
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
     # Error handlers
     @app.errorhandler(404)
     def not_found_error(error):
-        return render_template('404.html'), 404
+        try:
+            return render_template('404.html'), 404
+        except Exception:
+            return '<h2>404 — Page not found</h2><a href="/">Home</a>', 404
 
     @app.errorhandler(500)
     def internal_error(error):
-        db.session.rollback()
-        return render_template('500.html'), 500
+        try:
+            db.session.rollback()
+        except Exception:
+            pass
+        try:
+            return render_template('500.html'), 500
+        except Exception:
+            return '<h2>500 — Internal Server Error</h2><a href="/">Home</a>', 500
 
     return app
+
 
 # Create the application instance
 app = create_app()
