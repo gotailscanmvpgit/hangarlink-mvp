@@ -992,7 +992,10 @@ def subscription_success():
         current_user.is_premium = True
         current_user.subscription_expires = datetime.utcnow() + timedelta(days=30)
         db.session.commit()
-    
+
+    # Admin email notification (MVP placeholder)
+    _notify_admin_subscription(current_user, plan_type)
+
     flash('🎉 Welcome to Premium! Your subscription is active.', 'success')
     return render_template('subscription_success.html', plan_type=plan_type,
                            plan=OWNER_PLAN if plan_type == 'owner' else RENTER_PLAN)
@@ -1400,6 +1403,89 @@ def buy_report(report_id):
     except Exception as e:
         flash(f'Payment Error: {str(e)}', 'error')
         return redirect(url_for('main.market_reports'))
+
+
+# ─────────────────────────────────────────────
+#  ADMIN — EMAIL HELPER
+# ─────────────────────────────────────────────
+
+def _notify_admin_subscription(user, plan_type: str):
+    """MVP placeholder: log subscription event. Wire to real email (SendGrid/SES) later."""
+    admin_email = os.environ.get('ADMIN_EMAIL', 'admin@hangarlinks.com')
+    msg = (
+        f"[HangarLinks] NEW SUBSCRIPTION\n"
+        f"User:  {user.username} <{user.email}>\n"
+        f"Plan:  {plan_type}\n"
+        f"Time:  {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}\n"
+        f"---\n"
+        f"To send real emails, set ADMIN_EMAIL and wire Flask-Mail / SendGrid."
+    )
+    current_app.logger.info(f"[ADMIN NOTIFY] New subscription: {user.email} ({plan_type})")
+    # TODO: Replace with real email send, e.g.:
+    # mail.send_message(subject='New Subscription', recipients=[admin_email], body=msg)
+    print(msg)  # Visible in Railway/Gunicorn logs for now
+
+
+# ─────────────────────────────────────────────
+#  ADMIN — /admin/listings  (Featured Management)
+# ─────────────────────────────────────────────
+
+def admin_required(f):
+    """Decorator: only allow is_admin users."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not current_user.is_authenticated or not getattr(current_user, 'is_admin', False):
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated
+
+
+@bp.route('/admin/listings')
+@login_required
+@admin_required
+def admin_listings():
+    """Admin panel: all listings with featured toggle."""
+    page = request.args.get('page', 1, type=int)
+    search = request.args.get('q', '').strip().upper()
+    status_filter = request.args.get('status', '')
+    featured_filter = request.args.get('featured', '')
+
+    q = Listing.query
+    if search:
+        q = q.filter(Listing.airport_icao.ilike(f'%{search}%'))
+    if status_filter:
+        q = q.filter_by(status=status_filter)
+    if featured_filter == 'yes':
+        q = q.filter_by(is_featured=True)
+    elif featured_filter == 'no':
+        q = q.filter_by(is_featured=False)
+
+    listings = q.order_by(Listing.is_featured.desc(), Listing.created_at.desc()) \
+                 .paginate(page=page, per_page=25, error_out=False)
+
+    stats = {
+        'total': Listing.query.count(),
+        'featured': Listing.query.filter_by(is_featured=True).count(),
+        'active': Listing.query.filter_by(status='Active').count(),
+        'users': User.query.count(),
+        'premium_users': User.query.filter_by(subscription_tier='premium').count(),
+    }
+    return render_template('admin_listings.html', listings=listings, stats=stats,
+                           search=search, status_filter=status_filter,
+                           featured_filter=featured_filter)
+
+
+@bp.route('/admin/toggle-featured/<int:listing_id>', methods=['POST'])
+@login_required
+@admin_required
+def toggle_featured(listing_id):
+    """Toggle is_featured on a listing."""
+    listing = Listing.query.get_or_404(listing_id)
+    listing.is_featured = not listing.is_featured
+    db.session.commit()
+    state = 'Featured' if listing.is_featured else 'Unfeatured'
+    flash(f'✅ Listing {listing.airport_icao} #{listing.id} → {state}', 'success')
+    return redirect(request.referrer or url_for('main.admin_listings'))
 
 
 # ─────────────────────────────────────────────

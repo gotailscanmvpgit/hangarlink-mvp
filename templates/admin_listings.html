@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+{% block title %}Admin — Listings Management | HangarLinks{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+    <!-- ── Header ── -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+            <div class="flex items-center gap-3 mb-1">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+                    style="background: linear-gradient(135deg,#1a56db,#0e9f6e);">
+                    <i class="fas fa-shield-alt text-white"></i>
+                </div>
+                <h1 class="text-3xl font-extrabold text-white">Admin — Listings</h1>
+            </div>
+            <p class="text-slate-400 text-sm ml-13">Manage featured status for all hangar listings</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{{ url_for('main.admin_ads') }}"
+                class="px-4 py-2 rounded-xl text-sm font-semibold border border-white/20 text-slate-300 hover:bg-white/10 transition-all">
+                <i class="fas fa-ad mr-1.5"></i>Manage Ads
+            </a>
+            <a href="{{ url_for('main.index') }}"
+                class="px-4 py-2 rounded-xl text-sm font-semibold border border-white/20 text-slate-300 hover:bg-white/10 transition-all">
+                <i class="fas fa-home mr-1.5"></i>Home
+            </a>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="mb-6 px-4 py-3 rounded-xl text-sm font-medium
+        {% if category == 'success' %}bg-green-500/15 border border-green-500/30 text-green-300
+        {% else %}bg-red-500/15 border border-red-500/30 text-red-300{% endif %}">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <!-- ── Stats Row ── -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        {% set stat_items = [
+        ('fas fa-list', 'Total Listings', stats.total, '#3b82f6'),
+        ('fas fa-star', 'Featured', stats.featured, '#f59e0b'),
+        ('fas fa-check-circle', 'Active', stats.active, '#10b981'),
+        ('fas fa-users', 'Total Users', stats.users, '#8b5cf6'),
+        ('fas fa-crown', 'Premium Users', stats.premium_users, '#f97316'),
+        ] %}
+        {% for icon, label, value, color in stat_items %}
+        <div class="rounded-xl p-4 border border-white/10" style="background: rgba(255,255,255,0.04);">
+            <div class="flex items-center gap-2 mb-2">
+                <i class="{{ icon }} text-xs" style="color: {{ color }};"></i>
+                <span class="text-xs text-slate-400 font-medium uppercase tracking-wider">{{ label }}</span>
+            </div>
+            <p class="text-2xl font-bold text-white">{{ value }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- ── Filters ── -->
+    <form method="GET" action="{{ url_for('main.admin_listings') }}"
+        class="rounded-2xl p-5 mb-6 border border-white/10 flex flex-wrap gap-3 items-end"
+        style="background: rgba(255,255,255,0.04);">
+        <div class="flex-1 min-w-[160px]">
+            <label class="block text-xs text-slate-400 mb-1 uppercase tracking-wider">Search ICAO</label>
+            <input type="text" name="q" value="{{ search }}" placeholder="CYTZ"
+                class="block w-full rounded-xl px-3 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);">
+        </div>
+        <div class="min-w-[130px]">
+            <label class="block text-xs text-slate-400 mb-1 uppercase tracking-wider">Status</label>
+            <select name="status"
+                class="block w-full rounded-xl px-3 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                style="background: rgba(30,41,59,1); border: 1px solid rgba(255,255,255,0.15);">
+                <option value="" {% if not status_filter %}selected{% endif %} style="background:#0d1117;">All</option>
+                <option value="Active" {% if status_filter=='Active' %}selected{% endif %} style="background:#0d1117;">
+                    Active</option>
+                <option value="Inactive" {% if status_filter=='Inactive' %}selected{% endif %}
+                    style="background:#0d1117;">Inactive</option>
+                <option value="Rented" {% if status_filter=='Rented' %}selected{% endif %} style="background:#0d1117;">
+                    Rented</option>
+            </select>
+        </div>
+        <div class="min-w-[130px]">
+            <label class="block text-xs text-slate-400 mb-1 uppercase tracking-wider">Featured</label>
+            <select name="featured"
+                class="block w-full rounded-xl px-3 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                style="background: rgba(30,41,59,1); border: 1px solid rgba(255,255,255,0.15);">
+                <option value="" {% if not featured_filter %}selected{% endif %} style="background:#0d1117;">All
+                </option>
+                <option value="yes" {% if featured_filter=='yes' %}selected{% endif %} style="background:#0d1117;">⭐
+                    Featured</option>
+                <option value="no" {% if featured_filter=='no' %}selected{% endif %} style="background:#0d1117;">Not
+                    Featured</option>
+            </select>
+        </div>
+        <button type="submit"
+            class="px-5 py-2 rounded-xl text-sm font-bold text-white transition-all hover:-translate-y-0.5"
+            style="background: linear-gradient(135deg,#1a56db,#0e9f6e);">
+            <i class="fas fa-search mr-1.5"></i>Filter
+        </button>
+        <a href="{{ url_for('main.admin_listings') }}"
+            class="px-4 py-2 rounded-xl text-sm text-slate-400 border border-white/15 hover:bg-white/10 transition-all">
+            Reset
+        </a>
+    </form>
+
+    <!-- ── Listings Table ── -->
+    <div class="rounded-2xl overflow-hidden border border-white/10" style="background: rgba(255,255,255,0.03);">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr style="background: rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.08);">
+                        <th class="px-5 py-3 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">ID
+                        </th>
+                        <th class="px-5 py-3 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            Airport</th>
+                        <th class="px-5 py-3 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Owner
+                        </th>
+                        <th class="px-5 py-3 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Size
+                        </th>
+                        <th class="px-5 py-3 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            Price/mo</th>
+                        <th class="px-5 py-3 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Status
+                        </th>
+                        <th class="px-5 py-3 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Health
+                        </th>
+                        <th class="px-5 py-3 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            Featured</th>
+                        <th class="px-5 py-3 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for listing in listings.items %}
+                    <tr class="border-b border-white/5 hover:bg-white/5 transition-colors
+                        {% if listing.is_featured %}ring-1 ring-amber-500/20{% endif %}">
+                        <td class="px-5 py-3.5 text-slate-500 font-mono text-xs">#{{ listing.id }}</td>
+                        <td class="px-5 py-3.5">
+                            <a href="{{ url_for('main.listing_detail', id=listing.id) }}" target="_blank"
+                                class="font-bold text-blue-400 hover:text-blue-300 transition-colors">
+                                {{ listing.airport_icao }}
+                            </a>
+                        </td>
+                        <td class="px-5 py-3.5 text-slate-300 text-xs">
+                            {{ listing.owner.username if listing.owner else '—' }}
+                        </td>
+                        <td class="px-5 py-3.5 text-slate-300">{{ listing.size_sqft }} sqft</td>
+                        <td class="px-5 py-3.5 text-white font-semibold">${{ "%.0f"|format(listing.price_month) }}</td>
+                        <td class="px-5 py-3.5">
+                            {% if listing.status == 'Active' %}
+                            <span
+                                class="px-2 py-0.5 rounded-full text-xs font-bold bg-green-500/15 text-green-400 border border-green-500/25">Active</span>
+                            {% elif listing.status == 'Rented' %}
+                            <span
+                                class="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-500/15 text-blue-400 border border-blue-500/25">Rented</span>
+                            {% else %}
+                            <span
+                                class="px-2 py-0.5 rounded-full text-xs font-bold bg-slate-500/15 text-slate-400 border border-slate-500/25">{{
+                                listing.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-5 py-3.5">
+                            <div class="flex items-center gap-2">
+                                <div class="w-16 h-1.5 rounded-full bg-white/10 overflow-hidden">
+                                    <div class="h-full rounded-full transition-all
+                                        {% if listing.health_score >= 70 %}bg-green-500
+                                        {% elif listing.health_score >= 40 %}bg-amber-500
+                                        {% else %}bg-red-500{% endif %}" style="width: {{ listing.health_score }}%">
+                                    </div>
+                                </div>
+                                <span class="text-xs text-slate-400">{{ listing.health_score }}</span>
+                            </div>
+                        </td>
+                        <!-- Featured Toggle -->
+                        <td class="px-5 py-3.5 text-center">
+                            {% if listing.is_featured %}
+                            <span
+                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                                <i class="fas fa-star text-[10px]"></i> Featured
+                            </span>
+                            {% else %}
+                            <span
+                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-slate-500/10 text-slate-500 border border-slate-600/20">
+                                <i class="far fa-star text-[10px]"></i> Standard
+                            </span>
+                            {% endif %}
+                        </td>
+                        <!-- Action Button -->
+                        <td class="px-5 py-3.5 text-center">
+                            <form action="{{ url_for('main.toggle_featured', listing_id=listing.id) }}" method="POST"
+                                class="inline">
+                                <button type="submit"
+                                    class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105 active:scale-95"
+                                    style="{% if listing.is_featured %}background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3);{% else %}background:rgba(245,158,11,0.15);color:#fbbf24;border:1px solid rgba(245,158,11,0.3);{% endif %}"
+                                    onclick="return confirm('{{ 'Unfeature' if listing.is_featured else 'Feature' }} this listing?')">
+                                    {% if listing.is_featured %}
+                                    <i class="fas fa-star-half-alt mr-1"></i>Unfeature
+                                    {% else %}
+                                    <i class="fas fa-star mr-1"></i>Feature
+                                    {% endif %}
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="px-5 py-12 text-center text-slate-500">
+                            <i class="fas fa-inbox text-3xl mb-3 block opacity-40"></i>
+                            No listings match your filters.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if listings.pages > 1 %}
+        <div class="px-5 py-4 flex items-center justify-between border-t border-white/8"
+            style="background: rgba(255,255,255,0.02);">
+            <p class="text-xs text-slate-500">
+                Showing {{ listings.per_page * (listings.page - 1) + 1 }}–{{ [listings.per_page * listings.page,
+                listings.total]|min }}
+                of {{ listings.total }} listings
+            </p>
+            <div class="flex gap-2">
+                {% if listings.has_prev %}
+                <a href="{{ url_for('main.admin_listings', page=listings.prev_num, q=search, status=status_filter, featured=featured_filter) }}"
+                    class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 border border-white/15 hover:bg-white/10 transition-all">
+                    <i class="fas fa-chevron-left mr-1"></i>Prev
+                </a>
+                {% endif %}
+                <span class="px-3 py-1.5 rounded-lg text-xs font-bold text-white"
+                    style="background: rgba(26,86,219,0.3);">
+                    {{ listings.page }} / {{ listings.pages }}
+                </span>
+                {% if listings.has_next %}
+                <a href="{{ url_for('main.admin_listings', page=listings.next_num, q=search, status=status_filter, featured=featured_filter) }}"
+                    class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 border border-white/15 hover:bg-white/10 transition-all">
+                    Next<i class="fas fa-chevron-right ml-1"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ── Email Notification Info ── -->
+    <div class="mt-8 rounded-2xl p-5 border border-blue-500/20" style="background: rgba(26,86,219,0.06);">
+        <div class="flex items-start gap-4">
+            <div class="w-9 h-9 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <i class="fas fa-envelope text-blue-400 text-sm"></i>
+            </div>
+            <div>
+                <h3 class="text-white font-bold mb-1">Admin Email Notifications</h3>
+                <p class="text-slate-400 text-sm mb-3">
+                    New subscription events are currently <strong class="text-green-400">logged to Railway/Gunicorn
+                        logs</strong>.
+                    To receive real email alerts, set the following environment variable and wire Flask-Mail or
+                    SendGrid:
+                </p>
+                <code class="block text-xs rounded-lg px-4 py-2.5 text-green-300 font-mono"
+                    style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08);">
+                    ADMIN_EMAIL=you@yourdomain.com
+                </code>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
