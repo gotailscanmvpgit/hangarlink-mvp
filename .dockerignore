@@ -1,0 +1,68 @@
+# .dockerignore — keeps the Docker image lean and secure
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+
+# Virtual environments (never copy these into the image)
+.venv/
+venv/
+env/
+
+# Dev/local databases
+*.db
+*.db-shm
+*.db-wal
+*.db.bak
+instance/
+
+# Git history
+.git/
+.gitignore
+
+# GitHub Actions
+.github/
+
+# Environment files (secrets must come from Railway env vars, not .env)
+.env
+.env.*
+!.env.example
+
+# Test files (not needed in production image)
+tests/
+conftest.py
+
+# Documentation / guides
+*.md
+planning/
+prompts/
+backups/
+backup/
+BACKUP-ORIGINAL-2026-02-13/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (if any frontend tooling was added)
+node_modules/
+
+# Migration scripts (one-off scripts, not needed in image)
+seed_*.py
+fix_*.py
+reset_*.py
+drop_*.py
+clean_*.py
+init_db.py
+inspect_db.py
+migrate_db.py
+rename_to_hangarlinks.py
+set_admin.py
+delete_fake_listings.py
+force_reset_db.py
+fix_migration_history.py
+fix_indexes.py
