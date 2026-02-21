@@ -73,31 +73,49 @@ def _safe_migrate(db):
         ("messages", "guest_email",          "VARCHAR(120)"),
     ]
 
-    applied, skipped = 0, 0
+    applied = skipped = already_exists = 0
+    is_sqlite = db.engine.dialect.name == "sqlite"
+    is_postgres = db.engine.dialect.name in ("postgresql", "postgres")
 
-    # CRITICAL: use AUTOCOMMIT so each DDL is its own transaction.
-    # Without this, a single failed ALTER TABLE (column already exists) puts
-    # Postgres into "transaction aborted" state for the whole connection,
-    # polluting the connection pool → every subsequent query gets e3q8
-    # PendingRollbackError until the process restarts.
-    try:
-        autocommit_engine = db.engine.execution_options(isolation_level="AUTOCOMMIT")
-    except Exception:
-        autocommit_engine = db.engine  # SQLite fallback
+    logger.warning(f"[DB-MIGRATE] starting on {db.engine.dialect.name} — {len(migrations)} column checks")
 
     for table, column, col_type in migrations:
-        ddl = f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {column} {col_type}"
         try:
-            with autocommit_engine.connect() as conn:
-                conn.execute(text(ddl))
-            applied += 1
+            if is_sqlite:
+                # SQLite: PRAGMA table_info returns existing columns — no IF NOT EXISTS needed
+                with db.engine.connect() as conn:
+                    result = conn.execute(text(f"PRAGMA table_info({table})"))
+                    existing = {row[1] for row in result}  # row[1] = column name
+                if column in existing:
+                    already_exists += 1
+                    continue
+                # Column is missing — add it (no IF NOT EXISTS, plain ADD COLUMN)
+                with db.engine.connect() as conn:
+                    conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column} {col_type}"))
+                    conn.commit()
+                applied += 1
+                logger.warning(f"[DB-MIGRATE] ✓ added {table}.{column}")
+
+            else:
+                # Postgres / other: IF NOT EXISTS is safe and atomic
+                autocommit_engine = db.engine.execution_options(isolation_level="AUTOCOMMIT")
+                with autocommit_engine.connect() as conn:
+                    conn.execute(text(
+                        f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {column} {col_type}"
+                    ))
+                applied += 1
+                logger.warning(f"[DB-MIGRATE] ✓ added {table}.{column}")
+
         except Exception as exc:
             skipped += 1
-            logger.warning(f"[DB-MIGRATE] skipped {table}.{column}: {str(exc)[:120]}")
+            logger.warning(f"[DB-MIGRATE] ✗ {table}.{column}: {str(exc)[:100]}")
+
+    logger.warning(
+        f"[DB-MIGRATE] done — {applied} added, {already_exists} already present, "
+        f"{skipped} errors out of {len(migrations)} checks"
+    )
 
 
-
-    logger.warning(f"[DB-MIGRATE] done — {applied} applied / {skipped} skipped out of {len(migrations)} checks")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -202,9 +220,11 @@ def create_app(config_class=Config):
     return app
 
 
-# Create the application instance
+# Module-level app instance for Gunicorn (app:app) and direct import.
+# run.py should import this rather than calling create_app() again.
 app = create_app()
 
 if __name__ == '__main__':
-    # Run the application
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
+

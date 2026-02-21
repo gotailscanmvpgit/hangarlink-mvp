@@ -1,7 +1,10 @@
-from app import create_app
+"""
+Entry point for local development.
+Imports the already-created `app` from app.py — does NOT call create_app() again,
+which would trigger _safe_migrate twice.
+"""
 import os
-
-app = create_app()
+from app import app  # app is created once at module level in app.py
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
