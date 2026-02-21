@@ -43,12 +43,20 @@ def get_stripe():
 
 @bp.before_request
 def ensure_admin():
-    if current_user.is_authenticated and current_user.email == 'admin@hangarlink.com':
-        # Check if attribute exists (for safety) and if False
-        if not getattr(current_user, 'is_admin', False):
-            current_user.is_admin = True
-            db.session.commit()
-            flash('Admin privileges granted.', 'success')
+    try:
+        if current_user.is_authenticated and current_user.email == 'admin@hangarlink.com':
+            if not getattr(current_user, 'is_admin', False):
+                current_user.is_admin = True
+                db.session.commit()
+                flash('Admin privileges granted.', 'success')
+    except Exception as exc:
+        import logging
+        logging.getLogger(__name__).error(f"[ensure_admin] error: {exc}")
+        try:
+            db.session.rollback()
+        except Exception:
+            pass
+
 
 # File upload configuration
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}

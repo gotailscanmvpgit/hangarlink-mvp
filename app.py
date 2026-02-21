@@ -74,20 +74,28 @@ def _safe_migrate(db):
     ]
 
     applied, skipped = 0, 0
-    with db.engine.connect() as conn:
-        for table, column, col_type in migrations:
-            ddl = f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {column} {col_type}"
-            try:
+
+    # CRITICAL: use AUTOCOMMIT so each DDL is its own transaction.
+    # Without this, a single failed ALTER TABLE (column already exists) puts
+    # Postgres into "transaction aborted" state for the whole connection,
+    # polluting the connection pool → every subsequent query gets e3q8
+    # PendingRollbackError until the process restarts.
+    try:
+        autocommit_engine = db.engine.execution_options(isolation_level="AUTOCOMMIT")
+    except Exception:
+        autocommit_engine = db.engine  # SQLite fallback
+
+    for table, column, col_type in migrations:
+        ddl = f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {column} {col_type}"
+        try:
+            with autocommit_engine.connect() as conn:
                 conn.execute(text(ddl))
-                conn.commit()
-                applied += 1
-            except Exception as exc:
-                skipped += 1
-                logger.warning(f"[DB-MIGRATE] skipped {table}.{column}: {exc!s:.120}")
-                try:
-                    conn.rollback()
-                except Exception:
-                    pass
+            applied += 1
+        except Exception as exc:
+            skipped += 1
+            logger.warning(f"[DB-MIGRATE] skipped {table}.{column}: {str(exc)[:120]}")
+
+
 
     logger.warning(f"[DB-MIGRATE] done — {applied} applied / {skipped} skipped out of {len(migrations)} checks")
 
