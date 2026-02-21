@@ -5,8 +5,16 @@ from functools import wraps
 from werkzeug.utils import secure_filename
 from extensions import db, mail
 from models import User, Listing, Message, Booking, Ad, WhiteLabelRequest
-from flask_mail import Message as MailMessage
-from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+
+try:
+    from flask_mail import Message as MailMessage
+except ImportError:
+    MailMessage = None
+
+try:
+    from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+except ImportError:
+    URLSafeTimedSerializer = SignatureExpired = BadSignature = None
 import os
 import random
 import uuid
@@ -538,7 +546,10 @@ def logout():
 # ─────────────────────────────────────────────
 
 def _get_reset_serializer():
+    if URLSafeTimedSerializer is None:
+        raise RuntimeError("itsdangerous not installed. Run: pip install itsdangerous")
     return URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+
 
 
 def _send_reset_email(user):
