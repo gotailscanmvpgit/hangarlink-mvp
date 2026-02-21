@@ -10,7 +10,7 @@ import random
 import uuid
 # ... (rest of imports)
 from datetime import datetime, date, timedelta
-from sqlalchemy import text
+from sqlalchemy import text, func
 
 try:
     import stripe
@@ -1246,9 +1246,8 @@ def insights_success():
 def inject_ads():
     def get_ads(placement, limit=1):
         try:
-             # Randomly select active ads for the placement
             return Ad.query.filter_by(placement=placement, active=True).order_by(func.random()).limit(limit).all()
-        except:
+        except Exception:
             return []
     return dict(get_ads=get_ads)
 
@@ -1270,16 +1269,22 @@ def admin_ads():
         flash('Ad created successfully!', 'success')
         return redirect(url_for('main.admin_ads'))
         
-    # Calculate stats
-    active_ads_count = Ad.query.filter_by(active=True).count()
-    total_impressions = db.session.query(func.sum(Ad.impressions)).scalar() or 0
-    total_clicks = db.session.query(func.sum(Ad.clicks)).scalar() or 0
+    # Calculate stats — wrapped in try/except in case Ad table is not yet migrated
+    try:
+        active_ads_count = Ad.query.filter_by(active=True).count()
+        total_impressions = db.session.query(func.sum(Ad.impressions)).scalar() or 0
+        total_clicks = db.session.query(func.sum(Ad.clicks)).scalar() or 0
+        ads = Ad.query.order_by(Ad.created_at.desc()).all()
+    except Exception as e:
+        current_app.logger.error(f"admin_ads DB error: {e}")
+        active_ads_count = total_impressions = total_clicks = 0
+        ads = []
+        flash('⚠️ Ad table not yet created — run db.create_all() or restart the app.', 'warning')
 
-    ads = Ad.query.all()
-    return render_template('admin_ads.html', ads=ads, 
-                          active_ads_count=active_ads_count, 
-                          total_impressions=total_impressions, 
-                          total_clicks=total_clicks)
+    return render_template('admin_ads.html', ads=ads,
+                           active_ads_count=active_ads_count,
+                           total_impressions=total_impressions,
+                           total_clicks=total_clicks)
 
 @bp.route('/admin/ads/toggle/<int:ad_id>', methods=['POST'])
 @login_required
