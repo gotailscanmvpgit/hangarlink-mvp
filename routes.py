@@ -3,8 +3,10 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from werkzeug.utils import secure_filename
-from extensions import db
+from extensions import db, mail
 from models import User, Listing, Message, Booking, Ad, WhiteLabelRequest
+from flask_mail import Message as MailMessage
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 import os
 import random
 import uuid
@@ -529,6 +531,124 @@ def logout():
     logout_user()
     flash('Logged out successfully', 'success')
     return redirect(url_for('main.index'))
+
+
+# ─────────────────────────────────────────────
+#  PASSWORD RESET FLOW
+# ─────────────────────────────────────────────
+
+def _get_reset_serializer():
+    return URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+
+
+def _send_reset_email(user):
+    """Send a password-reset email (falls back to console print if mail not configured)."""
+    s = _get_reset_serializer()
+    token = s.dumps(user.email, salt='password-reset-salt')
+    reset_url = url_for('main.reset_password', token=token, _external=True)
+
+    subject = '🔒 Reset Your HangarLinks Password'
+    body = f"""Hi {user.username},
+
+You requested a password reset for your HangarLinks account.
+
+Click the link below to reset your password (valid for 1 hour):
+
+{reset_url}
+
+If you did not request this, you can safely ignore this email.
+
+– The HangarLinks Team"""
+
+    html_body = f"""
+    <div style="font-family:sans-serif;max-width:520px;margin:0 auto;">
+      <div style="background:linear-gradient(135deg,#001F3F,#002952);padding:32px;border-radius:16px 16px 0 0;text-align:center;">
+        <h1 style="color:white;font-size:28px;margin:0;">&#128274; Password Reset</h1>
+      </div>
+      <div style="background:#0d1117;padding:32px;border-radius:0 0 16px 16px;border:1px solid rgba(255,255,255,0.08);">
+        <p style="color:#94a3b8;">Hi <strong style="color:white;">{user.username}</strong>,</p>
+        <p style="color:#94a3b8;">Click the button below to reset your password. This link expires in <strong style="color:white;">1 hour</strong>.</p>
+        <div style="text-align:center;margin:32px 0;">
+          <a href="{reset_url}" style="background:linear-gradient(135deg,#1a56db,#0e9f6e);color:white;font-weight:bold;padding:14px 32px;border-radius:12px;text-decoration:none;display:inline-block;">
+            Reset My Password
+          </a>
+        </div>
+        <p style="color:#475569;font-size:12px;">If you didn't request this, ignore this email. Your password won't change.</p>
+      </div>
+    </div>
+    """
+
+    mail_configured = bool(current_app.config.get('MAIL_USERNAME'))
+    if mail_configured:
+        try:
+            msg = MailMessage(subject=subject,
+                              recipients=[user.email],
+                              body=body,
+                              html=html_body)
+            mail.send(msg)
+            current_app.logger.info(f"[RESET] Email sent to {user.email}")
+        except Exception as e:
+            current_app.logger.error(f"[RESET] Mail send failed: {e}")
+            # Fall through to console output
+            print(f"\n[RESET LINK for {user.email}]: {reset_url}\n")
+    else:
+        # MVP fallback — print to console / Railway logs
+        print(f"\n{'='*60}")
+        print(f"PASSWORD RESET LINK (no mail configured)")
+        print(f"User: {user.email}")
+        print(f"URL:  {reset_url}")
+        print(f"{'='*60}\n")
+
+
+@bp.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip().lower()
+        user = User.query.filter_by(email=email).first()
+        # Always show success to prevent email enumeration
+        if user:
+            _send_reset_email(user)
+        flash('If that email is registered, a reset link has been sent. Check your inbox (and spam folder).', 'info')
+        return redirect(url_for('main.forgot_password'))
+    return render_template('forgot_password.html')
+
+
+@bp.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+    s = _get_reset_serializer()
+    try:
+        email = s.loads(token, salt='password-reset-salt', max_age=3600)  # 1 hour
+    except SignatureExpired:
+        flash('⏰ This password reset link has expired. Please request a new one.', 'warning')
+        return redirect(url_for('main.forgot_password'))
+    except BadSignature:
+        flash('❌ Invalid reset link. Please request a new one.', 'danger')
+        return redirect(url_for('main.forgot_password'))
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        flash('❌ No account found. Please try again.', 'danger')
+        return redirect(url_for('main.forgot_password'))
+
+    if request.method == 'POST':
+        password = request.form.get('password', '')
+        confirm = request.form.get('confirm_password', '')
+        if len(password) < 8:
+            flash('Password must be at least 8 characters.', 'warning')
+            return render_template('reset_password.html', token=token)
+        if password != confirm:
+            flash('Passwords do not match.', 'warning')
+            return render_template('reset_password.html', token=token)
+        user.password_hash = generate_password_hash(password)
+        db.session.commit()
+        flash('✅ Password updated! You can now log in.', 'success')
+        return redirect(url_for('main.login'))
+
+    return render_template('reset_password.html', token=token)
 
 @bp.route('/terms')
 def terms():

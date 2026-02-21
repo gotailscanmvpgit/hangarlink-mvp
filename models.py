@@ -54,6 +54,11 @@ class User(UserMixin, db.Model):
     # Feature 7: Certified Owner
     is_certified = db.Column(db.Boolean, default=False)
     seasonal_alerts = db.Column(db.Boolean, default=True) # Feature 4
+
+    # Password Reset
+    reset_token = db.Column(db.String(256), nullable=True, unique=True)
+    reset_token_expires = db.Column(db.DateTime, nullable=True)
+
     
     def __repr__(self):
         return f'<User {self.email}>'

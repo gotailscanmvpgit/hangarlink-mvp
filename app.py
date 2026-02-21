@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 from config import Config
-from extensions import db, migrate, login_manager, cache
-from models import User, Listing, Message, Booking, Ad, WhiteLabelRequest 
+from extensions import db, migrate, login_manager, cache, mail
+from models import User, Listing, Message, Booking, Ad, WhiteLabelRequest
 from routes import bp as main_bp
 import os
 
@@ -15,6 +15,15 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     login_manager.init_app(app)
     cache.init_app(app)
+    mail.init_app(app)
+
+    # Flask-Mail config (reads from environment, falls back to console-print mode)
+    app.config.setdefault('MAIL_SERVER', os.environ.get('MAIL_SERVER', 'smtp.gmail.com'))
+    app.config.setdefault('MAIL_PORT', int(os.environ.get('MAIL_PORT', 587)))
+    app.config.setdefault('MAIL_USE_TLS', os.environ.get('MAIL_USE_TLS', 'true').lower() == 'true')
+    app.config.setdefault('MAIL_USERNAME', os.environ.get('MAIL_USERNAME', ''))
+    app.config.setdefault('MAIL_PASSWORD', os.environ.get('MAIL_PASSWORD', ''))
+    app.config.setdefault('MAIL_DEFAULT_SENDER', os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@hangarlinks.com'))
 
     # Ensure all tables exist on startup (bypasses Alembic migration issues)
     with app.app_context():
@@ -38,7 +47,7 @@ def create_app(config_class=Config):
         return {
             'app_version': 'v2.1.0',
             'stripe_publishable_key': app.config.get('STRIPE_PUBLISHABLE_KEY', ''),
-            'legal_disclaimer': "HangarLink is a platform connecting hangar owners with aircraft owners. We do not own or operate hangars."
+            'legal_disclaimer': "HangarLinks is a platform connecting hangar owners with aircraft owners. We do not own or operate hangars."
         }
 
     # Error handlers
