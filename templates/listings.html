@@ -1,5 +1,33 @@
 {% extends "base.html" %}
 
+{% block extra_head %}
+<script>
+    window.mapMarkers = {{ markers | tojson | safe }};
+</script>
+<script>
+    function toggleListingsMap() {
+        const container = document.getElementById('listings-map-container');
+        const text = document.getElementById('map-toggle-text');
+        const isHidden = container.classList.contains('hidden');
+
+        if (isHidden) {
+            container.classList.remove('hidden');
+            text.textContent = 'Hide Map';
+            // Trigger map resize since it was hidden
+            if (window.google && window.google.maps) {
+                // initMap is called automatically if map div exists, 
+                // but we might need to re-init if it wasn't present.
+                // Our base.html initMap checks for #map.
+                initMap();
+            }
+        } else {
+            container.classList.add('hidden');
+            text.textContent = 'Show Map';
+        }
+    }
+</script>
+{% endblock %}
+
 {% block content %}
 <!-- Search/Browse Header -->
 <div class="py-16" style="background: linear-gradient(135deg, #001229 0%, #001F3F 40%, #002952 70%, #000d1a 100%);">
@@ -100,10 +128,29 @@
 <!-- Listings Results -->
 <div class="max-w-7xl mx-auto px-6 lg:px-8 py-12">
     {% if listings %}
-    <div class="mb-6">
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
         <p class="text-gray-600 dark:text-platinum-300">
             <span class="font-bold text-gray-900 dark:text-platinum-100">{{ listings|length }}</span> listing(s) found
         </p>
+
+        <!-- Map Toggle -->
+        <button id="map-toggle" onclick="toggleListingsMap()"
+            class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-dark-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow hover:shadow-md transition-all text-sm font-bold text-blue-600 dark:text-blue-400">
+            <i class="fas fa-map-marked-alt"></i>
+            <span id="map-toggle-text">Show Map</span>
+        </button>
+    </div>
+
+    <!-- Collapsible Map -->
+    <div id="listings-map-container" class="hidden mb-8 animate-fade-in-up">
+        <div
+            class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-4 relative">
+            <div id="map" style="height: 400px; width: 100%;" class="rounded-xl"></div>
+            <button onclick="toggleListingsMap()"
+                class="absolute top-6 right-6 z-10 bg-white/90 dark:bg-dark-800/90 p-2 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+                <i class="fas fa-times text-gray-500"></i>
+            </button>
+        </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">

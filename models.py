@@ -103,6 +103,8 @@ class Listing(db.Model):
     availability_start = db.Column(db.Date, nullable=True)
     availability_end = db.Column(db.Date, nullable=True)
     is_premium_listing = db.Column(db.Boolean, default=False)  # Premium listings get priority
+    lat = db.Column(db.Float, nullable=True) # Automatic lat from airport_icao
+    lon = db.Column(db.Float, nullable=True) # Automatic lon from airport_icao
     
     # Relationships
     bookings = db.relationship('Booking', backref='listing', lazy=True)

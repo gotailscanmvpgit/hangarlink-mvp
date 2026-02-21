@@ -61,6 +61,8 @@ def _safe_migrate(db):
         ("listings", "availability_start",   "DATE"),
         ("listings", "availability_end",     "DATE"),
         ("listings", "is_premium_listing",   "BOOLEAN DEFAULT FALSE"),
+        ("listings", "lat",                  "FLOAT"),
+        ("listings", "lon",                  "FLOAT"),
         # ── bookings ───────────────────────────────────────────────────
         ("bookings", "insurance_opt_in",     "BOOLEAN DEFAULT FALSE"),
         ("bookings", "insurance_fee",        "FLOAT DEFAULT 0.0"),
@@ -145,6 +147,11 @@ def create_app(config_class=Config):
     with app.app_context():
         db.create_all()
         _safe_migrate(db)
+
+    # Load airport lat/lon lookup table from OurAirports CSV (or bundled fallback)
+    from airport_coords import load_airport_coords, _COORDS_CACHE
+    load_airport_coords()
+    app.config['AIRPORT_COORDS'] = _COORDS_CACHE
 
 
     

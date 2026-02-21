@@ -99,12 +99,28 @@ def index():
         show_onboarding = False
         if current_user.is_authenticated:
             show_onboarding = session.pop('show_onboarding', False)
+
+        # Get map markers (all active listings with coordinates)
+        map_listings = Listing.query.filter_by(status='Active').all()
+        markers = []
+        for l in map_listings:
+            if l.lat is not None and l.lon is not None:
+                markers.append({
+                    'id': l.id,
+                    'lat': l.lat,
+                    'lon': l.lon,
+                    'title': f"{l.airport_icao} Hangar",
+                    'icao': l.airport_icao,
+                    'price': f"${int(l.price_month)}",
+                    'is_premium': l.is_premium_listing or (l.owner and l.owner.is_premium)
+                })
             
         return render_template('index.html', 
                               listings_count=listings_count, 
                               messages_count=messages_count, 
                               saved_searches_count=saved_searches_count,
-                              show_onboarding=show_onboarding)
+                              show_onboarding=show_onboarding,
+                              markers=markers)
     except Exception as e:
         print(f"CRITICAL ERROR in index route: {str(e)}")
         import traceback
@@ -162,6 +178,20 @@ def listings():
     
     listings = pagination.items
     
+    # Calculate markers for search results
+    markers = []
+    for l in listings:
+        if l.lat is not None and l.lon is not None:
+            markers.append({
+                'id': l.id,
+                'lat': l.lat,
+                'lon': l.lon,
+                'title': f"{l.airport_icao} Hangar",
+                'icao': l.airport_icao,
+                'price': f"${int(l.price_month)}",
+                'is_premium': l.is_premium_listing or (l.owner and l.owner.is_premium)
+            })
+
     return render_template('listings.html', 
                          listings=listings, 
                          pagination=pagination,
@@ -170,7 +200,8 @@ def listings():
                          covered=covered,
                          min_price=min_price,
                          max_price=max_price,
-                         search_limited=search_limited)
+                         search_limited=search_limited,
+                         markers=markers)
 
 @bp.route('/listing/<int:id>')
 def listing_detail(id):
@@ -261,8 +292,15 @@ def post_listing():
                  except ValueError:
                     pass
     
+            # ── Auto-resolve lat/lon from ICAO ───────────────────────────────
+            from airport_coords import get_coords
+            icao_upper = request.form.get('airport_icao', '').upper()
+            lat, lon, coord_found = get_coords(icao_upper)
+            if not coord_found:
+                logger.warning(f"[AIRPORT-COORDS] unknown ICAO '{icao_upper}', using Toronto default")
+
             listing = Listing(
-                airport_icao=request.form.get('airport_icao').upper(),
+                airport_icao=icao_upper,
                 size_sqft=int(request.form.get('size_sqft')),
                 covered=request.form.get('covered') == 'on',
                 price_month=float(request.form.get('price_month')),
@@ -275,11 +313,13 @@ def post_listing():
                 health_score=min(score, 100), # Cap at 100
                 availability_start=avail_start,
                 availability_end=avail_end,
-                virtual_tour_url=request.form.get('virtual_tour_url') # Feature 2
+                virtual_tour_url=request.form.get('virtual_tour_url'), # Feature 2
+                lat=lat,
+                lon=lon,
             )
             db.session.add(listing)
             db.session.commit()
-            print(f"DEBUG: Saved listing {listing.id} for user {current_user.id}")
+            print(f"DEBUG: Saved listing {listing.id} at {icao_upper} ({lat:.4f}, {lon:.4f}) for user {current_user.id}")
             
             # Check for matching alert preferences and notify users
             check_and_send_alerts(listing)
@@ -394,7 +434,18 @@ def edit_listing(id):
         listing.price_month = float(request.form.get('price_month'))
         listing.description = request.form.get('description')
         listing.status = request.form.get('status', 'Active')
-        
+
+        # ── Auto-update lat/lon when ICAO changes ────────────────────────────
+        from airport_coords import get_coords
+        lat, lon, coord_found = get_coords(listing.airport_icao)
+        if not coord_found:
+            import logging
+            logging.getLogger(__name__).warning(
+                f"[AIRPORT-COORDS] unknown ICAO '{listing.airport_icao}' on edit, using Toronto default"
+            )
+        listing.lat = lat
+        listing.lon = lon
+
         db.session.commit()
         flash('Listing updated successfully!', 'success')
         return redirect(url_for('main.listing_detail', id=id))

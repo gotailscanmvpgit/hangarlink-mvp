@@ -1,4 +1,18 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
+
+{% block extra_head %}
+<script>
+    window.mapMarkers = [{
+        'id': {{ listing.id }},
+        'lat': {{ listing.lat or 43.6275 }},
+        'lon': {{ listing.lon or - 79.3962 }},
+        'title': "{{ listing.airport_icao }} Hangar",
+        'icao': "{{ listing.airport_icao }}",
+        'price': "${{ int(listing.price_month) }}",
+        'is_premium': {{ 'true' if listing.is_premium_listing else 'false' }}
+    }];
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-6 lg:px-8 py-12">
@@ -128,7 +142,7 @@
                 class="fixed bottom-24 right-6 w-80 sm:w-96 bg-white dark:bg-dark-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 hidden z-50 flex flex-col overflow-hidden animate-fade-in-up">
                 <div
                     class="bg-gradient-to-r from-blue-900 to-purple-900 p-4 text-white flex justify-between items-center">
-                    <h3 class="font-bold"><i class="fas fa-robot mr-2"></i>HangarLink Concierge</h3>
+                    <h3 class="font-bold"><i class="fas fa-robot mr-2"></i>HangarLinks Concierge</h3>
                     <button onclick="toggleConcierge()" class="text-blue-200 hover:text-white"><i
                             class="fas fa-times"></i></button>
                 </div>
@@ -450,7 +464,7 @@
                 <div
                     class="mt-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 text-center">
                     <div class="font-bold text-green-800 dark:text-green-300 flex items-center justify-center mb-1">
-                        <i class="fas fa-shield-alt mr-2 text-xl"></i> HangarLink Guaranteed
+                        <i class="fas fa-shield-alt mr-2 text-xl"></i> HangarLinks Guaranteed
                     </div>
                     <p class="text-xs text-green-700 dark:text-green-400">Protected booking. Liability coverage active.
                     </p>
@@ -505,6 +519,14 @@
 
             </div>
         </div>
+    </div>
+
+    <!-- Dynamic Map Location -->
+    <div class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
+        <h3 class="text-xl font-bold text-gray-900 dark:text-platinum-100 mb-4 flex items-center">
+            <i class="fas fa-map-marked-alt text-blue-600 mr-2"></i>Location at {{ listing.airport_icao }}
+        </h3>
+        <div id="map" style="height: 300px; width: 100%;" class="rounded-xl"></div>
     </div>
 
     <!-- Nearby FBOs & Fuel Widget -->

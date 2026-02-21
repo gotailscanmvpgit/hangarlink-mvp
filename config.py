@@ -25,3 +25,7 @@ class Config:
     
     # Application
     DEBUG = os.environ.get('FLASK_DEBUG', '0') == '1'
+
+    # Airport Data (Loaded on startup in app.py)
+    # Accessible via current_app.config['AIRPORT_COORDS']
+    AIRPORT_COORDS = {} 

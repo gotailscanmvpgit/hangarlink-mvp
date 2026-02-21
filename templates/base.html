@@ -196,23 +196,57 @@
                 },
             });
 
-            // Add info window for test marker
-            const infoWindow = new google.maps.InfoWindow({
-                content: `
-                    <div style="padding: 8px; font-family: Inter, sans-serif;">
-                        <h3 style="font-weight: bold; margin-bottom: 4px; color: #1F2937;">Test Hangar Location</h3>
-                        <p style="margin: 0; color: #6B7280;">CYHM - Hamilton</p>
-                        <p style="margin: 4px 0 0 0; font-size: 12px; color: #9CA3AF;">Click to view details</p>
-                    </div>
-                `,
-            });
-
             testMarker.addListener("click", () => {
                 infoWindow.open(map, testMarker);
             });
 
-            // Future: Add markers from listings dynamically
-            // This will be populated from the backend with actual listing data
+            // Add dynamic markers from the backend
+            if (window.mapMarkers && window.mapMarkers.length > 0) {
+                const bounds = new google.maps.LatLngBounds();
+                const infoWindow = new google.maps.InfoWindow();
+
+                window.mapMarkers.forEach(markerData => {
+                    const position = { lat: markerData.lat, lng: markerData.lon };
+
+                    const marker = new google.maps.Marker({
+                        position: position,
+                        map: map,
+                        title: markerData.title,
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            scale: 10,
+                            fillColor: markerData.is_premium ? "#F59E0B" : "#3B82F6", // Amber for premium, Blue for others
+                            fillOpacity: 1,
+                            strokeColor: "#FFFFFF",
+                            strokeWeight: 2,
+                        },
+                    });
+
+                    marker.addListener("click", () => {
+                        infoWindow.setContent(`
+                            <div style="padding: 12px; font-family: Inter, sans-serif; min-width: 180px;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                                    <h3 style="font-weight: bold; margin: 0; color: #111827; font-size: 16px;">${markerData.title}</h3>
+                                    <span style="background: #EBF5FF; color: #1E429F; font-size: 10px; font-weight: bold; padding: 2px 6px; rounded: 4px;">${markerData.icao}</span>
+                                </div>
+                                <div style="font-size: 18px; font-weight: 800; color: #2563EB; margin-bottom: 8px;">${markerData.price}<span style="font-size: 12px; color: #6B7280; font-weight: 400;">/mo</span></div>
+                                <a href="/listing/${markerData.id}" style="display: block; width: 100%; text-align: center; background: #2563EB; color: white; border-radius: 8px; padding: 8px; font-size: 12px; font-weight: bold; text-decoration: none; transition: background 0.2s;">View Details</a>
+                            </div>
+                        `);
+                        infoWindow.open(map, marker);
+                    });
+
+                    bounds.extend(position);
+                });
+
+                // If multiple markers, auto-zoom to fit them. If one, center it.
+                if (window.mapMarkers.length > 1) {
+                    map.fitBounds(bounds);
+                } else if (window.mapMarkers.length === 1) {
+                    map.setCenter({ lat: window.mapMarkers[0].lat, lng: window.mapMarkers[0].lon });
+                    map.setZoom(12);
+                }
+            }
         }
 
         // Fallback if Google Maps fails to load

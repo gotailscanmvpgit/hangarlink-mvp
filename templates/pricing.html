@@ -1,6 +1,6 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
-{% block title %}HangarLink Premium - Upgrade Your Experience{% endblock %}
+{% block title %}HangarLinks Premium - Upgrade Your Experience{% endblock %}
 
 {% block content %}
 <!-- ═══════════════════════════════════════════════════════════════
@@ -29,10 +29,10 @@
 
         <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6">
             Elevate Your <span
-                class="bg-gradient-to-r from-amber-400 via-orange-400 to-pink-500 bg-clip-text text-transparent">HangarLink</span>
+                class="bg-gradient-to-r from-amber-400 via-orange-400 to-pink-500 bg-clip-text text-transparent">HangarLinks</span>
         </h1>
         <p class="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto mb-4">
-            Unlock unlimited listings, priority search, analytics, and more with HangarLink Premium.
+            Unlock unlimited listings, priority search, analytics, and more with HangarLinks Premium.
         </p>
 
         {% if current_user.is_authenticated and current_user.subscription_tier == 'premium' %}
@@ -238,7 +238,7 @@
                 <div>
                     <h3 class="text-xl font-bold text-white mb-2">{{ fee_percent }}% Transaction Fee</h3>
                     <p class="text-slate-300 mb-4">
-                        When a booking is completed, HangarLink charges an <strong class="text-white">{{ fee_percent }}%
+                        When a booking is completed, HangarLinks charges an <strong class="text-white">{{ fee_percent }}%
                             platform fee</strong> on the total rental amount. This covers payment processing, platform
                         maintenance, and dispute resolution.
                     </p>
@@ -285,7 +285,7 @@
             </div>
 
             <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6">
-                <h4 class="text-white font-semibold mb-2">Do I need Premium to use HangarLink?</h4>
+                <h4 class="text-white font-semibold mb-2">Do I need Premium to use HangarLinks?</h4>
                 <p class="text-slate-400 text-sm">No! The free tier gives you access to core features. Premium simply
                     removes limits and adds advanced tools like analytics, priority placement, and unlimited searches.
                 </p>

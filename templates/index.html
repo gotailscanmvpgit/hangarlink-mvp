@@ -1,5 +1,12 @@
 ﻿{% extends "base.html" %}
 
+{% block extra_head %}
+<script>
+    // Injected from Flask backend
+    window.mapMarkers = {{ markers | tojson | safe }};
+</script>
+{% endblock %}
+
 {% block content %}
 <!-- ═══════════════════════════════════════════════════════════════
      CINEMATIC HERO SECTION — Luxury Aviation Experience

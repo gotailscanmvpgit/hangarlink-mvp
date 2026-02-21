@@ -1,0 +1,38 @@
+from app import db, Listing
+import random
+from datetime import datetime
+from flask import current_app
+
+with current_app.app_context():
+    airports = ['CYTZ', 'CYHM', 'CYYZ', 'CYOO', 'CYKZ', 'CYBN', 'CYSN', 'CYXU', 'CYKF', 'CYFD']
+    statuses = ['Active', 'Rented', 'Expired']
+
+    # Seed 10000 listings in batches to avoid memory issues
+    start_time = datetime.now()
+    batch_size = 1000  # Commit every 1000 to be efficient
+    for batch in range(0, 10000, batch_size):
+        for i in range(batch_size):
+            listing = Listing(
+                airport_icao=random.choice(airports),
+                size_sqft=random.randint(500, 1500),
+                covered=random.choice([True, False]),
+                price_month=random.randint(200, 800),
+                description=f"Test hangar {batch + i + 1} at {random.choice(airports)} – clean and secure",
+                owner_id=1,  # Assume test owner ID 1
+                status=random.choice(statuses),
+                created_at=datetime.now()
+            )
+            db.session.add(listing)
+        db.session.commit()
+    end_time = datetime.now()
+    duration = (end_time - start_time).total_seconds()
+
+    # Test search performance with pagination
+    search_start = datetime.now()
+    results = Listing.query.filter_by(airport_icao='CYTZ').paginate(page=1, per_page=20)
+    search_end = datetime.now()
+    search_duration = (search_end - search_start).total_seconds()
+
+    print(f"Seeded 10000 listings in {duration} seconds")
+    print(f"Search for 'CYTZ' with pagination took {search_duration} seconds")
+    print(f"Total listings in DB: {Listing.query.count()}")

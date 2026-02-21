@@ -1,15 +1,6 @@
 # ──────────────────────────────────────────────────────────────────────────────
 # HangarLinks CI/CD Pipeline
 # ──────────────────────────────────────────────────────────────────────────────
-# Triggers: push to main, or pull requests targeting main
-#
-# Secrets required (GitHub → Settings → Secrets → Actions):
-#   DOCKER_USERNAME       — Docker Hub username
-#   DOCKER_PASSWORD       — Docker Hub access token (not your password)
-#   RAILWAY_TOKEN         — Railway project token  (railway.app → Project → Settings → Tokens)
-#   RAILWAY_SERVICE_ID    — The service ID from Railway (see setup guide below)
-# ──────────────────────────────────────────────────────────────────────────────
-
 name: CI / CD
 
 on:
@@ -18,39 +9,13 @@ on:
   pull_request:
     branches: [main]
 
-env:
-  IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/hangarlinks
-
 jobs:
   # ─────────────────────────────────────────
-  # JOB 1 — CI: Test + Build + Push image
+  # JOB 1: Continuous Integration (CI)
   # ─────────────────────────────────────────
   ci:
-    name: Test → Build → Push
+    name: Test and Build
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_DB: hangarlinks_test
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    env:
-      # Use SQLite for tests (faster, no extra setup needed)
-      # Override to Postgres if you want integration tests:
-      # DATABASE_URL: postgresql://postgres:postgres@localhost:5432/hangarlinks_test
-      DATABASE_URL: ""
-      SECRET_KEY: ci-test-secret-key-not-real
-      FLASK_ENV: testing
 
     steps:
       - name: Checkout code
@@ -62,7 +27,7 @@ jobs:
           python-version: "3.12"
           cache: "pip"
 
-      - name: Install system dependencies (for WeasyPrint/Cairo)
+      - name: Install system dependencies (WeasyPrint)
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
@@ -71,13 +36,16 @@ jobs:
             libffi-dev zlib1g libjpeg-dev \
             libgobject-2.0-0
 
-      - name: Install Python dependencies
+      - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run pytest
-        run: pytest tests/ -v --tb=short --color=yes
+      - name: Run tests (pytest)
+        env:
+          FLASK_ENV: testing
+          DATABASE_URL: sqlite:///:memory:
+          SECRET_KEY: ci-testing-key
+        run: pytest tests/ -v
 
-      # ── Docker steps only run on push to main (not PRs) ──────────────────
       - name: Log in to Docker Hub
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: docker/login-action@v3
@@ -85,30 +53,18 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Extract metadata (tags & labels)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.IMAGE_NAME }}
-          tags: |
-            type=sha,prefix=sha-,format=short
-            type=raw,value=latest
-
       - name: Build and push Docker image
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/hangarlink:latest
+            ${{ secrets.DOCKER_USERNAME }}/hangarlink:${{ github.sha }}
 
   # ─────────────────────────────────────────
-  # JOB 2 — CD: Deploy to Railway
-  # Only runs after ci succeeds, only on main
+  # JOB 2: Continuous Deployment (CD)
   # ─────────────────────────────────────────
   deploy:
     name: Deploy to Railway
@@ -121,17 +77,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Railway CLI
-        run: |
-          curl -fsSL https://railway.app/install.sh | bash
-          echo "$HOME/.railway/bin" >> $GITHUB_PATH
+        run: npm install -g @railway/cli
 
       - name: Deploy to Railway
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        run: |
-          railway up --service ${{ secrets.RAILWAY_SERVICE_ID }} --detach
-
-      - name: Deployment summary
-        run: |
-          echo "✅ Deployed commit ${{ github.sha }} to Railway"
-          echo "   Docker image: ${{ env.IMAGE_NAME }}:sha-$(echo ${{ github.sha }} | cut -c1-7)"
+        run: railway up --service hangarlink --detach

@@ -1,6 +1,6 @@
-# HangarLink Clean 2026
+# HangarLinks Clean 2026
 
-Refactored clean version of the HangarLink MVP project.
+Refactored clean version of the HangarLinks MVP project.
 
 ## Structure
 
