@@ -65,14 +65,7 @@ ENV PATH="/venv/bin:$PATH" \
 # Expose port (Railway injects $PORT)
 EXPOSE 8000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD curl -f http://localhost:$PORT/health || exit 1
+# Health check removed temporarily to isolate port issue
 
 # Start the application
-CMD gunicorn      --bind 0.0.0.0:$PORT \
-  --workers 2 \
-  --timeout 120 \
-  --access-logfile - \
-  --error-logfile - \
-  app:app
+CMD gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 120 app:app

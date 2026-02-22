@@ -1,5 +1,0 @@
-[phases.setup]
-nixPkgs = ["gcc", "pango", "gdk-pixbuf", "cairo", "gobject-introspection", "libffi", "zlib", "libjpeg", "openjpeg"]
-
-[phases.install]
-cmds = ["pip install -r requirements.txt"]
