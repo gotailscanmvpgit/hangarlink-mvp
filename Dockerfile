@@ -28,14 +28,18 @@ RUN python -m venv /venv \
 # ── Stage 2: runtime — lean final image ───────────────────────────
 FROM python:3.12-slim AS runtime
 
-# Same runtime libs (not build tools)
+# Runtime libraries required by WeasyPrint and other components
 RUN apt-get update && apt-get install -y --no-install-recommends \
   libpango-1.0-0 \
   libpangoft2-1.0-0 \
   libgdk-pixbuf2.0-0 \
   libcairo2 \
   libgobject-2.0-0 \
-  libjpeg62-turbo \
+  libjpeg-dev \
+  libfontconfig1 \
+  libharfbuzz0b \
+  libfribidi0 \
+  shared-mime-info \
   zlib1g \
   curl \
   && rm -rf /var/lib/apt/lists/*
