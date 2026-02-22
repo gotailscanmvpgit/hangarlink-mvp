@@ -8,7 +8,7 @@
         'lon': {{ listing.lon or - 79.3962 }},
         'title': "{{ listing.airport_icao }} Hangar",
         'icao': "{{ listing.airport_icao }}",
-        'price': "${{ int(listing.price_month) }}",
+        'price': "${{ listing.price_month|int }}",
         'is_premium': {{ 'true' if listing.is_premium_listing else 'false' }}
     }];
 </script>
