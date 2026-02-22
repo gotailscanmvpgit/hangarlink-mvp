@@ -8,6 +8,9 @@ import os
 import logging
 logger = logging.getLogger(__name__)
 
+# Verify PORT for Railway
+print("PORT from env:", os.environ.get('PORT', '5000'))
+
 # ── Safe startup DDL patcher ──────────────────────────────────────────────────
 def _safe_migrate(db):
     """
