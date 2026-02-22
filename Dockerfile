@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   gcc \
   libpango-1.0-0 \
   libpangoft2-1.0-0 \
-  libgdk-pixbuf2.0-0 \
+  libgdk-pixbuf-2.0-0 \
   libcairo2 \
   libffi-dev \
   zlib1g \
@@ -32,10 +32,10 @@ FROM python:3.12-slim AS runtime
 RUN apt-get update && apt-get install -y --no-install-recommends \
   libpango-1.0-0 \
   libpangoft2-1.0-0 \
-  libgdk-pixbuf2.0-0 \
+  libgdk-pixbuf-2.0-0 \
   libcairo2 \
   libgobject-2.0-0 \
-  libjpeg-dev \
+  libjpeg62-turbo \
   libfontconfig1 \
   libharfbuzz0b \
   libfribidi0 \
