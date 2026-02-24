@@ -8,6 +8,7 @@ stripe==7.0.0
 psycopg2-binary
 Flask-Migrate
 Flask-Limiter
+flask-recaptcha
 redis
 Flask-Caching==2.3.0
 sqlalchemy>=2.0.16

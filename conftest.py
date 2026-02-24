@@ -22,6 +22,7 @@ class TestConfig:
     MAIL_USERNAME = ''
     LOGIN_DISABLED = False
     UPLOAD_FOLDER = 'static/uploads'
+    RECAPTCHA_ENABLED = False
 
 
 @pytest.fixture(scope='session')
