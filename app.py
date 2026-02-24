@@ -22,124 +22,7 @@ logger = logging.getLogger(__name__)
 # Verify PORT for Railway
 print("PORT from env:", os.environ.get('PORT', '5000'))
 
-# ── Safe startup DDL patcher ──────────────────────────────────────────────────
-def _safe_migrate(db):
-    """
-    Apply every missing column to existing production tables.
-    Logs at WARNING level so output is visible in Railway/Gunicorn.
-    Uses ADD COLUMN IF NOT EXISTS (Postgres 9.6+).
-    SQLite silently swallows the IF NOT EXISTS on older versions.
-    """
-    from sqlalchemy import text
-
-    # ALL columns across all model classes — add to this list whenever
-    # you add a new db.Column to any model.
-    migrations = [
-        # ── users ──────────────────────────────────────────────────────
-        ("users", "alert_enabled",          "BOOLEAN DEFAULT FALSE"),
-        ("users", "alert_airport",          "VARCHAR(4)"),
-        ("users", "alert_max_price",        "FLOAT"),
-        ("users", "alert_min_size",         "INTEGER"),
-        ("users", "alert_covered_only",     "BOOLEAN DEFAULT FALSE"),
-        ("users", "reputation_score",       "FLOAT DEFAULT 5.0"),
-        ("users", "rentals_count",          "INTEGER DEFAULT 0"),
-        ("users", "is_premium",             "BOOLEAN DEFAULT FALSE"),
-        ("users", "subscription_tier",      "VARCHAR(20) DEFAULT 'free'"),
-        ("users", "stripe_customer_id",     "VARCHAR(100)"),
-        ("users", "stripe_subscription_id", "VARCHAR(100)"),
-        ("users", "subscription_expires",   "TIMESTAMP"),
-        ("users", "has_analytics_access",   "BOOLEAN DEFAULT FALSE"),
-        ("users", "analytics_expires_at",   "TIMESTAMP"),
-        ("users", "is_admin",               "BOOLEAN DEFAULT FALSE"),
-        ("users", "search_count_today",     "INTEGER DEFAULT 0"),
-        ("users", "search_reset_date",      "DATE"),
-        ("users", "points",                 "INTEGER DEFAULT 0"),
-        ("users", "referral_code",          "VARCHAR(20)"),
-        ("users", "referred_by_id",         "INTEGER"),
-        ("users", "is_certified",           "BOOLEAN DEFAULT FALSE"),
-        ("users", "seasonal_alerts",        "BOOLEAN DEFAULT TRUE"),
-        ("users", "reset_token",            "VARCHAR(256)"),
-        ("users", "reset_token_expires",    "TIMESTAMP"),
-        # ── listings ───────────────────────────────────────────────────
-        ("listings", "updated_at",           "TIMESTAMP"),
-        ("listings", "is_featured",          "BOOLEAN DEFAULT FALSE"),
-        ("listings", "featured_expires_at",  "TIMESTAMP"),
-        ("listings", "featured_tier",        "VARCHAR(20)"),
-        ("listings", "insurance_active",     "BOOLEAN DEFAULT FALSE"),
-        ("listings", "condition_verified",   "BOOLEAN DEFAULT FALSE"),
-        ("listings", "likes",                "INTEGER DEFAULT 0"),
-        ("listings", "video_url",            "VARCHAR(255)"),
-        ("listings", "virtual_tour_url",     "VARCHAR(255)"),
-        ("listings", "health_score",         "INTEGER DEFAULT 0"),
-        ("listings", "checklist_completed",  "BOOLEAN DEFAULT FALSE"),
-        ("listings", "availability_start",   "DATE"),
-        ("listings", "availability_end",     "DATE"),
-        ("listings", "is_premium_listing",   "BOOLEAN DEFAULT FALSE"),
-        ("listings", "lat",                  "FLOAT"),
-        ("listings", "lon",                  "FLOAT"),
-        # ── bookings ───────────────────────────────────────────────────
-        ("bookings", "insurance_opt_in",     "BOOLEAN DEFAULT FALSE"),
-        ("bookings", "insurance_fee",        "FLOAT DEFAULT 0.0"),
-        ("bookings", "owner_rating",         "INTEGER"),
-        ("bookings", "renter_rating",        "INTEGER"),
-        ("bookings", "owner_review",         "TEXT"),
-        ("bookings", "renter_review",        "TEXT"),
-        # ── messages ───────────────────────────────────────────────────
-        ("messages", "is_guest",             "BOOLEAN DEFAULT FALSE"),
-        ("messages", "guest_email",          "VARCHAR(120)"),
-        # ── safety columns ──────────────────────────────────────────────
-        ("users", "id_verified",            "BOOLEAN DEFAULT FALSE"),
-        ("users", "id_photo_url",           "VARCHAR(255)"),
-        ("users", "verification_status",    "VARCHAR(20) DEFAULT 'none'"),
-        ("users", "is_banned",              "BOOLEAN DEFAULT FALSE"),
-        ("listings", "is_reported",         "BOOLEAN DEFAULT FALSE"),
-        ("listings", "report_count",        "INTEGER DEFAULT 0"),
-        ("listings", "report_reason",       "TEXT"),
-        ("messages", "is_flagged",          "BOOLEAN DEFAULT FALSE"),
-        ("messages", "flag_reason",         "VARCHAR(100)"),
-    ]
-
-    applied = skipped = already_exists = 0
-    is_sqlite = db.engine.dialect.name == "sqlite"
-    is_postgres = db.engine.dialect.name in ("postgresql", "postgres")
-
-    logger.warning(f"[DB-MIGRATE] starting on {db.engine.dialect.name} — {len(migrations)} column checks")
-
-    for table, column, col_type in migrations:
-        try:
-            if is_sqlite:
-                # SQLite: PRAGMA table_info returns existing columns — no IF NOT EXISTS needed
-                with db.engine.connect() as conn:
-                    result = conn.execute(text(f"PRAGMA table_info({table})"))
-                    existing = {row[1] for row in result}  # row[1] = column name
-                if column in existing:
-                    already_exists += 1
-                    continue
-                # Column is missing — add it (no IF NOT EXISTS, plain ADD COLUMN)
-                with db.engine.connect() as conn:
-                    conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column} {col_type}"))
-                    conn.commit()
-                applied += 1
-                logger.warning(f"[DB-MIGRATE] ✓ added {table}.{column}")
-
-            else:
-                # Postgres / other: IF NOT EXISTS is safe and atomic
-                autocommit_engine = db.engine.execution_options(isolation_level="AUTOCOMMIT")
-                with autocommit_engine.connect() as conn:
-                    conn.execute(text(
-                        f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {column} {col_type}"
-                    ))
-                applied += 1
-                logger.warning(f"[DB-MIGRATE] ✓ added {table}.{column}")
-
-        except Exception as exc:
-            skipped += 1
-            logger.warning(f"[DB-MIGRATE] ✗ {table}.{column}: {str(exc)[:100]}")
-
-    logger.warning(
-        f"[DB-MIGRATE] done — {applied} added, {already_exists} already present, "
-        f"{skipped} errors out of {len(migrations)} checks"
-    )
+# Database initialization and migrations happen via extensions.py and create_app()
 
 
 
@@ -152,9 +35,18 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
     
-    # Ensure DATABASE_URL is used if present
-    if os.environ.get('DATABASE_URL'):
-        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace("postgres://", "postgresql://", 1)
+    # Database Configuration
+    database_url = os.environ.get('DATABASE_URL')
+    if database_url:
+        # Compatibility for Railway/Heroku postgres:// URLs
+        if database_url.startswith("postgres://"):
+            database_url = database_url.replace("postgres://", "postgresql://", 1)
+        app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+    else:
+        # Fallback to local SQLite if DATABASE_URL is not set
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hangarlink.db'
+    
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # Initialize extensions
     db.init_app(app)
@@ -183,10 +75,10 @@ def create_app(config_class=Config):
     app.config.setdefault('MAIL_PASSWORD', os.environ.get('MAIL_PASSWORD', ''))
     app.config.setdefault('MAIL_DEFAULT_SENDER', os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@hangarlinks.com'))
 
-    # Ensure all tables exist on startup (bypasses Alembic migration issues)
+    # All tables are created/updated via migrations or db.create_all() if needed
     with app.app_context():
+        # Reliable startup: create tables if they don't exist
         db.create_all()
-        _safe_migrate(db)
 
     # Load airport lat/lon lookup table from OurAirports CSV (or bundled fallback)
     from airport_coords import load_airport_coords, _COORDS_CACHE
