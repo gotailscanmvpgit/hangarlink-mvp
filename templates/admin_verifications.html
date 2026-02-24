@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="min-h-screen pt-24 pb-12 bg-gray-50 dark:bg-dark-950">
+    <div class="max-w-6xl mx-auto px-4">
+        <div class="flex items-center justify-between mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Pending Verifications</h1>
+            <div class="bg-blue-100 text-blue-800 px-4 py-1 rounded-full text-sm font-bold">
+                {{ users|length }} Pending
+            </div>
+        </div>
+
+        {% if users %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for user in users %}
+            <div
+                class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col">
+                <div class="aspect-video bg-gray-200 relative">
+                    <img src="{{ url_for('static', filename='uploads/verifications/' + user.id_photo_url) }}"
+                        alt="ID for {{ user.username }}" class="w-full h-full object-contain cursor-zoom-in"
+                        onclick="window.open(this.src)">
+                    <div
+                        class="absolute top-2 right-2 bg-black/50 text-white text-[10px] px-2 py-1 rounded backdrop-blur-md">
+                        ID PHOTO
+                    </div>
+                </div>
+                <div class="p-6 flex-1 flex flex-col">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="font-bold text-gray-900 dark:text-white">{{ user.username }}</h3>
+                            <p class="text-xs text-gray-500">{{ user.email }}</p>
+                        </div>
+                        <div class="text-xs font-mono bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                            ID: {{ user.id }}
+                        </div>
+                    </div>
+
+                    <div class="mt-auto grid grid-cols-2 gap-3">
+                        <a href="{{ url_for('main.verify_user_action', user_id=user.id, action='approve') }}"
+                            class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg text-center text-sm shadow-md transition-all">
+                            Approve
+                        </a>
+                        <a href="{{ url_for('main.verify_user_action', user_id=user.id, action='reject') }}"
+                            class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg text-center text-sm shadow-md transition-all">
+                            Reject
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div
+            class="bg-white dark:bg-dark-900 rounded-2xl p-12 text-center border-2 border-dashed border-gray-200 dark:border-gray-700">
+            <i class="fas fa-check-circle text-5xl text-green-500 mb-4"></i>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">All caught up!</h2>
+            <p class="text-gray-500 dark:text-gray-400 mt-2">No pending identity verifications at this time.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

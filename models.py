@@ -59,6 +59,12 @@ class User(UserMixin, db.Model):
     reset_token = db.Column(db.String(256), nullable=True, unique=True)
     reset_token_expires = db.Column(db.DateTime, nullable=True)
 
+    # Safety Features
+    id_verified = db.Column(db.Boolean, default=False)
+    id_photo_url = db.Column(db.String(255), nullable=True)
+    verification_status = db.Column(db.String(20), default='none') # 'none', 'pending', 'verified', 'rejected'
+    is_banned = db.Column(db.Boolean, default=False)
+
     
     def __repr__(self):
         return f'<User {self.email}>'
@@ -105,6 +111,11 @@ class Listing(db.Model):
     is_premium_listing = db.Column(db.Boolean, default=False)  # Premium listings get priority
     lat = db.Column(db.Float, nullable=True) # Automatic lat from airport_icao
     lon = db.Column(db.Float, nullable=True) # Automatic lon from airport_icao
+    
+    # Safety Features
+    is_reported = db.Column(db.Boolean, default=False)
+    report_count = db.Column(db.Integer, default=0)
+    report_reason = db.Column(db.Text, nullable=True)
     
     # Relationships
     bookings = db.relationship('Booking', backref='listing', lazy=True)
@@ -171,6 +182,10 @@ class Message(db.Model):
     is_guest = db.Column(db.Boolean, default=False)
     guest_email = db.Column(db.String(120), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Safety Features
+    is_flagged = db.Column(db.Boolean, default=False)
+    flag_reason = db.Column(db.String(100), nullable=True)
     
     # Relationships
     sender = db.relationship('User', foreign_keys=[sender_id], backref='sent_messages')

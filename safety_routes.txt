@@ -1,0 +1,68 @@
+@bp.route('/report-listing/<int:id>', methods=['POST'])
+@login_required
+def report_listing(id):
+    """Report a suspicious listing"""
+    listing = Listing.query.get_or_404(id)
+    data = request.json or {}
+    reason = data.get('reason', 'No reason provided')
+    
+    listing.is_reported = True
+    listing.report_count += 1
+    new_reason = f"[{datetime.now().strftime('%Y-%m-%d')}] {reason}"
+    listing.report_reason = (listing.report_reason + " | " + new_reason) if listing.report_reason else new_reason
+    
+    db.session.commit()
+    return jsonify({'status': 'ok', 'report_count': listing.report_count})
+
+@bp.route('/verification', methods=['GET', 'POST'])
+@login_required
+def verification():
+    """Identity verification flow"""
+    if request.method == 'POST':
+        if 'id_photo' not in request.files:
+            flash('No file uploaded', 'error')
+            return redirect(url_for('main.verification'))
+        
+        file = request.files['id_photo']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            unique_id = uuid.uuid4().hex[:8]
+            filename = f"verify_{current_user.id}_{unique_id}_{filename}"
+            
+            filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], 'verifications', filename)
+            os.makedirs(os.path.dirname(filepath), exist_ok=True)
+            file.save(filepath)
+            
+            current_user.id_photo_url = filename
+            current_user.verification_status = 'pending'
+            db.session.commit()
+            flash('ID uploaded successfully! Manual review in progress (24-48h).', 'success')
+            return redirect(url_for('main.profile'))
+            
+    return render_template('verification.html')
+
+@bp.route('/admin/verifications')
+@login_required
+def admin_verifications():
+    """Admin-only: Review pending verifications"""
+    if not current_user.is_admin:
+        abort(403)
+    pending_users = User.query.filter_by(verification_status='pending').all()
+    return render_template('admin_verifications.html', users=pending_users)
+
+@bp.route('/admin/verify-user/<int:user_id>/<action>')
+@login_required
+def verify_user_action(user_id, action):
+    """Approve or reject a user's ID"""
+    if not current_user.is_admin:
+        abort(403)
+    user = User.query.get_or_404(user_id)
+    if action == 'approve':
+        user.verification_status = 'verified'
+        user.id_verified = True
+    else:
+        user.verification_status = 'rejected'
+        user.id_verified = False
+    db.session.commit()
+    flash(f'User {user.username} {action}ed.', 'success')
+    return redirect(url_for('main.admin_verifications'))

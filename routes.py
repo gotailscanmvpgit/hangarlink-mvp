@@ -3,7 +3,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from werkzeug.utils import secure_filename
-from extensions import db, mail
+from extensions import db, mail, limiter
 from models import User, Listing, Message, Booking, Ad, WhiteLabelRequest
 
 try:
@@ -19,7 +19,7 @@ import os
 import random
 import uuid
 # ... (rest of imports)
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 from sqlalchemy import text, func
 
 try:
@@ -206,7 +206,7 @@ def listings():
 @bp.route('/listing/<int:id>')
 def listing_detail(id):
     """Individual listing detail page"""
-    listing = Listing.query.get_or_404(id)
+    listing = db.get_or_404(Listing, id)
     return render_template('listing_detail.html', listing=listing)
 
 @bp.route('/post-listing', methods=['GET', 'POST'])
@@ -503,11 +503,22 @@ def message_user(user_id):
         listing_id = request.form.get('listing_id', type=int)
         
         if content:
+            # AI Concierge Scrutiny (Anti-Scam)
+            is_flagged = False
+            flag_reason = None
+            risky_words = ['western union', 'moneygram', 'gift card', 'whatsapp', 'wire transfer', 'zelle']
+            if any(word in content.lower() for word in risky_words):
+                is_flagged = True
+                flag_reason = "Suspicious payment method mentioned"
+                flash('⚠️ Safety Note: Avoid wire transfers or non-escrow payments. Report suspicious requests.', 'warning')
+
             message = Message(
                 sender_id=current_user.id,
                 receiver_id=user_id,
                 listing_id=listing_id,
-                content=content
+                content=content,
+                is_flagged=is_flagged,
+                flag_reason=flag_reason
             )
             db.session.add(message)
             db.session.commit()
@@ -534,6 +545,7 @@ def message_user(user_id):
     return render_template('message_user.html', partner=partner, messages=messages, listing=listing)
 
 @bp.route('/login', methods=['GET', 'POST'])
+@limiter.limit("10 per hour")
 def login():
     """User login"""
     if request.method == 'POST':
@@ -561,6 +573,7 @@ def login():
     return render_template('login.html')
 
 @bp.route('/register', methods=['GET', 'POST'])
+@limiter.limit("5 per hour")
 def register():
     """User registration"""
     if request.method == 'POST':
@@ -568,7 +581,18 @@ def register():
         email = request.form.get('email', '').strip().lower()
         password = request.form.get('password', '')
         role = request.form.get('role', 'renter')
+        gdpr_consent = request.form.get('gdpr_consent') == 'on'
         try:
+            # Check reCAPTCHA
+            if current_app.config.get('RECAPTCHA_ENABLED') and not current_app.recaptcha.verify():
+                flash('Please complete the CAPTCHA.', 'error')
+                return redirect(url_for('main.register'))
+
+            if not gdpr_consent:
+                # This should be handled by 'required' in HTML, but server-side check is safer
+                flash('Please agree to the GDPR/CCPA consent.', 'error')
+                return redirect(url_for('main.register'))
+
             if User.query.filter_by(email=email).first():
                 flash('Email already registered', 'error')
                 return redirect(url_for('main.register'))
@@ -1078,7 +1102,7 @@ def contact_guest(listing_id):
         content=f"[GUEST: {guest_email}] {message_content}",
         is_guest=True,
         guest_email=guest_email,
-        created_at=datetime.utcnow()
+        created_at=datetime.now(timezone.utc)
     )
     db.session.add(msg)
     db.session.commit()
@@ -1380,8 +1404,11 @@ def sponsored_success():
 @login_required
 def insights():
     has_access = current_user.has_analytics_access or current_user.subscription_tier == 'premium'
-    if current_user.analytics_expires_at and current_user.analytics_expires_at < datetime.utcnow():
-        has_access = False
+    # If analytics expired, reset access
+    if current_user.analytics_expires_at and current_user.analytics_expires_at < datetime.now(timezone.utc):
+        current_user.has_analytics_access = False
+        db.session.commit()
+        has_access = False # Re-evaluate access after resetting
         
     if not has_access:
         return render_template('insights_teaser.html', pricing=INSIGHTS_PRICING)
@@ -1439,10 +1466,10 @@ def insights_success():
     type = request.args.get('type')
     
     current_user.has_analytics_access = True
-    if type == 'subscription':
-         current_user.analytics_expires_at = datetime.utcnow() + timedelta(days=365)
+    if type == 'subscription': # Assuming 'subscription' implies yearly based on INSIGHTS_PRICING
+        current_user.analytics_expires_at = datetime.now(timezone.utc) + timedelta(days=365)
     else:
-         current_user.analytics_expires_at = datetime.utcnow() + timedelta(days=30) 
+        current_user.analytics_expires_at = datetime.now(timezone.utc) + timedelta(days=30) 
     db.session.commit()
     
     flash('Analytics Unlocked!', 'success')
@@ -1862,4 +1889,73 @@ INSTRUCTIONS:
     # Rule-based fallback
     reply = _rule_based_response(message, user_role, db_context)
     return jsonify({'reply': reply, 'source': 'rules'})
+
+@bp.route('/report-listing/<int:id>', methods=['POST'])
+@login_required
+def report_listing(id):
+    """Report a suspicious listing"""
+    listing = Listing.query.get_or_404(id)
+    data = request.json or {}
+    reason = data.get('reason', 'No reason provided')
+    
+    listing.is_reported = True
+    listing.report_count += 1
+    new_reason = f"[{datetime.now().strftime('%Y-%m-%d')}] {reason}"
+    listing.report_reason = (listing.report_reason + " | " + new_reason) if listing.report_reason else new_reason
+    
+    db.session.commit()
+    return jsonify({'status': 'ok', 'report_count': listing.report_count})
+
+@bp.route('/verification', methods=['GET', 'POST'])
+@login_required
+def verification():
+    """Identity verification flow"""
+    if request.method == 'POST':
+        if 'id_photo' not in request.files:
+            flash('No file uploaded', 'error')
+            return redirect(url_for('main.verification'))
+        
+        file = request.files['id_photo']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            unique_id = uuid.uuid4().hex[:8]
+            filename = f"verify_{current_user.id}_{unique_id}_{filename}"
+            
+            filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], 'verifications', filename)
+            os.makedirs(os.path.dirname(filepath), exist_ok=True)
+            file.save(filepath)
+            
+            current_user.id_photo_url = filename
+            current_user.verification_status = 'pending'
+            db.session.commit()
+            flash('ID uploaded successfully! Manual review in progress (24-48h).', 'success')
+            return redirect(url_for('main.profile'))
+            
+    return render_template('verification.html')
+
+@bp.route('/admin/verifications')
+@login_required
+def admin_verifications():
+    """Admin-only: Review pending verifications"""
+    if not current_user.is_admin:
+        abort(403)
+    pending_users = User.query.filter_by(verification_status='pending').all()
+    return render_template('admin_verifications.html', users=pending_users)
+
+@bp.route('/admin/verify-user/<int:user_id>/<action>')
+@login_required
+def verify_user_action(user_id, action):
+    """Approve or reject a user's ID"""
+    if not current_user.is_admin:
+        abort(403)
+    user = User.query.get_or_404(user_id)
+    if action == 'approve':
+        user.verification_status = 'verified'
+        user.id_verified = True
+    else:
+        user.verification_status = 'rejected'
+        user.id_verified = False
+    db.session.commit()
+    flash(f'User {user.username} {action}ed.', 'success')
+    return redirect(url_for('main.admin_verifications'))
 

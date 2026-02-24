@@ -1,9 +1,20 @@
 from flask import Flask, render_template
 from config import Config
-from extensions import db, migrate, login_manager, cache, mail
+from extensions import db, migrate, login_manager, cache, mail, limiter
 from models import User, Listing, Message, Booking, Ad, WhiteLabelRequest
 from routes import bp as main_bp
+from flask_recaptcha import ReCaptcha
 import os
+
+# Compatibility for flask-recaptcha which may expect flask.Markup
+import flask
+try:
+    from markupsafe import Markup
+    flask.Markup = Markup
+    import builtins
+    builtins.Markup = Markup
+except ImportError:
+    pass
 
 import logging
 logger = logging.getLogger(__name__)
@@ -76,6 +87,16 @@ def _safe_migrate(db):
         # ── messages ───────────────────────────────────────────────────
         ("messages", "is_guest",             "BOOLEAN DEFAULT FALSE"),
         ("messages", "guest_email",          "VARCHAR(120)"),
+        # ── safety columns ──────────────────────────────────────────────
+        ("users", "id_verified",            "BOOLEAN DEFAULT FALSE"),
+        ("users", "id_photo_url",           "VARCHAR(255)"),
+        ("users", "verification_status",    "VARCHAR(20) DEFAULT 'none'"),
+        ("users", "is_banned",              "BOOLEAN DEFAULT FALSE"),
+        ("listings", "is_reported",         "BOOLEAN DEFAULT FALSE"),
+        ("listings", "report_count",        "INTEGER DEFAULT 0"),
+        ("listings", "report_reason",       "TEXT"),
+        ("messages", "is_flagged",          "BOOLEAN DEFAULT FALSE"),
+        ("messages", "flag_reason",         "VARCHAR(100)"),
     ]
 
     applied = skipped = already_exists = 0
@@ -130,6 +151,10 @@ def create_app(config_class=Config):
 
     app = Flask(__name__)
     app.config.from_object(config_class)
+    
+    # Ensure DATABASE_URL is used if present
+    if os.environ.get('DATABASE_URL'):
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace("postgres://", "postgresql://", 1)
 
     # Initialize extensions
     db.init_app(app)
@@ -138,10 +163,22 @@ def create_app(config_class=Config):
     cache.init_app(app)
     mail.init_app(app)
 
+    limiter.init_app(app)
+    app.limiter = limiter
+
+    # reCAPTCHA
+    recaptcha = ReCaptcha(app=app)
+    app.recaptcha = recaptcha
+
     # Flask-Mail config (reads from environment, falls back to console-print mode)
     app.config.setdefault('MAIL_SERVER', os.environ.get('MAIL_SERVER', 'smtp.gmail.com'))
     app.config.setdefault('MAIL_PORT', int(os.environ.get('MAIL_PORT', 587)))
-    app.config.setdefault('MAIL_USE_TLS', os.environ.get('MAIL_USE_TLS', 'true').lower() == 'true')
+    app.config.setdefault('MAIL_USE_TLS', os.environ.get('MAIL_USE_TLS', 'True') == 'True')
+
+    # reCAPTCHA Keys (Should be in env)
+    app.config.setdefault('RECAPTCHA_PUBLIC_KEY', os.environ.get('RECAPTCHA_PUBLIC_KEY', '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI')) # Dummy key
+    app.config.setdefault('RECAPTCHA_PRIVATE_KEY', os.environ.get('RECAPTCHA_PRIVATE_KEY', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe')) # Dummy key
+    app.config.setdefault('RECAPTCHA_ENABLED', os.environ.get('RECAPTCHA_ENABLED', 'True') == 'True')
     app.config.setdefault('MAIL_USERNAME', os.environ.get('MAIL_USERNAME', ''))
     app.config.setdefault('MAIL_PASSWORD', os.environ.get('MAIL_PASSWORD', ''))
     app.config.setdefault('MAIL_DEFAULT_SENDER', os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@hangarlinks.com'))
@@ -181,9 +218,10 @@ def create_app(config_class=Config):
     @app.context_processor
     def inject_global_data():
         return {
-            'app_version': 'v2.1.0',
+            'app_version': 'v2.2.0-secure',
             'stripe_publishable_key': app.config.get('STRIPE_PUBLISHABLE_KEY', ''),
-            'legal_disclaimer': "HangarLinks is a platform connecting hangar owners with aircraft owners. We do not own or operate hangars."
+            'legal_disclaimer': "HangarLinks is a coordination tool only. No liability for incidents, accidents, or disputes. Users responsible for compliance.",
+            'safety_disclaimer': "HangarLink is a coordination tool only. No liability for incidents, accidents, or disputes. Users responsible for compliance."
         }
 
     # ── Debug DB schema — admin-only, exposes column names for each table ──────

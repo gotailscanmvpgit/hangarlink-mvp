@@ -73,6 +73,24 @@
                     </div>
                 </div>
 
+                <!-- reCAPTCHA -->
+                <div class="mb-4 flex justify-center">
+                    {{ recaptcha }}
+                </div>
+
+                <!-- GDPR Consent -->
+                <div class="flex items-start p-2 bg-gray-50 dark:bg-dark-800 rounded-xl mb-4">
+                    <div class="flex items-center h-5">
+                        <input id="gdpr_consent" name="gdpr_consent" type="checkbox" required
+                            class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                    </div>
+                    <label for="gdpr_consent" class="ml-3 text-xs text-gray-600 dark:text-platinum-300">
+                        I agree to the <a href="{{ url_for('main.privacy') }}"
+                            class="text-blue-600 font-bold hover:underline">Privacy Policy</a>
+                        and consent to processing my data under <span class="font-bold">GDPR/CCPA</span> guidelines.
+                    </label>
+                </div>
+
                 <!-- Submit -->
                 <button type="submit"
                     class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-2xl transition-all hover-lift">

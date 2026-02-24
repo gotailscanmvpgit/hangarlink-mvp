@@ -230,6 +230,32 @@
                 </div>
             </div>
 
+            <!-- FAA/Legal Compliance Check -->
+            <div
+                class="p-6 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/30 rounded-2xl">
+                <h3 class="text-lg font-bold text-amber-900 dark:text-amber-400 mb-4 flex items-center">
+                    <i class="fas fa-shield-alt mr-2"></i> Safety & Compliance
+                </h3>
+                <div class="space-y-4">
+                    <label class="flex items-start cursor-pointer group">
+                        <input type="checkbox" required name="compliance_fbo"
+                            class="mt-1 w-5 h-5 text-amber-600 rounded border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-sm text-gray-700 dark:text-platinum-300 leading-snug">
+                            I verify that listing this space does not violate my lease with the Airport Sponsor (FBO) or
+                            local airport authority.
+                        </span>
+                    </label>
+                    <label class="flex items-start cursor-pointer group">
+                        <input type="checkbox" required name="compliance_liability"
+                            class="mt-1 w-5 h-5 text-amber-600 rounded border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-sm text-gray-700 dark:text-platinum-300 leading-snug font-bold">
+                            I acknowledge HangarLink is a coordination tool ONLY. I assume full liability for all
+                            disputes or incidents.
+                        </span>
+                    </label>
+                </div>
+            </div>
+
             <!-- Submit Button -->
             <div class="pt-4">
                 <button type="submit"

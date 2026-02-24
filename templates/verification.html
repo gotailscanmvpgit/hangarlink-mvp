@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="min-h-screen pt-24 pb-12 bg-gray-50 dark:bg-dark-950">
+    <div class="max-w-3xl mx-auto px-4">
+        <div
+            class="bg-white dark:bg-dark-900 rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-800">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-700 px-8 py-10 text-white text-center">
+                <div
+                    class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-md">
+                    <i class="fas fa-id-card text-2xl"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2">Owner Verification</h1>
+                <p class="text-blue-100 max-w-md mx-auto">Verify your identity to build trust and unlock premium listing
+                    features.</p>
+            </div>
+
+            <div class="p-8 md:p-12">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <span class="text-gray-700 dark:text-platinum-200 font-medium">Verified Owner Badge</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <span class="text-gray-700 dark:text-platinum-200 font-medium">Boosted Search
+                                Placement</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <span class="text-gray-700 dark:text-platinum-200 font-medium">Faster Payment
+                                Releases</span>
+                        </div>
+                    </div>
+                    <div
+                        class="bg-blue-50 dark:bg-blue-900/10 rounded-2xl p-6 border border-blue-100 dark:border-blue-800/30">
+                        <h3 class="font-bold text-blue-900 dark:text-blue-400 mb-2">Requirements</h3>
+                        <ul class="text-sm text-blue-700 dark:text-platinum-300 space-y-2">
+                            <li>• Government-issued Photo ID</li>
+                            <li>• Clear photo without glares</li>
+                            <li>• Name must match profile</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <form action="{{ url_for('main.verification') }}" method="POST" enctype="multipart/form-data"
+                    class="space-y-6">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-bold text-gray-700 dark:text-platinum-200">Upload ID
+                            Photo</label>
+                        <div class="relative group">
+                            <input type="file" name="id_photo" required accept="image/*"
+                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                            <div
+                                class="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-2xl p-10 text-center group-hover:border-blue-500 transition-colors">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                                <p class="text-gray-600 dark:text-gray-400">Click or drag image to upload</p>
+                                <p class="text-xs text-gray-400 mt-2">JPG, PNG, WebP (max 5MB)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/30 rounded-xl p-4 flex items-start">
+                        <i class="fas fa-info-circle text-amber-600 mt-1 mr-3"></i>
+                        <p class="text-xs text-amber-800 dark:text-amber-300">
+                            Your ID is stored securely and only used for identity verification. It will never be shared
+                            with other users or 3rd parties.
+                        </p>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-2xl transition-all hover-lift">
+                        Submit for Review
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

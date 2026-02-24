@@ -11,7 +11,7 @@ from models import User, Listing, Ad
 
 class TestConfig:
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///test_hangarlink.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = 'test-secret-key-not-for-prod'
     WTF_CSRF_ENABLED = False
@@ -21,6 +21,7 @@ class TestConfig:
     STRIPE_PUBLISHABLE_KEY = ''
     MAIL_USERNAME = ''
     LOGIN_DISABLED = False
+    UPLOAD_FOLDER = 'static/uploads'
 
 
 @pytest.fixture(scope='session')

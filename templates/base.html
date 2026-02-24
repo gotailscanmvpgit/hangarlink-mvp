@@ -556,11 +556,30 @@
                 </div>
             </div>
 
-            <!-- Legal Disclaimer -->
+            <!-- Detailed Safety & Compliance (FAA/CARs) -->
             <div class="pt-8 border-t border-gray-200 dark:border-gray-800">
-                <p class="text-gray-500 dark:text-gray-600 text-xs leading-relaxed">
-                    <strong class="font-semibold">Legal Disclaimer:</strong> {{ legal_disclaimer }}
-                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-xs leading-relaxed">
+                    <div>
+                        <h4 class="font-bold text-gray-900 dark:text-platinum-100 uppercase mb-2 flex items-center">
+                            <i class="fas fa-gavel mr-2 text-blue-600"></i> FAA/CARs Compliance Note
+                        </h4>
+                        <p class="text-gray-500 dark:text-gray-600">
+                            Users are solely responsible for ensuring that hangar usage complies with all FAA (Federal
+                            Aviation Administration) and Transport Canada (CARs) regulations. Commercial operations or
+                            unauthorized storage of hazardous materials in airport-controlled hangars may be prohibited
+                            by airport sponsor agreements. HangarLink is not a party to these agreements.
+                        </p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-900 dark:text-platinum-100 uppercase mb-2 flex items-center">
+                            <i class="fas fa-shield-alt mr-2 text-blue-600"></i> Legal Disclaimer
+                        </h4>
+                        <p class="text-gray-500 dark:text-gray-600">
+                            {{ legal_disclaimer }} No transactions on this platform constitute an endorsement of
+                            airworthiness or safety. Users are advised to perform their own due diligence.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     </footer>
@@ -835,6 +854,12 @@
                                     class="text-xs px-2 py-1 rounded-full border border-blue-500/40 text-blue-400 hover:bg-blue-500/20 transition-colors">📍
                                     CYTZ prices</button>
                                 {% endif %}
+                                <button onclick="sendSuggestion('How to verify an owner?')"
+                                    class="text-xs px-2 py-1 rounded-full border border-blue-500/40 text-blue-400 hover:bg-blue-500/20 transition-colors">🛡️
+                                    Owner Verification</button>
+                                <button onclick="sendSuggestion('Report a safety issue')"
+                                    class="text-xs px-2 py-1 rounded-full border border-red-500/40 text-red-400 hover:bg-red-500/20 transition-colors">🚩
+                                    Report Issue</button>
                                 <button onclick="sendSuggestion('help')"
                                     class="text-xs px-2 py-1 rounded-full border border-green-500/40 text-green-400 hover:bg-green-500/20 transition-colors">❓
                                     What can you do?</button>

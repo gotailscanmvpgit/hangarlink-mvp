@@ -424,9 +424,14 @@
                 </a>
                 {% else %}
                 <a href="{{ url_for('main.message_user', user_id=listing.owner_id, listing_id=listing.id) }}"
-                    class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl text-center shadow-lg hover:shadow-xl transition-all hover-lift">
+                    class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl text-center shadow-lg hover:shadow-xl transition-all hover-lift mb-3">
                     <i class="fas fa-envelope mr-2"></i>Message Owner
                 </a>
+
+                <button onclick="reportListing({{ listing.id }})"
+                    class="w-full text-center bg-white dark:bg-dark-800 text-gray-500 hover:text-red-500 font-medium py-3 px-6 rounded-xl border border-gray-200 dark:border-gray-700 transition-colors text-sm">
+                    <i class="fas fa-flag mr-2"></i>Report Suspicious Listing
+                </button>
 
                 {% if listing.status == 'Active' %}
                 <form action="{{ url_for('main.book_listing', listing_id=listing.id) }}" method="POST" class="mt-3">
@@ -605,6 +610,26 @@
             </a>
         </div>
     </div>
+    <script>
+        function reportListing(id) {
+            const reason = prompt("Please tell us why you are reporting this listing (e.g. Scammer, Incorrect Details, Spam):");
+            if (reason) {
+                fetch(`/report-listing/${id}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reason: reason })
+                })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.status === 'ok') {
+                            alert("Thank you. Our safety team has been notified and will review this listing.");
+                        } else {
+                            alert("Error submitting report. Please try again.");
+                        }
+                    });
+            }
+        }
+    </script>
 </div>
 </div>
 </div>

@@ -282,7 +282,8 @@
                         • {{ listing.size_sqft|int }} sq ft
                     </p>
                     <p class="text-gray-400 dark:text-gray-500 text-xs line-clamp-2 leading-relaxed">
-                        {{ listing.description[:100] }}{% if listing.description|length > 100 %}...{% endif %}
+                        {{ (listing.description or '')[:100] }}{% if (listing.description or '')|length > 100 %}...{%
+                        endif %}
                     </p>
 
                     <!-- Health Score micro-bar -->
