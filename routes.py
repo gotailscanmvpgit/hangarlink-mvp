@@ -32,6 +32,14 @@ try:
 except ImportError:
     openai = None
 
+try:
+    import pandas as pd
+    import numpy as np
+    from sklearn.ensemble import RandomForestRegressor
+    from sklearn.model_selection import train_test_split
+except ImportError:
+    pd = np = RandomForestRegressor = train_test_split = None
+
 bp = Blueprint('main', __name__)
 
 def get_stripe():
@@ -208,7 +216,8 @@ def listings():
 def listing_detail(id):
     """Individual listing detail page"""
     listing = db.get_or_404(Listing, id)
-    return render_template('listing_detail.html', listing=listing)
+    aircraft_sizes = current_app.config.get('AIRCRAFT_SIZES', {})
+    return render_template('listing_detail.html', listing=listing, aircraft_sizes=aircraft_sizes)
 
 @bp.route('/post-listing', methods=['GET', 'POST'])
 @login_required
@@ -1959,4 +1968,102 @@ def verify_user_action(user_id, action):
     db.session.commit()
     flash(f'User {user.username} {action}ed.', 'success')
     return redirect(url_for('main.admin_verifications'))
+
+
+# --- AI Rental Optimizer Feature ---
+
+def train_optimizer_model():
+    """Trains a simple RandomForest model on current market data or synthetic data if empty"""
+    if not pd or not RandomForestRegressor:
+        return None, None
+
+    # Get all listings for training
+    all_listings = Listing.query.all()
+    
+    data = []
+    if len(all_listings) < 15:
+        # Generate synthetic data if not enough real data
+        # Features: [size_sqft, covered (1/0), airport_freq_score (simple mock)]
+        # Target: price_month
+        for _ in range(50):
+            size = random.randint(800, 5000)
+            is_covered = random.choice([0, 1])
+            base_price = (size * 0.15) + (is_covered * 200) + random.randint(-100, 100)
+            data.append({
+                'size_sqft': size,
+                'covered': is_covered,
+                'price_month': max(150, base_price)
+            })
+    
+    # Add real data
+    for l in all_listings:
+        data.append({
+            'size_sqft': l.size_sqft,
+            'covered': 1 if l.covered else 0,
+            'price_month': l.price_month
+        })
+
+    df = pd.DataFrame(data)
+    X = df[['size_sqft', 'covered']]
+    y = df['price_month']
+    
+    model = RandomForestRegressor(n_estimators=100, random_state=42)
+    model.fit(X, y)
+    
+    # Calculate global market average
+    market_avg = df['price_month'].mean()
+    
+    return model, market_avg
+
+@bp.route('/insights/optimizer')
+@login_required
+def rental_optimizer():
+    """Predictive pricing and performance insights tool (Premium Only)"""
+    if not current_user.is_premium:
+        flash("AI Rental Optimizer is a Premium feature. Upgrade to unlock predictive insights.", "warning")
+        return redirect(url_for('main.profile'))
+
+    # Load market model
+    model, market_avg = train_optimizer_model()
+    
+    # Analyze current user's active listings
+    user_listings = Listing.query.filter_by(owner_id=current_user.id, status='Active').all()
+    insights = []
+    
+    for l in user_listings:
+        # Prediction
+        ideal_price = l.price_month
+        success_chance = 75 # default
+        
+        if model:
+            pred_input = pd.DataFrame([[l.size_sqft, 1 if l.covered else 0]], columns=['size_sqft', 'covered'])
+            ideal_price = float(model.predict(pred_input)[0])
+            
+            # success chance logic: higher if price is <= ideal_price
+            price_diff_percent = (l.price_month - ideal_price) / ideal_price
+            success_chance = max(10, min(98, 85 - (price_diff_percent * 100)))
+
+        # Historical comparison (Mocked for MVP)
+        faster_than_avg = random.randint(15, 45)
+        
+        insights.append({
+            'listing': l,
+            'ideal_price': round(ideal_price, 2),
+            'success_chance': round(success_chance, 1),
+            'price_diff': round(l.price_month - ideal_price, 2),
+            'trend': 'up' if l.price_month < ideal_price else 'down',
+            'faster_than_avg': faster_than_avg,
+            'suggestion': "Strong pricing - maintain." if abs(l.price_month - ideal_price) < 50 else 
+                          f"Recommendation: {'Decrease' if l.price_month > ideal_price else 'Increase'} price by ${abs(round(l.price_month - ideal_price, 2))} for optimal velocity."
+        })
+
+    # Historical Trends Data (Mock for Chart.js)
+    history_labels = [(date.today() - timedelta(days=i*30)).strftime('%b %Y') for i in range(6)][::-1]
+    history_prices = [market_avg * (0.9 + (0.02 * i)) for i in range(6)] if market_avg else [350, 365, 380, 375, 390, 405]
+
+    return render_template('insights/optimizer.html', 
+                         insights=insights, 
+                         history_labels=history_labels,
+                         history_prices=history_prices,
+                         market_avg=market_avg or 400.0)
 

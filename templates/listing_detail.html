@@ -12,6 +12,25 @@
         'is_premium': {{ 'true' if listing.is_premium_listing else 'false' }}
     }];
 </script>
+<style>
+    /* Force dropdown options to be readable across browsers */
+    #aircraft-selector option,
+    #aircraft-selector optgroup {
+        background-color: #001F3F !important;
+        color: white !important;
+    }
+
+    .dark #aircraft-selector option,
+    .dark #aircraft-selector optgroup {
+        background-color: #2D2D2D !important;
+        color: white !important;
+    }
+
+    /* Fallback for system appearance */
+    #aircraft-selector {
+        color-scheme: dark;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -327,6 +346,185 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Aircraft Size Comparison Tool -->
+            <div
+                class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8 mb-8 mt-8 animate-fade-in-up">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-platinum-100 mb-6 flex items-center">
+                    <i class="fas fa-plane-arrival text-blue-600 mr-2 text-3xl"></i> Aircraft Fit Comparison
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                            Select your aircraft to compare its footprint against this <strong>{{ listing.size_sqft|int
+                                }} sq
+                                ft</strong> space.
+                        </p>
+
+                        <label for="aircraft-selector"
+                            class="block text-sm font-medium text-gray-700 dark:text-platinum-200 mb-2 font-mono uppercase tracking-wider">Select
+                            Model</label>
+                        <select id="aircraft-selector"
+                            class="w-full bg-[#001F3F] dark:bg-[#2D2D2D] text-[#FAFAFA] border border-gray-300 dark:border-gray-700 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none mb-6 appearance-none shadow-sm cursor-pointer transition-all hover:bg-[#002b5a] dark:hover:bg-[#3d3d3d]">
+                            <option value="" class="bg-[#001F3F] dark:bg-[#2D2D2D]">-- Choose an aircraft --</option>
+                            {% for category, aircrafts in aircraft_sizes.items() %}
+                            <optgroup label="{{ category }}"
+                                class="bg-[#001F3F] dark:bg-[#2D2D2D] text-blue-400 font-bold">
+                                {% for name, specs in aircrafts.items() %}
+                                <option value="{{ name }}" data-length="{{ specs.length }}"
+                                    data-wingspan="{{ specs.wingspan }}" data-height="{{ specs.height }}"
+                                    class="bg-white dark:bg-dark-800 text-gray-900 dark:text-white">
+                                    {{ name }}
+                                </option>
+                                {% endfor %}
+                            </optgroup>
+                            {% endfor %}
+                        </select>
+
+                        <div id="aircraft-specs"
+                            class="hidden space-y-3 bg-blue-50/50 dark:bg-blue-900/10 p-5 rounded-2xl border border-blue-100 dark:border-blue-800/50 backdrop-blur-sm shadow-inner transition-all duration-300">
+                            <div class="flex justify-between text-sm items-center">
+                                <span class="text-gray-500 dark:text-gray-400 font-medium">Length:</span>
+                                <span
+                                    class="font-bold text-gray-900 dark:text-platinum-100 bg-white dark:bg-dark-800 px-2 py-1 rounded-md shadow-sm"
+                                    id="spec-length">-</span>
+                            </div>
+                            <div class="flex justify-between text-sm items-center">
+                                <span class="text-gray-500 dark:text-gray-400 font-medium">Wingspan:</span>
+                                <span
+                                    class="font-bold text-gray-900 dark:text-platinum-100 bg-white dark:bg-dark-800 px-2 py-1 rounded-md shadow-sm"
+                                    id="spec-wingspan">-</span>
+                            </div>
+                            <div class="flex justify-between text-sm items-center">
+                                <span class="text-gray-500 dark:text-gray-400 font-medium">Height:</span>
+                                <span
+                                    class="font-bold text-gray-900 dark:text-platinum-100 bg-white dark:bg-dark-800 px-2 py-1 rounded-md shadow-sm"
+                                    id="spec-height">-</span>
+                            </div>
+                            <div
+                                class="flex justify-between text-sm pt-3 border-t border-blue-200 dark:border-blue-800/50 items-center">
+                                <span
+                                    class="text-gray-500 dark:text-gray-400 font-bold uppercase text-[10px] tracking-tighter">Required
+                                    Area:</span>
+                                <span class="font-black text-blue-600 dark:text-blue-400 text-lg"
+                                    id="spec-footprint">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        class="relative h-72 bg-gray-50 dark:bg-dark-800/50 rounded-2xl flex items-center justify-center overflow-hidden p-6 border-2 border-dashed border-gray-200 dark:border-gray-700/50 group transition-all">
+
+                        <!-- Visual Title -->
+                        <div
+                            class="absolute top-3 left-1/2 -translate-x-1/2 text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] whitespace-nowrap">
+                            Scale Visualization</div>
+
+                        <!-- Hangar Representation -->
+                        <div id="hangar-box"
+                            class="absolute bg-white dark:bg-dark-900/80 border-2 border-blue-500/50 shadow-2xl flex items-center justify-center rounded-sm transition-all duration-500"
+                            style="width: 85%; height: 85%;">
+                            <span
+                                class="text-[9px] text-blue-600/20 uppercase font-black text-center p-2 leading-tight">
+                                {{ listing.size_sqft|int }} SQ FT<br>MAX CLEARANCE
+                            </span>
+                        </div>
+
+                        <!-- Aircraft Representation -->
+                        <div id="aircraft-box"
+                            class="absolute bg-blue-600/30 border-2 border-blue-500 shadow-[0_0_20px_rgba(37,99,235,0.2)] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] hidden z-10 flex items-center justify-center rounded-xs backdrop-blur-[1px]">
+                            <div class="w-full h-full flex items-center justify-center relative overflow-hidden">
+                                <!-- Top View SVG Icon -->
+                                <svg class="w-2/3 h-2/3 text-blue-700 dark:text-blue-400 drop-shadow-lg"
+                                    viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M21,16L21,14L13,9L13,3.5A1.5,1.5 0 0,0 11.5,2A1.5,1.5 0 0,0 10,3.5L10,9L2,14L2,16L10,13.5L10,19L8,20.5L8,22L11.5,21L15,22L15,20.5L13,19L13,13.5L21,16Z" />
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div id="placeholder-text" class="text-xs text-gray-400 text-center z-20 font-medium">
+                            <i class="fas fa-hand-pointer block text-2xl mb-2 opacity-50 animate-bounce"></i>
+                            Select an aircraft to<br>calculate fitment
+                        </div>
+                    </div>
+                </div>
+
+                <div id="fit-status"
+                    class="mt-8 hidden p-4 rounded-2xl text-center text-sm font-bold animate-fade-in-up border-2 shadow-sm transition-all">
+                    <!-- Status injected here -->
+                </div>
+
+                <div
+                    class="mt-6 flex items-center justify-center space-x-6 text-[10px] text-gray-400 font-medium border-t border-gray-100 dark:border-gray-800 pt-4">
+                    <span class="flex items-center"><i class="fas fa-info-circle mr-1 text-blue-500"></i> Footprint
+                        calculation based on L × W</span>
+                    <span class="flex items-center"><i class="fas fa-exclamation-triangle mr-1 text-amber-500"></i>
+                        Check tail height for hangar clearance</span>
+                </div>
+            </div>
+
+            <script>
+                document.getElementById('aircraft-selector').addEventListener('change', function () {
+                    const selected = this.options[this.selectedIndex];
+                    const specs = document.getElementById('aircraft-specs');
+                    const aircraftBox = document.getElementById('aircraft-box');
+                    const placeholder = document.getElementById('placeholder-text');
+                    const status = document.getElementById('fit-status');
+
+                    if (!selected.value) {
+                        specs.classList.add('hidden');
+                        aircraftBox.classList.add('hidden');
+                        placeholder.classList.remove('hidden');
+                        status.classList.add('hidden');
+                        return;
+                    }
+
+                    const L = parseFloat(selected.getAttribute('data-length'));
+                    const W = parseFloat(selected.getAttribute('data-wingspan'));
+                    const H = parseFloat(selected.getAttribute('data-height'));
+                    const area = L * W;
+                    const hangarArea = {{ listing.size_sqft| int
+                }};
+
+                // Update specs
+                specs.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                document.getElementById('spec-length').textContent = L + ' ft';
+                document.getElementById('spec-wingspan').textContent = W + ' ft';
+                document.getElementById('spec-height').textContent = H + ' ft';
+                document.getElementById('spec-footprint').textContent = Math.round(area) + ' sq ft';
+
+                // Update visualization
+                const hangarSide = Math.sqrt(hangarArea);
+
+                // Scale factor: hangarSide corresponds to 85% of container
+                let boxL = (L / hangarSide) * 85;
+                let boxW = (W / hangarSide) * 85;
+
+                // Cap visual size
+                boxL = Math.min(boxL, 120);
+                boxW = Math.min(boxW, 120);
+
+                aircraftBox.style.width = boxW + '%';
+                aircraftBox.style.height = boxL + '%';
+                aircraftBox.classList.remove('hidden');
+
+                // Update status
+                status.classList.remove('hidden');
+                if (area > hangarArea) {
+                    status.className = 'mt-8 p-4 rounded-2xl text-center text-sm font-bold bg-red-50 text-red-700 border-red-100 dark:bg-red-900/10 dark:text-red-400 dark:border-red-900/50';
+                    status.innerHTML = '<i class="fas fa-times-circle mr-2 text-xl align-middle"></i> OVER CAPACITY: Footprint exceeds available square footage.';
+                } else if (area > hangarArea * 0.85) {
+                    status.className = 'mt-8 p-4 rounded-2xl text-center text-sm font-bold bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/10 dark:text-amber-400 dark:border-amber-900/50';
+                    status.innerHTML = '<i class="fas fa-exclamation-triangle mr-2 text-xl align-middle"></i> TIGHT TOLERANCE: Fits with minimal margin. Exercise caution.';
+                } else {
+                    status.className = 'mt-8 p-4 rounded-2xl text-center text-sm font-bold bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/10 dark:text-emerald-400 dark:border-emerald-900/50';
+                    status.innerHTML = '<i class="fas fa-check-circle mr-2 text-xl align-middle"></i> GUARANTEED FIT: footprint fits comfortably in this space.';
+                }
+                });
+            </script>
         </div>
 
         <!-- Sidebar -->

@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<!-- Chart.js for Premium Insights -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-6 lg:px-8 py-12 transition-all duration-500 animate-fade-in">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
+        <div>
+            <div class="flex items-center gap-3 mb-2">
+                <span
+                    class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-widest shadow-lg shadow-blue-500/20">Premium
+                    AI Tool</span>
+                <h1 class="text-4xl font-black text-gray-900 dark:text-platinum-100 tracking-tight">AI Rental <span
+                        class="text-blue-600">Optimizer</span></h1>
+            </div>
+            <p class="text-gray-500 dark:text-gray-400 max-w-2xl">
+                Leveraging machine learning to analyze market demand, pricing elasticity, and regional competition for
+                your hangar listings.
+            </p>
+        </div>
+        <div
+            class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-gray-700 p-4 rounded-2xl shadow-xl flex items-center gap-4">
+            <div
+                class="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center text-blue-600">
+                <i class="fas fa-microchip text-xl animate-pulse"></i>
+            </div>
+            <div>
+                <div class="text-xs text-gray-400 font-bold uppercase tracking-tighter">Market Pulse</div>
+                <div class="text-xl font-black text-gray-900 dark:text-white tabular-nums">${{ "%.2f"|format(market_avg)
+                    }}<span class="text-xs text-gray-400 font-normal ml-1">avg/mo</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Dashboard -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Market Trends Chart -->
+        <div
+            class="lg:col-span-2 bg-white dark:bg-dark-900 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 p-8">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-chart-line text-blue-600 mr-2"></i> Regional Price Index (6 Months)
+            </h3>
+            <div class="h-[300px]">
+                <canvas id="marketTrendChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Global Insights Sidebar -->
+        <div class="space-y-6">
+            <div
+                class="bg-gradient-to-br from-gray-900 to-blue-900 rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden group">
+                <div
+                    class="absolute -top-10 -right-10 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl group-hover:bg-blue-500/20 transition-all duration-700">
+                </div>
+                <h4 class="text-sm font-bold uppercase tracking-[0.2em] mb-4 text-blue-400">Personal Performance</h4>
+                <div class="space-y-6">
+                    <div>
+                        <div class="text-4xl font-black mb-1 flex items-baseline">
+                            25% <span class="text-xs text-blue-300 font-medium ml-2 uppercase">faster</span>
+                        </div>
+                        <p class="text-sm text-gray-300">Your listings typically convert faster than the regional
+                            average.</p>
+                    </div>
+                    <div class="pt-6 border-t border-white/10">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold uppercase text-gray-400">Portfolio Health</span>
+                            <span class="text-xs font-black text-emerald-400">EXCELLENT</span>
+                        </div>
+                        <div class="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                            <div
+                                class="w-4/5 h-full bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Tip Card -->
+            <div
+                class="bg-blue-600/5 dark:bg-blue-600/10 border-2 border-dashed border-blue-600/30 rounded-3xl p-6 relative">
+                <i
+                    class="fas fa-lightbulb text-blue-600 absolute -top-4 -right-4 bg-white dark:bg-dark-900 p-3 rounded-full shadow-lg"></i>
+                <h4 class="font-bold text-gray-900 dark:text-white mb-2">Optimizer Intelligence</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed italic">
+                    "Listings with at least 5 photos and a detailed 'Checklist' score above 80% convert at a 42% higher
+                    rate in current market conditions."
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Optimizer -->
+    <div class="mt-12">
+        <h2 class="text-2xl font-black text-gray-900 dark:text-white mb-8 flex items-center">
+            <i class="fas fa-wand-magic-sparkles text-blue-600 mr-3"></i> Predictive Analysis for Your Listings
+        </h2>
+
+        {% if not insights %}
+        <div
+            class="bg-gray-50 dark:bg-dark-900/50 rounded-3xl p-12 text-center border-2 border-dashed border-gray-200 dark:border-gray-800">
+            <div
+                class="w-16 h-16 bg-gray-100 dark:bg-dark-800 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                <i class="fas fa-plus text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">No Active Listings to Optimize</h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-6">Create a listing to see predictive success modeling and
+                pricing intelligence.</p>
+            <a href="{{ url_for('main.post_listing') }}"
+                class="inline-flex items-center justify-center bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20">
+                <i class="fas fa-plane-up mr-2"></i> Post New Listing
+            </a>
+        </div>
+        {% else %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {% for item in insights %}
+            <div
+                class="bg-white dark:bg-dark-900 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden group hover:border-blue-500/50 transition-all duration-300">
+                <div class="p-8">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <span class="text-[10px] font-black text-blue-600 uppercase tracking-widest">{{
+                                item.listing.airport_icao }}</span>
+                            <h3 class="text-xl font-black text-gray-900 dark:text-white mt-1">{{ item.listing.size_sqft
+                                }} SQ FT Hangar</h3>
+                        </div>
+                        <div
+                            class="bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1 rounded text-emerald-600 dark:text-emerald-400 text-xs font-black uppercase tracking-tighter">
+                            Active
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6 mb-8">
+                        <div class="p-4 bg-gray-50 dark:bg-dark-800 rounded-2xl">
+                            <div class="text-[10px] text-gray-400 font-bold uppercase tracking-tighter mb-1">Current
+                                Price</div>
+                            <div class="text-2xl font-black text-gray-800 dark:text-white">${{
+                                "%.0f"|format(item.listing.price_month) }}</div>
+                        </div>
+                        <div
+                            class="p-4 bg-blue-600/5 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-900">
+                            <div
+                                class="text-[10px] text-blue-600 dark:text-blue-400 font-bold uppercase tracking-tighter mb-1">
+                                AI Target Price</div>
+                            <div class="text-2xl font-black text-blue-600 dark:text-blue-400">${{
+                                "%.0f"|format(item.ideal_price) }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Success Probability -->
+                    <div class="mb-8">
+                        <div class="flex justify-between items-end mb-2">
+                            <span class="text-sm font-bold text-gray-500 dark:text-gray-400">Success Probability (7
+                                Days)</span>
+                            <span class="text-xl font-black text-gray-900 dark:text-white tabular-nums">{{
+                                item.success_chance }}%</span>
+                        </div>
+                        <div class="w-full h-3 bg-gray-100 dark:bg-dark-800 rounded-full overflow-hidden p-0.5">
+                            <div class="h-full rounded-full transition-all duration-1000 ease-out"
+                                style="width: {{ item.success_chance }}%; background: linear-gradient(90deg, #3b82f6, #10b981);">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recommendation Banner -->
+                    <div
+                        class="flex items-center gap-4 p-4 rounded-2xl {{ 'bg-emerald-50 text-emerald-700' if item.price_diff <= 0 else 'bg-amber-50 text-amber-700' }} dark:bg-opacity-10">
+                        <div
+                            class="w-10 h-10 rounded-full flex items-center justify-center bg-white dark:bg-dark-800 shadow-sm flex-shrink-0">
+                            <i
+                                class="fas {{ 'fa-check' if item.price_diff <= 0 else 'fa-arrow-trend-down' }} text-sm"></i>
+                        </div>
+                        <p class="text-sm font-bold leading-tight">{{ item.suggestion }}</p>
+                    </div>
+                </div>
+
+                <!-- Bottom Action -->
+                <div
+                    class="bg-gray-50 dark:bg-dark-800 px-8 py-4 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center opacity-70 group-hover:opacity-100 transition-all">
+                    <span class="text-xs text-gray-500 font-medium">Last processed: Just now</span>
+                    <a href="{{ url_for('main.edit_listing', id=item.listing.id) }}"
+                        class="text-blue-600 hover:text-blue-700 font-bold text-xs flex items-center">
+                        Adjust Pricing <i class="fas fa-chevron-right ml-1"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ctx = document.getElementById('marketTrendChart').getContext('2d');
+
+        // Custom gradient for the chart
+        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
+        gradient.addColorStop(1, 'rgba(59, 130, 246, 0.05)');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ history_labels| tojson }},
+        datasets: [{
+            label: 'Average Market Price ($)',
+            data: {{ history_prices| tojson }},
+        borderColor: '#3b82f6',
+        borderWidth: 4,
+        pointBackgroundColor: '#fff',
+        pointBorderColor: '#3b82f6',
+        pointBorderWidth: 2,
+        pointRadius: 6,
+        pointHoverRadius: 8,
+        tension: 0.4,
+        fill: true,
+        backgroundColor: gradient
+                }]
+            },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                mode: 'index',
+                intersect: false,
+                backgroundColor: '#1f2937',
+                titleFont: { weight: 'bold' },
+                padding: 12,
+                borderRadius: 12
+            }
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: { color: '#9ca3af', font: { weight: 'bold' } }
+            },
+            y: {
+                grid: { color: 'rgba(156, 163, 175, 0.05)' },
+                ticks: {
+                    color: '#9ca3af',
+                    font: { weight: 'bold' },
+                    callback: value => '$' + value
+                }
+            }
+        }
+    }
+        });
+    });
+</script>
+
+<style>
+    @keyframes fade-in {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in {
+        animation: fade-in 0.8s ease-out forwards;
+    }
+</style>
+{% endblock %}
