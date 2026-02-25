@@ -5,6 +5,10 @@ from models import User, Listing, Message, Booking, Ad, WhiteLabelRequest
 from routes import bp as main_bp
 from flask_recaptcha import ReCaptcha
 import os
+from dotenv import load_dotenv
+
+# Load .env file if it exists
+load_dotenv()
 
 # Compatibility for flask-recaptcha which may expect flask.Markup
 import flask

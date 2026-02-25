@@ -4,10 +4,16 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-this-in-prod'
     
     # Priority order for Database URI:
-    # 1. DATABASE_URL (Standard production)
-    # 2. DATABASE_PRIVATE_URL (Alternative Railway private link)
-    # 3. Local SQLite (fallback)
-    raw_db_url = os.environ.get('DATABASE_URL') or os.environ.get('DATABASE_PRIVATE_URL')
+    # 1. DATABASE_URL (Standard)
+    # 2. DATABASE_PRIVATE_URL (Railway Private)
+    # 3. POSTGRES_URL (Alternative name)
+    # 4. Local SQLite (fallback)
+    raw_db_url = os.environ.get('DATABASE_URL') or \
+                 os.environ.get('DATABASE_PRIVATE_URL') or \
+                 os.environ.get('POSTGRES_URL')
+    
+    # Log all available environment keys (not values) for debugging
+    print(f"DEBUG: Available Env Keys: {list(os.environ.keys())}")
     
     if raw_db_url:
         # Standardize for SQLAlchemy
