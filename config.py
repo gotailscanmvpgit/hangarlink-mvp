@@ -3,12 +3,26 @@ import os
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-this-in-prod'
     
-    # Database (PostgreSQL for Prod, SQLite for Dev)
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///hangarlink.db'
-    if SQLALCHEMY_DATABASE_URI and SQLALCHEMY_DATABASE_URI.startswith("postgres://"):
-        SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace("postgres://", "postgresql://", 1)
-        
+    # Priority order for Database URI:
+    # 1. DATABASE_URL (Standard production)
+    # 2. DATABASE_PRIVATE_URL (Alternative Railway private link)
+    # 3. Local SQLite (fallback)
+    raw_db_url = os.environ.get('DATABASE_URL') or os.environ.get('DATABASE_PRIVATE_URL')
+    
+    if raw_db_url:
+        # Standardize for SQLAlchemy
+        if raw_db_url.startswith("postgres://"):
+            SQLALCHEMY_DATABASE_URI = raw_db_url.replace("postgres://", "postgresql://", 1)
+        else:
+            SQLALCHEMY_DATABASE_URI = raw_db_url
+        DB_TYPE = "POSTGRESQL"
+    else:
+        SQLALCHEMY_DATABASE_URI = 'sqlite:///hangarlink.db'
+        DB_TYPE = "SQLITE (EPHEMERAL - DATA WILL BE LOST ON REDEPLOY)"
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    
+    # ... rest of the config ...
     
     # Uploads
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER') or 'static/uploads'

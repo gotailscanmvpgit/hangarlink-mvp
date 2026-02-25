@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
-echo "=== DEPLOY: Starting database reset ==="
-python clean_db.py
+# echo "=== DEPLOY: Starting database reset ==="
+# python clean_db.py (DANGEROUS: Wipes data!)
 echo "=== DEPLOY: Running migrations ==="
 flask db upgrade
 echo "=== DEPLOY: Starting server ==="

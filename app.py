@@ -35,18 +35,18 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
     
-    # Database Configuration
-    database_url = os.environ.get('DATABASE_URL')
-    if database_url:
-        # Compatibility for Railway/Heroku postgres:// URLs
-        if database_url.startswith("postgres://"):
-            database_url = database_url.replace("postgres://", "postgresql://", 1)
-        app.config['SQLALCHEMY_DATABASE_URI'] = database_url
-    else:
-        # Fallback to local SQLite if DATABASE_URL is not set
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hangarlink.db'
+    # Database Summary Logging
+    db_uri = app.config.get('SQLALCHEMY_DATABASE_URI', '')
+    db_type = getattr(config_class, 'DB_TYPE', 'UNKNOWN')
     
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    # Anonymize logs (don't print passwords)
+    safe_uri = db_uri
+    if '@' in db_uri:
+        safe_uri = db_uri.split('@')[1] if ':' not in db_uri.split('@')[0] else f"***@{db_uri.split('@')[1]}"
+
+    print(f"🚀 [DB-INIT] Type: {db_type}")
+    print(f"📍 [DB-INIT] Target: {safe_uri}")
+    logger.warning(f"[DB-INIT] Type: {db_type} Target: {safe_uri}")
 
     # Initialize extensions
     db.init_app(app)
