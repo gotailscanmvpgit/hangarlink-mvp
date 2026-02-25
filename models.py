@@ -78,6 +78,10 @@ class Listing(db.Model):
         db.Index('idx_listing_price', 'price_month'),
         db.Index('idx_listing_status', 'status'),
         db.Index('idx_listing_created', 'created_at'),
+        db.Index('idx_listing_owner', 'owner_id'),
+        db.Index('idx_listing_covered', 'covered'),
+        db.Index('idx_listing_featured', 'is_featured'),
+        db.Index('idx_listing_premium', 'is_premium_listing'),
     )
     
     id = db.Column(db.Integer, primary_key=True)
@@ -219,12 +223,4 @@ class WhiteLabelRequest(db.Model):
     status = db.Column(db.String(20), default='Pending') # Pending, Approved, Rejected
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-# Optimization Indexes
-db.Index('idx_airport', Listing.airport_icao)
-db.Index('idx_price', Listing.price_month)
-db.Index('idx_status', Listing.status)
-db.Index('idx_created', Listing.created_at)
-db.Index('idx_owner', Listing.owner_id)
-db.Index('idx_covered', Listing.covered)
-db.Index('idx_featured', Listing.is_featured)
-db.Index('idx_premium_listing', Listing.is_premium_listing)
+# Optimization Indexes are defined within the Listing model's __table_args__

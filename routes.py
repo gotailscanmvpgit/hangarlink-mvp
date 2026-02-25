@@ -3,7 +3,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from werkzeug.utils import secure_filename
-from extensions import db, mail, limiter
+from extensions import db, mail, limiter, cache
 from models import User, Listing, Message, Booking, Ad, WhiteLabelRequest
 
 try:
@@ -139,6 +139,7 @@ def health():
         return {"status": "error", "database": str(e)}, 500
 
 @bp.route('/listings')
+@cache.cached(timeout=300, query_string=True)
 def listings():
     """Search and browse all listings"""
     # Check search limit for free-tier renters

@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 from config import Config
 from extensions import db, migrate, login_manager, cache, mail, limiter
+from flask_compress import Compress
 from models import User, Listing, Message, Booking, Ad, WhiteLabelRequest
 from routes import bp as main_bp
 from flask_recaptcha import ReCaptcha
@@ -58,8 +59,11 @@ def create_app(config_class=Config):
     login_manager.init_app(app)
     cache.init_app(app)
     mail.init_app(app)
-
     limiter.init_app(app)
+    
+    # Enable Gzip compression
+    Compress(app)
+    
     app.limiter = limiter
 
     # reCAPTCHA
