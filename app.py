@@ -10,7 +10,11 @@ import stripe
 from dotenv import load_dotenv
 
 # Load .env file if it exists
-load_dotenv()
+if os.path.exists('.env'):
+    print("📁 [CONFIG] Found .env file, loading...")
+    load_dotenv()
+else:
+    print("☁️ [CONFIG] No .env file found, using system environment variables.")
 
 # Compatibility for flask-recaptcha which may expect flask.Markup
 import flask
@@ -68,7 +72,29 @@ def create_app(config_class=Config):
     app.limiter = limiter
 
     # Stripe Configuration
-    stripe.api_key = app.config.get('STRIPE_SECRET_KEY')
+    s_key = app.config.get('STRIPE_SECRET_KEY')
+    p_key = app.config.get('STRIPE_PUBLISHABLE_KEY')
+    
+    # Check for placeholder values
+    if s_key and 'here' in s_key:
+        print("⚠️ WARNING: Detected STRIPE_SECRET_KEY placeholder! Payment will fail.")
+        logger.error("Detected STRIPE_SECRET_KEY placeholder!")
+    
+    if s_key and 'here' not in s_key:
+        # Masked print for debugging live site
+        masked_s = s_key[:7] + "..." + s_key[-4:] if len(s_key) > 15 else "***"
+        print(f"✅ [STRIPE] Secret Key detected: {masked_s}")
+        logger.info(f"Stripe Secret Key loaded: {masked_s}")
+        stripe.api_key = s_key
+    else:
+        print("❌ [STRIPE] Secret Key is MISSING or using PLACEHOLDER.")
+        logger.error("Stripe Secret Key is missing or invalid.")
+
+    if p_key and 'here' not in p_key:
+        masked_p = p_key[:7] + "..." + p_key[-4:] if len(p_key) > 15 else "***"
+        print(f"✅ [STRIPE] Publishable Key detected: {masked_p}")
+    else:
+        print("❌ [STRIPE] Publishable Key is MISSING or using PLACEHOLDER.")
 
     # reCAPTCHA
     recaptcha = ReCaptcha(app=app)

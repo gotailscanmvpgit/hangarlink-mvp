@@ -45,7 +45,11 @@ bp = Blueprint('main', __name__)
 def get_stripe():
     if not stripe:
         return None
-    stripe.api_key = current_app.config.get('STRIPE_SECRET_KEY')
+    # Ensure current key is set from config
+    key = current_app.config.get('STRIPE_SECRET_KEY')
+    if not key or 'here' in key:
+        return None
+    stripe.api_key = key
     return stripe
 
 
@@ -72,11 +76,6 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Stripe initialization helper
-def get_stripe():
-    if stripe:
-        stripe.api_key = current_app.config['STRIPE_SECRET_KEY']
-    return stripe
 
 @bp.route('/')
 def index():

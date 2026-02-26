@@ -39,9 +39,9 @@ class Config:
     CACHE_DEFAULT_TIMEOUT = 300
     
     # Stripe
-    STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY')
-    STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
-    STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET')
+    STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY', '').strip()
+    STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '').strip()
+    STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '').strip()
     
     # Application
     DEBUG = os.environ.get('FLASK_DEBUG', '0') == '1'
