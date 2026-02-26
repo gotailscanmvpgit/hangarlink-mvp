@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from werkzeug.utils import secure_filename
 from extensions import db, mail, limiter, cache
-from models import User, Listing, Message, Booking, Ad, WhiteLabelRequest
+from models import User, Listing, Message, Booking, Ad, WhiteLabelRequest, Payment
 
 try:
     from flask_mail import Message as MailMessage
@@ -889,6 +889,11 @@ def book_listing(listing_id):
                 mode='payment',
                 success_url=url_for('main.booking_success', _external=True) + '?session_id={CHECKOUT_SESSION_ID}',
                 cancel_url=url_for('main.listing_detail', id=listing.id, _external=True),
+                metadata={
+                    'user_id': current_user.id,
+                    'item_type': 'rental_booking',
+                    'listing_id': listing.id
+                }
             )
             checkout_session_url = checkout_session.url
             session_id = checkout_session.id
@@ -904,7 +909,17 @@ def book_listing(listing_id):
             insurance_opt_in=add_insurance,
             insurance_fee=insurance_fee
         )
+        # Log to Payment model for billing history
+        payment = Payment(
+            user_id=current_user.id,
+            amount=final_total,
+            item_type='rental_booking',
+            item_id=listing.id,
+            stripe_session_id=session_id,
+            status='pending'
+        )
         db.session.add(booking)
+        db.session.add(payment)
         db.session.commit()
             
         return redirect(checkout_session_url, code=303)
@@ -921,6 +936,12 @@ def booking_success():
     booking.status = 'Confirmed'
     booking.listing.status = 'Rented'
     booking.listing.insurance_active = True
+    
+    # Update Payment status
+    payment = Payment.query.filter_by(stripe_session_id=session_id).first()
+    if payment:
+        payment.status = 'completed'
+        
     db.session.commit()
     
     agreement_url = url_for('main.download_agreement', booking_id=booking.id)
@@ -1170,44 +1191,6 @@ RENTER_PLAN = {
 @bp.route('/pricing')
 def pricing():
     return render_template('pricing.html', owner_plan=OWNER_PLAN, renter_plan=RENTER_PLAN, fee_percent=TRANSACTION_FEE_PERCENT)
-
-@bp.route('/create-checkout-session', methods=['POST'])
-@login_required
-def create_checkout_session():
-    stripe = get_stripe()
-    if not stripe:
-        flash('Stripe is not configured. Please set STRIPE_SECRET_KEY.', 'warning')
-        return redirect(url_for('main.pricing'))
-    
-    plan_type = request.form.get('plan_type', 'owner')
-    plan = OWNER_PLAN if plan_type == 'owner' else RENTER_PLAN
-    
-    try:
-        checkout_session = stripe.checkout.Session.create(
-            payment_method_types=['card'],
-            line_items=[{
-                'price_data': {
-                    'currency': 'usd',
-                    'product_data': {
-                        'name': plan['name'],
-                        'description': f"HangarLinks {plan['name']} - Monthly Subscription",
-                    },
-                    'unit_amount': plan['price'],
-                    'recurring': {'interval': plan['interval']},
-                },
-                'quantity': 1,
-            }],
-            mode='subscription',
-            success_url=request.host_url + f'subscription/success?session_id={{CHECKOUT_SESSION_ID}}&plan={plan_type}',
-            cancel_url=request.host_url + 'subscription/cancel',
-            client_reference_id=str(current_user.id),
-            customer_email=current_user.email,
-            metadata={'user_id': current_user.id, 'plan_type': plan_type}
-        )
-        return redirect(checkout_session.url, code=303)
-    except Exception as e:
-        flash(f'Payment error: {str(e)}', 'danger')
-        return redirect(url_for('main.pricing'))
 
 @bp.route('/subscription/success')
 @login_required
@@ -1575,7 +1558,7 @@ def white_label_submit():
             db.session.commit()
             return redirect(url_for('main.white_label_success'))
             
-        checkout_session = stripe.checkout.Session.create(
+        checkout_session = stripe_lib.checkout.Session.create(
             payment_method_types=['card'],
             line_items=[{
                 'price_data': {
@@ -1591,7 +1574,24 @@ def white_label_submit():
             mode='payment',
             success_url=url_for('main.white_label_success', _external=True) + '?session_id={CHECKOUT_SESSION_ID}',
             cancel_url=url_for('main.white_label', _external=True),
+            metadata={
+                'user_id': current_user.id if current_user.is_authenticated else 'guest',
+                'item_type': 'white_label_reservation',
+                'fbo_name': fbo_name
+            }
         )
+        
+        if current_user.is_authenticated:
+            payment = Payment(
+                user_id=current_user.id,
+                amount=499.00,
+                item_type='white_label_reservation',
+                stripe_session_id=checkout_session.id,
+                status='pending'
+            )
+            db.session.add(payment)
+            db.session.commit()
+            
         return redirect(checkout_session.url, code=303)
     except Exception as e:
         flash(f'Payment Error: {str(e)}', 'error')
@@ -1599,6 +1599,29 @@ def white_label_submit():
 
 @bp.route('/white-label/success')
 def white_label_success():
+    session_id = request.args.get('session_id')
+    stripe_lib = get_stripe()
+    
+    if session_id and stripe_lib:
+        try:
+            session = stripe_lib.checkout.Session.retrieve(session_id)
+            fbo_name = session.metadata.get('fbo_name')
+            
+            # Update Payment Record
+            payment = Payment.query.filter_by(stripe_session_id=session_id).first()
+            if payment:
+                payment.status = 'completed'
+            
+            # Update Request Record
+            if fbo_name:
+                req = WhiteLabelRequest.query.filter_by(fbo_name=fbo_name, status='Pending Payment').first()
+                if req:
+                    req.status = 'Paid'
+            
+            db.session.commit()
+        except Exception as e:
+            print(f"White label success verification error: {e}")
+
     return render_template('subscription_success.html', title="Reservation Confirmed", message="Thank you for reserving your White-Label slot! Our deployment team will contact you within 24 hours.")
 
 @bp.route('/insights/market-reports')
@@ -2066,4 +2089,140 @@ def rental_optimizer():
                          history_labels=history_labels,
                          history_prices=history_prices,
                          market_avg=market_avg or 400.0)
+
+@bp.route('/billing')
+@login_required
+def billing():
+    """User billing history and current status"""
+    payments = Payment.query.filter_by(user_id=current_user.id).order_by(Payment.created_at.desc()).all()
+    return render_template('billing.html', payments=payments)
+
+@bp.route('/create-checkout-session', methods=['POST'])
+@login_required
+def create_checkout_session():
+    """Unified Stripe Checkout handler for all monetization features"""
+    item_type = request.form.get('item_type')
+    item_id = request.form.get('item_id')
+    
+    # Pricing configuration (Test Mode Defaults)
+    prices = {
+        'premium_owner': {'amount': 999, 'name': 'Owner Premium Subscription', 'recurring': True},
+        'premium_renter': {'amount': 699, 'name': 'Renter Premium Subscription', 'recurring': True},
+        'featured_silver': {'amount': 4900, 'name': 'Silver Featured Listing (30 Days)', 'recurring': False},
+        'featured_gold': {'amount': 9900, 'name': 'Gold Featured Listing (30 Days)', 'recurring': False},
+        'featured_platinum': {'amount': 19900, 'name': 'Platinum Featured Listing (30 Days)', 'recurring': False},
+        'insurance_base': {'amount': 4500, 'name': 'HangarLink Liability Coverage (Base)', 'recurring': False},
+        'analytics_report': {'amount': 1999, 'name': 'AI Market Intel Report', 'recurring': False},
+        'analytics_report_national': {'amount': 14900, 'name': 'National Hangar Market Report (Q1 2026)', 'recurring': False},
+        'white_label': {'amount': 9900, 'name': 'FBO White-Label Portal (Monthly)', 'recurring': True},
+    }
+    
+    config = prices.get(item_type)
+    if not config:
+        flash("Invalid product selection.", "error")
+        return redirect(url_for('main.profile'))
+    
+    stripe_lib = get_stripe()
+    if not stripe_lib:
+        flash("Payments currently unavailable.", "error")
+        return redirect(url_for('main.profile'))
+    
+    try:
+        session_params = {
+            'payment_method_types': ['card'],
+            'line_items': [{
+                'price_data': {
+                    'currency': 'usd',
+                    'product_data': {'name': config['name']},
+                    'unit_amount': config['amount'],
+                },
+                'quantity': 1,
+            }],
+            'mode': 'subscription' if config['recurring'] else 'payment',
+            'success_url': url_for('main.payment_success', _external=True) + '?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url': url_for('main.payment_cancel', _external=True),
+            'metadata': {
+                'user_id': current_user.id,
+                'item_type': item_type,
+                'item_id': item_id or ''
+            }
+        }
+        
+        if config['recurring']:
+            session_params['line_items'][0]['price_data']['recurring'] = {'interval': 'month'}
+            
+        checkout_session = stripe_lib.checkout.Session.create(**session_params)
+        
+        # Log pending payment
+        payment = Payment(
+            user_id=current_user.id,
+            amount=config['amount'] / 100.0,
+            item_type=item_type,
+            item_id=int(item_id) if item_id and item_id.isdigit() else None,
+            stripe_session_id=checkout_session.id,
+            status='pending'
+        )
+        db.session.add(payment)
+        db.session.commit()
+        
+        return redirect(checkout_session.url, code=303)
+        
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Payment error: {str(e)}", "error")
+        return redirect(url_for('main.profile'))
+
+@bp.route('/payment-success')
+@login_required
+def payment_success():
+    """Handle successful checkout redirection"""
+    session_id = request.args.get('session_id')
+    if not session_id:
+        return redirect(url_for('main.index'))
+        
+    stripe_lib = get_stripe()
+    try:
+        session = stripe_lib.checkout.Session.retrieve(session_id)
+        payment = Payment.query.filter_by(stripe_session_id=session_id).first()
+        
+        if payment and payment.status == 'pending':
+            payment.status = 'completed'
+            payment.stripe_payment_intent = getattr(session, 'payment_intent', None) or getattr(session, 'subscription', None)
+            
+            # Apply feature logic based on item_type
+            item_type = session.metadata.get('item_type')
+            if item_type in ['premium_owner', 'premium_renter']:
+                current_user.is_premium = True
+                current_user.subscription_tier = 'premium'
+                current_user.subscription_expires = datetime.utcnow() + timedelta(days=30)
+            elif 'featured' in item_type:
+                listing_id = session.metadata.get('item_id')
+                if listing_id:
+                    listing = Listing.query.get(listing_id)
+                    if listing:
+                        listing.is_featured = True
+                        listing.is_premium_listing = True
+                        listing.featured_tier = item_type.split('_')[1]
+                        listing.featured_expires_at = datetime.utcnow() + timedelta(days=30)
+            elif item_type in ['analytics_report', 'analytics_report_national']:
+                current_user.has_analytics_access = True
+                current_user.analytics_expires_at = datetime.utcnow() + timedelta(days=30)
+            elif item_type == 'white_label':
+                current_user.is_white_label_partner = True
+                # Add any other flags needed for white label
+            
+            db.session.commit()
+            flash(f"Success! Your payment for {item_type.replace('_', ' ').capitalize()} has been processed.", "success")
+            
+        return render_template('payment_success.html')
+    except Exception as e:
+        flash(f"Verification error: {str(e)}", "error")
+        return redirect(url_for('main.profile'))
+
+@bp.route('/payment-cancel')
+@login_required
+def payment_cancel():
+    """Handle cancelled checkout"""
+    flash("Payment cancelled.", "info")
+    return redirect(url_for('main.profile'))
 

@@ -41,7 +41,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
             <span class="text-green-300 font-semibold">You're on Premium!</span>
-            <a href="{{ url_for('main.manage_subscription') }}" class="ml-4 text-green-400 underline text-sm">Manage →</a>
+            <a href="{{ url_for('main.manage_subscription') }}" class="ml-4 text-green-400 underline text-sm">Manage
+                →</a>
         </div>
         {% endif %}
     </div>
@@ -154,7 +155,7 @@
                     </a>
                     {% else %}
                     <form action="{{ url_for('main.create_checkout_session') }}" method="POST">
-                        <input type="hidden" name="plan_type" value="owner">
+                        <input type="hidden" name="item_type" value="premium_owner">
                         <button type="submit"
                             class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-lg transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/25 hover:scale-[1.02] active:scale-[0.98]">
                             Subscribe — ${{ owner_plan.price_display }}/mo
@@ -202,7 +203,7 @@
                     </a>
                     {% else %}
                     <form action="{{ url_for('main.create_checkout_session') }}" method="POST">
-                        <input type="hidden" name="plan_type" value="renter">
+                        <input type="hidden" name="item_type" value="premium_renter">
                         <button type="submit"
                             class="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-400 hover:to-violet-400 text-white font-bold text-lg transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/25 hover:scale-[1.02] active:scale-[0.98]">
                             Subscribe — ${{ renter_plan.price_display }}/mo
@@ -238,7 +239,8 @@
                 <div>
                     <h3 class="text-xl font-bold text-white mb-2">{{ fee_percent }}% Transaction Fee</h3>
                     <p class="text-slate-300 mb-4">
-                        When a booking is completed, HangarLinks charges an <strong class="text-white">{{ fee_percent }}%
+                        When a booking is completed, HangarLinks charges an <strong class="text-white">{{ fee_percent
+                            }}%
                             platform fee</strong> on the total rental amount. This covers payment processing, platform
                         maintenance, and dispute resolution.
                     </p>

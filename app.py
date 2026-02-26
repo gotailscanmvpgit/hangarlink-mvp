@@ -2,10 +2,11 @@ from flask import Flask, render_template
 from config import Config
 from extensions import db, migrate, login_manager, cache, mail, limiter
 from flask_compress import Compress
-from models import User, Listing, Message, Booking, Ad, WhiteLabelRequest
+from models import User, Listing, Message, Booking, Ad, WhiteLabelRequest, Payment
 from routes import bp as main_bp
 from flask_recaptcha import ReCaptcha
 import os
+import stripe
 from dotenv import load_dotenv
 
 # Load .env file if it exists
@@ -65,6 +66,9 @@ def create_app(config_class=Config):
     Compress(app)
     
     app.limiter = limiter
+
+    # Stripe Configuration
+    stripe.api_key = app.config.get('STRIPE_SECRET_KEY')
 
     # reCAPTCHA
     recaptcha = ReCaptcha(app=app)

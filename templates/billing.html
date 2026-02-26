@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-6 lg:px-8 py-12 transition-all duration-500 animate-fade-in">
+    <div class="mb-10">
+        <h1 class="text-4xl font-black text-gray-900 dark:text-platinum-100 tracking-tight mb-2">Billing <span
+                class="text-blue-600">& History</span></h1>
+        <p class="text-gray-500 dark:text-gray-400">Manage your subscriptions and review past transactions.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Current Plan -->
+        <div class="lg:col-span-1 space-y-6">
+            <div
+                class="bg-gradient-to-br from-blue-700 to-indigo-900 rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden group">
+                <div
+                    class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-all duration-700">
+                </div>
+                <h4 class="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-blue-200">Current Plan</h4>
+                <div class="mb-6">
+                    <div class="text-3xl font-black mb-1 capitalize">{{ current_user.subscription_tier or 'Free' }}
+                    </div>
+                    {% if current_user.subscription_expires %}
+                    <p class="text-xs text-blue-100 opacity-80 italic">Renews on {{
+                        current_user.subscription_expires.strftime('%b %d, %Y') }}</p>
+                    {% else %}
+                    <p class="text-xs text-blue-100 opacity-80 italic">No active subscription</p>
+                    {% endif %}
+                </div>
+                <a href="{{ url_for('main.profile') }}"
+                    class="inline-flex items-center text-sm font-bold bg-white text-blue-700 px-6 py-2 rounded-xl hover:bg-blue-50 transition-colors shadow-lg">
+                    Manage Plan <i class="fas fa-chevron-right ml-2 text-[10px]"></i>
+                </a>
+            </div>
+
+            <!-- Stats Card -->
+            <div
+                class="bg-white dark:bg-dark-900 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 shadow-xl">
+                <div class="flex items-center gap-4 mb-4">
+                    <div
+                        class="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/20 rounded-full flex items-center justify-center text-emerald-600">
+                        <i class="fas fa-shield-check"></i>
+                    </div>
+                    <div>
+                        <div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Trust Status</div>
+                        <div class="text-sm font-black text-gray-900 dark:text-white">{{ 'Verified' if
+                            current_user.id_verified else 'Unverified' }}</div>
+                    </div>
+                </div>
+                <p class="text-[10px] text-gray-500 leading-tight">Verified members receive 15% discount on HangarLink
+                    insurance products.</p>
+            </div>
+        </div>
+
+        <!-- Transaction History -->
+        <div class="lg:col-span-2">
+            <div
+                class="bg-white dark:bg-dark-900 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden">
+                <div class="p-8 border-b border-gray-50 dark:border-gray-800 flex justify-between items-center">
+                    <h3 class="font-bold text-gray-900 dark:text-white">Transaction History</h3>
+                    <span
+                        class="text-xs bg-gray-100 dark:bg-dark-800 text-gray-400 px-3 py-1 rounded-full font-bold uppercase tracking-tight">{{
+                        payments|length }} Records</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr
+                                class="bg-gray-50/50 dark:bg-dark-800/50 text-[10px] text-gray-400 font-black uppercase tracking-widest">
+                                <th class="px-8 py-4">Item</th>
+                                <th class="px-8 py-4">Date</th>
+                                <th class="px-8 py-4">Amount</th>
+                                <th class="px-8 py-4">Status</th>
+                                <th class="px-8 py-4">Receipt</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
+                            {% for payment in payments %}
+                            <tr class="hover:bg-gray-50/50 dark:hover:bg-dark-800/30 transition-colors group">
+                                <td class="px-8 py-6">
+                                    <div class="text-sm font-bold text-gray-900 dark:text-white capitalize">{{
+                                        payment.item_type.replace('_', ' ') }}</div>
+                                    <div class="text-[10px] text-gray-400 font-mono tracking-tighter">ID: {{
+                                        payment.stripe_payment_intent[:15] if payment.stripe_payment_intent else 'N/A'
+                                        }}...</div>
+                                </td>
+                                <td class="px-8 py-6 text-sm text-gray-500 tabular-nums">
+                                    {{ payment.created_at.strftime('%b %d, %Y') }}
+                                </td>
+                                <td class="px-8 py-6 text-sm font-black text-gray-900 dark:text-white tabular-nums">
+                                    ${{ "%.2f"|format(payment.amount) }}
+                                </td>
+                                <td class="px-8 py-6">
+                                    <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter
+                                        {% if payment.status == 'completed' %}
+                                            bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400
+                                        {% elif payment.status == 'pending' %}
+                                            bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400
+                                        {% else %}
+                                            bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400
+                                        {% endif %}">
+                                        {{ payment.status }}
+                                    </span>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <button
+                                        class="text-blue-600 hover:text-blue-700 opacity-0 group-hover:opacity-100 transition-all">
+                                        <i class="fas fa-file-invoice-dollar text-lg"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+
+                            {% if not payments %}
+                            <tr>
+                                <td colspan="5" class="px-8 py-20 text-center">
+                                    <div
+                                        class="w-12 h-12 bg-gray-50 dark:bg-dark-800 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
+                                        <i class="fas fa-receipt text-xl"></i>
+                                    </div>
+                                    <h4 class="text-sm font-bold text-gray-400">No transactions found</h4>
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -223,4 +223,19 @@ class WhiteLabelRequest(db.Model):
     status = db.Column(db.String(20), default='Pending') # Pending, Approved, Rejected
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+class Payment(db.Model):
+    __tablename__ = 'payments'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    currency = db.Column(db.String(3), default='USD')
+    status = db.Column(db.String(20), default='pending') # pending, completed, failed
+    item_type = db.Column(db.String(50), nullable=False) # e.g., 'premium_owner', 'featured_listing', 'analytics_report', 'insurance'
+    item_id = db.Column(db.Integer, nullable=True) # ID of the related item (listing_id, booking_id, etc.)
+    stripe_session_id = db.Column(db.String(200), nullable=True)
+    stripe_payment_intent = db.Column(db.String(200), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    user = db.relationship('User', backref='payments_list') # renamed to avoid conflict with existing backrefs if any
+
 # Optimization Indexes are defined within the Listing model's __table_args__
