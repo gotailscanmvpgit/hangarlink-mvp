@@ -89,6 +89,7 @@ class Listing(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     airport_icao = db.Column(db.String(4), nullable=False)
     size_sqft = db.Column(db.Integer, nullable=False)
+    available_sqft = db.Column(db.Float, nullable=True) # Tracks specific sub-let space after rentals
     covered = db.Column(db.Boolean, default=False)
     price_month = db.Column(db.Float, nullable=False)
     price_night = db.Column(db.Float, nullable=True) # Airbnb-style daily rate

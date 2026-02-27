@@ -412,6 +412,7 @@ def post_listing():
             listing = Listing(
                 airport_icao=icao_upper,
                 size_sqft=int(request.form.get('size_sqft')),
+                available_sqft=float(request.form.get('size_sqft')),
                 covered=request.form.get('covered') == 'on',
                 price_month=price_month,
                 price_night=price_night,
@@ -1074,6 +1075,26 @@ def book_listing(listing_id):
             stripe_session_id=session_id,
             status='pending'
         )
+        
+        # Space Calculation via Aircraft Config
+        booking_aircraft = request.form.get('booking_aircraft')
+        if booking_aircraft:
+            from flask import current_app
+            sizes = current_app.config.get('AIRCRAFT_SIZES', {})
+            for cat, dicts in sizes.items():
+                if booking_aircraft in dicts:
+                    dims = dicts[booking_aircraft]
+                    # 10% buffer applied equivalent to booking verification modal
+                    req_sqft = (dims['length'] * dims['wingspan']) * 1.1 
+                    
+                    if listing.available_sqft is None:
+                        listing.available_sqft = listing.size_sqft
+                        
+                    if listing.available_sqft >= req_sqft:
+                        listing.available_sqft -= req_sqft
+                        listing.health_score = min(100, (listing.health_score or 0) + 5)
+                    break
+        
         db.session.add(booking)
         db.session.add(payment)
         db.session.commit()
@@ -1262,6 +1283,49 @@ def self_certify():
     db.session.commit()
     flash('You are now a Certified HangarLinks Partner! (+500 pts)', 'success')
     return redirect(url_for('main.profile'))
+
+@bp.route('/dashboard/space-calculator', methods=['GET', 'POST'])
+@login_required
+def space_calculator():
+    remaining_sqft = None
+    aircraft_count_fit = 0
+    if request.method == 'POST':
+        try:
+            length = float(request.form.get('hangar_length', 0))
+            width = float(request.form.get('hangar_width', 0))
+            total_sqft = length * width
+            
+            aircraft_type_1 = request.form.get('aircraft_type_1')
+            qty_1 = int(request.form.get('qty_1', 0))
+            
+            used_sqft = 0
+            
+            # Estimate footprint with a 20% buffer for maneuvering
+            sizes = current_app.config.get('AIRCRAFT_SIZES', {})
+            plane_dims = None
+            for category, dicts in sizes.items():
+                if aircraft_type_1 in dicts:
+                    plane_dims = dicts[aircraft_type_1]
+                    break
+                    
+            if plane_dims:
+                # Footprint = length * wingspan
+                footprint = plane_dims['length'] * plane_dims['wingspan']
+                used_sqft += (footprint * 1.2) * qty_1
+                
+            remaining_sqft = max(0, total_sqft - used_sqft)
+            
+            # How many small GA planes (Cessna 172 ~ 1000 sqft with buffer) could fit?
+            # 27.2L * 36.1W = 981 sqft. * 1.2 = 1178
+            aircraft_count_fit = int(remaining_sqft // 1178)
+            
+        except Exception as e:
+            flash(f"Error calculating space: {e}", "error")
+            
+    return render_template('space_calculator.html', 
+                           remaining_sqft=remaining_sqft, 
+                           aircraft_count_fit=aircraft_count_fit,
+                           aircraft_sizes=current_app.config.get('AIRCRAFT_SIZES', {}))
 
 @bp.route('/dashboard/insights')
 @login_required
@@ -1595,7 +1659,7 @@ def sponsored_success():
 def insights():
     has_access = current_user.has_analytics_access or current_user.subscription_tier == 'premium'
     # If analytics expired, reset access
-    if current_user.analytics_expires_at and current_user.analytics_expires_at < datetime.now(timezone.utc):
+    if current_user.analytics_expires_at and current_user.analytics_expires_at < datetime.datetime.now(timezone.utc):
         current_user.has_analytics_access = False
         db.session.commit()
         has_access = False # Re-evaluate access after resetting

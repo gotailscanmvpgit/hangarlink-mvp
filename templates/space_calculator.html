@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-6 py-12">
+    <!-- Header -->
+    <div class="mb-10 text-center">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-platinum-100 mb-2">Hangar Space Calculator</h1>
+        <p class="text-gray-600 dark:text-platinum-300">Quickly estimate remaining footprint inside your hangar.</p>
+    </div>
+
+    <!-- Main Container -->
+    <div
+        class="bg-white dark:bg-dark-900 rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row">
+
+        <!-- Form Section -->
+        <div class="w-full md:w-1/2 p-8">
+            <form method="POST" action="">
+                <!-- Section: Dimensions -->
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                    <i class="fas fa-ruler-combined mr-2 text-blue-500"></i>Hangar Dimensions
+                </h2>
+
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2"
+                            for="hangar_length">Length (ft)</label>
+                        <input
+                            class="w-full bg-gray-50 dark:bg-dark-800 border border-gray-300 dark:border-gray-700 rounded-lg py-3 px-4 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            id="hangar_length" name="hangar_length" type="number" required placeholder="e.g. 100"
+                            min="10" step="1">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2"
+                            for="hangar_width">Width (ft)</label>
+                        <input
+                            class="w-full bg-gray-50 dark:bg-dark-800 border border-gray-300 dark:border-gray-700 rounded-lg py-3 px-4 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            id="hangar_width" name="hangar_width" type="number" required placeholder="e.g. 50" min="10"
+                            step="1">
+                    </div>
+                </div>
+
+                <!-- Section: Current Aircraft -->
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center mt-8">
+                    <i class="fas fa-plane mr-2 text-blue-500"></i>Parked Aircraft
+                </h2>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2"
+                        for="aircraft_type_1">Aircraft Type</label>
+                    <select
+                        class="w-full bg-gray-50 dark:bg-dark-800 border border-gray-300 dark:border-gray-700 rounded-lg py-3 px-4 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        id="aircraft_type_1" name="aircraft_type_1" required>
+                        <option value="" disabled selected>Select aircraft...</option>
+                        {% for category, items in aircraft_sizes.items() %}
+                        <optgroup label="{{ category }}">
+                            {% for name in items.keys() %}
+                            <option value="{{ name }}">{{ name }}</option>
+                            {% endfor %}
+                        </optgroup>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-8">
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2"
+                        for="qty_1">Quantity</label>
+                    <input
+                        class="w-full bg-gray-50 dark:bg-dark-800 border border-gray-300 dark:border-gray-700 rounded-lg py-3 px-4 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        id="qty_1" name="qty_1" type="number" required value="1" min="1">
+                </div>
+
+                <button type="submit"
+                    class="w-full font-bold py-3.5 px-6 rounded-xl shadow-lg transition-all hover:-translate-y-0.5"
+                    style="background: linear-gradient(135deg, #1a56db 0%, #0e9f6e 100%); color: white;">
+                    <i class="fas fa-calculator mr-2"></i> Calculate Space
+                </button>
+            </form>
+        </div>
+
+        <!-- Logic Results Section -->
+        <div
+            class="w-full md:w-1/2 p-8 bg-gray-50 dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 flex flex-col justify-center">
+            {% if remaining_sqft is not none %}
+            <div class="text-center animate-fade-in">
+                <h3 class="text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-2">Space Remaining
+                </h3>
+                {% if remaining_sqft > 0 %}
+                <div class="text-5xl font-extrabold text-blue-600 dark:text-blue-400 mb-4 tracking-tight">{{
+                    "{:,.0f}".format(remaining_sqft) }} <span class="text-2xl font-semibold text-gray-500">SQ FT</span>
+                </div>
+
+                <div
+                    class="bg-blue-100 dark:bg-blue-900/30 rounded-xl p-4 mt-6 border border-blue-200 dark:border-blue-800/50">
+                    <p class="text-blue-800 dark:text-blue-300 font-medium">
+                        <i class="fas fa-check-circle mr-2"></i>Fits approximately <strong>{{ aircraft_count_fit }} more
+                            small GA plane(s)</strong> (e.g. Cessna 172)
+                    </p>
+                </div>
+                {% else %}
+                <div class="text-4xl font-extrabold text-red-500 mb-4 tracking-tight">Hangar is Full</div>
+                <p class="text-red-400 text-sm">You do not have enough footprint for another tenant aircraft securely.
+                </p>
+                {% endif %}
+
+                <p class="text-xs text-gray-500 dark:text-gray-500 mt-8 italic"><i
+                        class="fas fa-info-circle mr-1"></i>Estimate only including a 20% safety footprint buffer.
+                    Always measure boundaries in-person.</p>
+            </div>
+            {% else %}
+            <div class="text-center text-gray-400">
+                <i class="fas fa-drafting-compass text-6xl mb-4 opacity-50 block mx-auto"></i>
+                <p>Enter your measurements to calculate your vacant hangar footprint.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
