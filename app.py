@@ -121,14 +121,26 @@ def create_app(config_class=Config):
         db.create_all()
 
         # Dynamic Schema Patching (Zero Downtime / Render Live)
-        from sqlalchemy import text
+        from sqlalchemy import text, inspect
         try:
-            db.session.execute(text("ALTER TABLE listings ADD COLUMN available_sqft FLOAT;"))
-            db.session.execute(text("UPDATE listings SET available_sqft = size_sqft WHERE available_sqft IS NULL;"))
-            db.session.commit()
-            print("🚀 Successfully auto-migrated available_sqft column to live database.")
-        except Exception:
-            db.session.rollback()
+            inspector = inspect(db.engine)
+            existing_cols = [c['name'] for c in inspector.get_columns('listings')]
+            if 'available_sqft' not in existing_cols:
+                db.session.execute(text("ALTER TABLE listings ADD COLUMN available_sqft FLOAT"))
+                db.session.execute(text("UPDATE listings SET available_sqft = size_sqft WHERE available_sqft IS NULL"))
+                db.session.commit()
+                print("🚀 Successfully auto-migrated available_sqft column to live database.")
+            else:
+                # Backfill any NULLs
+                db.session.execute(text("UPDATE listings SET available_sqft = size_sqft WHERE available_sqft IS NULL"))
+                db.session.commit()
+                print("✅ available_sqft column already exists.")
+        except Exception as migrate_err:
+            print(f"⚠️ Schema migration note: {migrate_err}")
+            try:
+                db.session.rollback()
+            except Exception:
+                pass
 
     # Load airport lat/lon lookup table from OurAirports CSV (or bundled fallback)
     from airport_coords import load_airport_coords, _COORDS_CACHE
