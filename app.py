@@ -120,6 +120,16 @@ def create_app(config_class=Config):
         # Reliable startup: create tables if they don't exist
         db.create_all()
 
+        # Dynamic Schema Patching (Zero Downtime / Render Live)
+        from sqlalchemy import text
+        try:
+            db.session.execute(text("ALTER TABLE listings ADD COLUMN available_sqft FLOAT;"))
+            db.session.execute(text("UPDATE listings SET available_sqft = size_sqft WHERE available_sqft IS NULL;"))
+            db.session.commit()
+            print("🚀 Successfully auto-migrated available_sqft column to live database.")
+        except Exception:
+            db.session.rollback()
+
     # Load airport lat/lon lookup table from OurAirports CSV (or bundled fallback)
     from airport_coords import load_airport_coords, _COORDS_CACHE
     load_airport_coords()
