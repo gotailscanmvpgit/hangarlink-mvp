@@ -82,6 +82,8 @@ class Listing(db.Model):
         db.Index('idx_listing_covered', 'covered'),
         db.Index('idx_listing_featured', 'is_featured'),
         db.Index('idx_listing_premium', 'is_premium_listing'),
+        db.Index('idx_listing_price_night', 'price_night'),
+        db.Index('idx_listing_min_stay', 'min_stay_nights'),
     )
     
     id = db.Column(db.Integer, primary_key=True)
@@ -89,6 +91,8 @@ class Listing(db.Model):
     size_sqft = db.Column(db.Integer, nullable=False)
     covered = db.Column(db.Boolean, default=False)
     price_month = db.Column(db.Float, nullable=False)
+    price_night = db.Column(db.Float, nullable=True) # Airbnb-style daily rate
+    min_stay_nights = db.Column(db.Integer, default=1) # Airbnb-style min stay
     description = db.Column(db.Text, nullable=True)
     photos = db.Column(db.Text, nullable=True)  # Comma-separated filenames
     owner_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -115,6 +119,22 @@ class Listing(db.Model):
     is_premium_listing = db.Column(db.Boolean, default=False)  # Premium listings get priority
     lat = db.Column(db.Float, nullable=True) # Automatic lat from airport_icao
     lon = db.Column(db.Float, nullable=True) # Automatic lon from airport_icao
+    
+    # Practical Features
+    door_type = db.Column(db.String(50), nullable=True)
+    access_24_7 = db.Column(db.Boolean, default=False)
+    is_heated = db.Column(db.Boolean, default=False)
+    battery_tender = db.Column(db.Boolean, default=False)
+    engine_heater = db.Column(db.Boolean, default=False)
+    snow_removal = db.Column(db.Boolean, default=False)
+    hurricane_tiedowns = db.Column(db.Boolean, default=False)
+    ramp_cam_url = db.Column(db.String(255), nullable=True)
+    
+    # Corporate Jet Safety Features
+    tail_height_clearance = db.Column(db.Float, nullable=True) # in feet
+    nfpa_409_compliant = db.Column(db.Boolean, default=False)
+    floor_loading_pcn = db.Column(db.String(50), nullable=True)
+    gpu_power_available = db.Column(db.Boolean, default=False)
     
     # Safety Features
     is_reported = db.Column(db.Boolean, default=False)
@@ -159,6 +179,13 @@ class Booking(db.Model):
     # Tiert 2: Insurance Add-on
     insurance_opt_in = db.Column(db.Boolean, default=False)
     insurance_fee = db.Column(db.Float, default=0.0)
+    
+    # Digital Lease Data 
+    owner_signed = db.Column(db.Boolean, default=False)
+    renter_signed = db.Column(db.Boolean, default=False)
+    lease_pdf_path = db.Column(db.String(500), nullable=True)
+    sign_token_owner = db.Column(db.String(100), nullable=True)
+    sign_token_renter = db.Column(db.String(100), nullable=True)
     
     # Reviews
     owner_rating = db.Column(db.Integer, nullable=True)

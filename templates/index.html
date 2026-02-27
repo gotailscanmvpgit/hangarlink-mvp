@@ -99,14 +99,13 @@
         <!-- Guest: Aspirational Emotional Hook -->
         <h1
             class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-[1.1] tracking-tight animate-fade-in-up">
-            Unlock Your Hangar.<br>
-            <span class="bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent">Find
-                Your Spot.</span><br>
-            Fly More.
+            Weekend & Overnight Parking<br>
+            <span class="bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent">No
+                More Ramp Fees!</span><br>
         </h1>
         <p class="text-lg sm:text-xl text-white/70 mb-12 max-w-2xl mx-auto font-light leading-relaxed animate-fade-in-up"
             style="animation-delay: 0.1s;">
-            Rent out unused space. Discover parking at any airport. All in one trusted place.
+            Find instant 1-7 night transient parking at any airport without hidden FBO markups.
         </p>
         {% endif %}
 
@@ -115,7 +114,7 @@
             <form action="{{ url_for('main.listings') }}" method="GET"
                 class="rounded-2xl p-6 sm:p-8 shadow-2xl border border-white/20 transition-all duration-500"
                 style="background: rgba(0,18,41,0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
                     <!-- Airport ICAO -->
                     <div>
                         <label for="airport" class="block text-xs font-bold mb-2 text-left uppercase tracking-wider"
@@ -140,6 +139,25 @@
                             class="w-full h-3 rounded-lg appearance-none cursor-pointer mt-5"
                             style="background: rgba(255,255,255,0.2); accent-color: #3b82f6;"
                             oninput="document.getElementById('radius-value').textContent = this.value">
+                    </div>
+                    <!-- Duration -->
+                    <div>
+                        <label for="duration" class="block text-xs font-bold mb-2 text-left uppercase tracking-wider"
+                            style="color: rgba(255,255,255,0.85);">
+                            <i class="fas fa-calendar-alt mr-1.5" style="color: #60a5fa;"></i>Rental Duration
+                        </label>
+                        <select id="duration" name="duration"
+                            class="block w-full rounded-xl p-4 text-lg font-semibold shadow-inner focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all appearance-none cursor-pointer"
+                            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25); color: #FAFAFA;"
+                            onfocus="this.style.background='rgba(255,255,255,0.18)'; this.style.borderColor='rgba(96,165,250,0.7)';"
+                            onblur="this.style.background='rgba(255,255,255,0.1)'; this.style.borderColor='rgba(255,255,255,0.25)';">
+                            <option value="7" selected style="background:#001F3F; color:#FAFAFA;">Short-term (1-7
+                                nights)</option>
+                            <option value="1" style="background:#001F3F; color:#FAFAFA;">Overnight (1 Night)</option>
+                            <option value="3" style="background:#001F3F; color:#FAFAFA;">2-3 Nights</option>
+                            <option value="30" style="background:#001F3F; color:#FAFAFA;">Monthly (30+ Days)</option>
+                            <option value="" style="background:#001F3F; color:#FAFAFA;">Flexible / Any</option>
+                        </select>
                     </div>
                 </div>
                 <!-- Submit -->

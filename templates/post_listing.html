@@ -47,7 +47,95 @@
                 </label>
                 <input type="number" id="price_month" name="price_month" required min="0" step="0.01"
                     class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-4"
-                    placeholder="850.00">
+                    placeholder="850.00" oninput="calculateNightly()">
+
+                <div
+                    class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 border-t border-gray-200 dark:border-gray-700 pt-6">
+                    <div>
+                        <label for="price_night"
+                            class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
+                            <i class="fas fa-moon mr-2 text-blue-600"></i>Daily Rate ($/night)
+                        </label>
+                        <input type="number" id="price_night" name="price_night" min="0" step="0.01"
+                            class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-3"
+                            placeholder="e.g. 35.00">
+                        <p class="text-xs text-gray-500 mt-1">Leave empty to auto-calculate (Monthly ÷ 30)</p>
+                    </div>
+                    <div>
+                        <label for="min_stay_nights"
+                            class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
+                            <i class="fas fa-calendar-check mr-2 text-blue-600"></i>Minimum Stay (Nights)
+                        </label>
+                        <select id="min_stay_nights" name="min_stay_nights"
+                            class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-3 appearance-none cursor-pointer">
+                            <option value="1">Flexible (1 Night)</option>
+                            <option value="1">1 Night</option>
+                            <option value="2">2 Nights</option>
+                            <option value="3">3 Nights</option>
+                        </select>
+                    </div>
+                </div>
+
+                <script>
+                    const eventsData = {{ events | tojson | safe }};
+
+                    function calculateNightly() {
+                        const monthlyInput = document.getElementById('price_month');
+                        const nightlyInput = document.getElementById('price_night');
+                        let nightlyVal = parseFloat(nightlyInput.value);
+
+                        if (monthlyInput.value && !nightlyInput.value) {
+                            const val = parseFloat(monthlyInput.value);
+                            if (!isNaN(val) && val > 0) {
+                                nightlyVal = parseFloat((val / 30).toFixed(2));
+                                nightlyInput.placeholder = "Suggested: " + nightlyVal;
+                            }
+                        }
+                        checkDynamicPricing(nightlyVal);
+                    }
+
+                    function checkDynamicPricing(nightlyVal) {
+                        const alertBox = document.getElementById('dynamic-pricing-alert');
+                        const alertTxt = document.getElementById('dynamic-pricing-text');
+                        const icao = document.getElementById('airport_icao').value.toUpperCase();
+
+                        if (nightlyVal > 0) {
+                            let matchedEvent = null;
+                            let surgeVal = 0;
+
+                            if (eventsData) {
+                                for (const [eventName, data] of Object.entries(eventsData)) {
+                                    if (data.airports.includes(icao)) {
+                                        matchedEvent = eventName;
+                                        surgeVal = data.surge;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (matchedEvent) {
+                                let suggested = Math.round(nightlyVal * (1 + surgeVal / 100));
+                                alertBox.style.display = 'block';
+                                alertTxt.innerHTML = `<strong>${matchedEvent} Surge Alert</strong>: During event dates, consider increasing to <strong>$${suggested}/night</strong> (+${surgeVal}%) for optimal revenue.`;
+                            } else {
+                                let suggested = Math.round(nightlyVal * 0.85);
+                                if (suggested < 20) suggested = 20;
+                                alertBox.style.display = 'block';
+                                alertTxt.innerHTML = `<strong>AI Strategy</strong>: Set <strong>$${suggested}/night</strong> to hit projected <strong>85% occupancy</strong> volume this quarter.`;
+                            }
+                        } else {
+                            if (alertBox) alertBox.style.display = 'none';
+                        }
+                    }
+                </script>
+
+                <div id="dynamic-pricing-alert" style="display: none;"
+                    class="mt-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4 border border-purple-200 dark:border-purple-800 animate-fade-in">
+                    <h4 class="text-sm font-bold text-purple-800 dark:text-purple-300 mb-1 flex items-center">
+                        <i class="fas fa-robot mr-2"></i>AI Pricing Engine
+                    </h4>
+                    <p id="dynamic-pricing-text" class="text-xs text-purple-700 dark:text-purple-200"></p>
+                </div>
 
                 {% if price_intel %}
                 <div
@@ -76,7 +164,8 @@
                 </div>
                 {% elif airport %}
                 <div class="mt-2 text-sm text-gray-500 dark:text-gray-400 italic">
-                    <i class="fas fa-info-circle mr-1"></i> No prior listing data available for {{ airport }}. Be the
+                    <i class="fas fa-info-circle mr-1"></i> No prior listing data available for {{ airport }}. Be
+                    the
                     first!
                 </div>
                 {% endif %}
@@ -116,8 +205,179 @@
                 <input type="url" id="virtual_tour_url" name="virtual_tour_url"
                     class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-4 transition-all"
                     placeholder="https://matterport.com/show/?m=...">
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Paste a link to your Matterport, YouTube 360,
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Paste a link to your Matterport, YouTube
+                    360,
                     or Vimeo tour to get the "Interactive" badge.</p>
+            </div>
+
+            <!-- Ramp Cam (Premium Feature) -->
+            <div class="mt-6">
+                <label for="ramp_cam_url" class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
+                    <i class="fas fa-video mr-2 text-red-500"></i>Live Ramp Cam Link (Premium/Locked)
+                </label>
+                <input type="url" id="ramp_cam_url" name="ramp_cam_url"
+                    class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-4 transition-all"
+                    placeholder="https://ring.com/share/...">
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 font-bold text-green-600 dark:text-green-500"><i
+                        class="fas fa-lock mr-1"></i>Kept secure. Only revealed to tenants after deposit/booking.</p>
+            </div>
+
+            <!-- Hangar Features/Amenities -->
+            <div class="space-y-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-platinum-100 flex items-center">
+                    <i class="fas fa-tools mr-2 text-blue-600"></i>Practical Features & Amenities
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="door_type"
+                            class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
+                            <i class="fas fa-door-open mr-2 text-gray-500"></i>Door Operation
+                        </label>
+                        <select id="door_type" name="door_type"
+                            class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-3 appearance-none cursor-pointer">
+                            <option value="">Select Door Operation...</option>
+                            <option value="Manual Sliding">Manual Sliding</option>
+                            <option value="Electric">Electric</option>
+                            <option value="Hydraulic">Hydraulic</option>
+                            <option value="Bi-Fold (Electric)">Bi-Fold (Electric)</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <!-- Corporate Jet Safety Text Inputs -->
+                    <div>
+                        <label for="tail_height_clearance"
+                            class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
+                            <i class="fas fa-arrows-alt-v mr-2 text-gray-400"></i>Tail Height Clearance (feet)
+                        </label>
+                        <input type="number" step="0.1" id="tail_height_clearance" name="tail_height_clearance"
+                            class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-3 transition-all"
+                            placeholder="e.g. 28">
+                    </div>
+
+                    <div>
+                        <label for="floor_loading_pcn"
+                            class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
+                            <i class="fas fa-weight-hanging mr-2 text-gray-400"></i>Floor Loading Specs (PCN)
+                        </label>
+                        <input type="text" id="floor_loading_pcn" name="floor_loading_pcn"
+                            class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-3 transition-all"
+                            placeholder="e.g. PCN for 100,000 lb jet">
+                    </div>
+                </div>
+
+                <h4 class="text-md font-bold text-gray-900 dark:text-platinum-100 mt-6 mb-4 flex items-center">
+                    <i class="fas fa-shield-alt mr-2 text-green-500"></i>Peace of Mind & Protection
+                </h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                    <label
+                        class="flex items-start space-x-3 cursor-pointer group bg-green-50 dark:bg-green-900/10 p-4 rounded-xl border border-green-200 dark:border-green-800/30 hover:border-green-500 transition-all shadow-sm">
+                        <input type="checkbox" name="insurance_provided"
+                            class="mt-1 w-5 h-5 text-green-600 rounded border-gray-300 focus:ring-green-500">
+                        <div>
+                            <span class="block font-bold text-gray-900 dark:text-platinum-100"><i
+                                    class="fas fa-file-contract text-green-500 mr-2"></i>Short-Term Insurance
+                                Provided</span>
+                            <span class="block text-xs text-green-700 dark:text-green-500 mt-1">Host carries
+                                policy</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <label
+                        class="flex items-start space-x-3 cursor-pointer group bg-white dark:bg-dark-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-all shadow-sm">
+                        <input type="checkbox" name="access_24_7"
+                            class="mt-1 w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                        <div>
+                            <span class="block font-bold text-gray-900 dark:text-platinum-100"><i
+                                    class="fas fa-key text-blue-500 mr-2"></i>24-Hour Access</span>
+                            <span class="block text-xs text-gray-500 dark:text-gray-400 mt-1">Key code/access
+                                provided</span>
+                        </div>
+                    </label>
+
+                    <label
+                        class="flex items-start space-x-3 cursor-pointer group bg-white dark:bg-dark-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-all shadow-sm">
+                        <input type="checkbox" name="is_heated"
+                            class="mt-1 w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                        <div>
+                            <span class="block font-bold text-gray-900 dark:text-platinum-100"><i
+                                    class="fas fa-thermometer-half text-red-500 mr-2"></i>Heated</span>
+                            <span class="block text-xs text-gray-500 dark:text-gray-400 mt-1">Temperature
+                                maintained</span>
+                        </div>
+                    </label>
+
+                    <label
+                        class="flex items-start space-x-3 cursor-pointer group bg-white dark:bg-dark-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-all shadow-sm">
+                        <input type="checkbox" name="battery_tender"
+                            class="mt-1 w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                        <div>
+                            <span class="block font-bold text-gray-900 dark:text-platinum-100"><i
+                                    class="fas fa-car-battery text-green-500 mr-2"></i>Battery Tender</span>
+                        </div>
+                    </label>
+
+                    <label
+                        class="flex items-start space-x-3 cursor-pointer group bg-white dark:bg-dark-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-all shadow-sm">
+                        <input type="checkbox" name="engine_heater"
+                            class="mt-1 w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                        <div>
+                            <span class="block font-bold text-gray-900 dark:text-platinum-100"><i
+                                    class="fas fa-fire-alt text-orange-500 mr-2"></i>Engine Heater Plug</span>
+                        </div>
+                    </label>
+
+                    <!-- Pilot requested safety additions -->
+                    <label
+                        class="flex items-start space-x-3 cursor-pointer group bg-white dark:bg-dark-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-all shadow-sm">
+                        <input type="checkbox" name="snow_removal"
+                            class="mt-1 w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                        <div>
+                            <span class="block font-bold text-gray-900 dark:text-platinum-100"><i
+                                    class="fas fa-snowflake text-blue-300 mr-2"></i>Snow Removal Available</span>
+                            <span class="block text-xs text-gray-500 dark:text-gray-400 mt-1">"Winter-ready"</span>
+                        </div>
+                    </label>
+
+                    <label
+                        class="flex items-start space-x-3 cursor-pointer group bg-white dark:bg-dark-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-all shadow-sm">
+                        <input type="checkbox" name="hurricane_tiedowns"
+                            class="mt-1 w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                        <div>
+                            <span class="block font-bold text-gray-900 dark:text-platinum-100"><i
+                                    class="fas fa-wind text-gray-500 mr-2"></i>Hurricane Tie-Downs</span>
+                            <span class="block text-xs text-gray-500 dark:text-gray-400 mt-1">Straps or Anchors
+                                provided</span>
+                        </div>
+                    </label>
+
+                    <!-- Corporate Jet Safety Checks -->
+                    <label
+                        class="flex items-start space-x-3 cursor-pointer group bg-amber-50 dark:bg-amber-900/10 p-4 rounded-xl border border-amber-200 dark:border-amber-800/30 hover:border-amber-500 transition-all shadow-sm">
+                        <input type="checkbox" name="nfpa_409_compliant"
+                            class="mt-1 w-5 h-5 text-amber-600 rounded border-gray-300 focus:ring-amber-500">
+                        <div>
+                            <span class="block font-bold text-gray-900 dark:text-platinum-100"><i
+                                    class="fas fa-fire-extinguisher text-amber-500 mr-2"></i>NFPA 409 Compliant</span>
+                            <span class="block text-xs text-amber-700 dark:text-amber-500 mt-1">Group I foam
+                                suppression</span>
+                        </div>
+                    </label>
+
+                    <label
+                        class="flex items-start space-x-3 cursor-pointer group bg-white dark:bg-dark-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-all shadow-sm">
+                        <input type="checkbox" name="gpu_power_available"
+                            class="mt-1 w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                        <div>
+                            <span class="block font-bold text-gray-900 dark:text-platinum-100"><i
+                                    class="fas fa-plug text-blue-500 mr-2"></i>GPU Power Available</span>
+                            <span class="block text-xs text-gray-500 dark:text-gray-400 mt-1">400 Hz / 28V
+                                capable</span>
+                        </div>
+                    </label>
+                </div>
             </div>
 
             <!-- Availability & Health Score Section -->
@@ -158,7 +418,8 @@
                             <i class="fas fa-heartbeat text-red-500 mr-2"></i>Hangar Health Score
                         </h3>
                         <p class="text-sm text-blue-800 dark:text-platinum-300 mb-6 max-w-2xl">
-                            Build trust instantly! Listings with a high Health Score get <span class="font-bold">3x more
+                            Build trust instantly! Listings with a high Health Score get <span class="font-bold">3x
+                                more
                                 views</span> and a distinctive Trust Badge.
                         </p>
 
@@ -217,7 +478,8 @@
                                 <div class="flex-1">
                                     <span
                                         class="block font-bold text-gray-900 dark:text-platinum-100 flex items-center">
-                                        <i class="fas fa-certificate text-yellow-500 mr-2"></i>Condition Guarantee (+20
+                                        <i class="fas fa-certificate text-yellow-500 mr-2"></i>Condition Guarantee
+                                        (+20
                                         pts)
                                     </span>
                                     <span class="block text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -241,7 +503,8 @@
                         <input type="checkbox" required name="compliance_fbo"
                             class="mt-1 w-5 h-5 text-amber-600 rounded border-gray-300 focus:ring-amber-500">
                         <span class="ml-3 text-sm text-gray-700 dark:text-platinum-300 leading-snug">
-                            I verify that listing this space does not violate my lease with the Airport Sponsor (FBO) or
+                            I verify that listing this space does not violate my lease with the Airport Sponsor
+                            (FBO) or
                             local airport authority.
                         </span>
                     </label>

@@ -65,6 +65,8 @@ def create_app(config_class=Config):
     cache.init_app(app)
     mail.init_app(app)
     limiter.init_app(app)
+    from extensions import socketio
+    socketio.init_app(app, cors_allowed_origins="*")
     
     # Enable Gzip compression
     Compress(app)
@@ -145,13 +147,15 @@ def create_app(config_class=Config):
     app.register_blueprint(main_bp)
 
     # Global Context Processors
+    import datetime
     @app.context_processor
     def inject_global_data():
         return {
             'app_version': 'v2.2.0-secure',
             'stripe_publishable_key': app.config.get('STRIPE_PUBLISHABLE_KEY', ''),
             'legal_disclaimer': "HangarLinks is a coordination tool only. No liability for incidents, accidents, or disputes. Users responsible for compliance.",
-            'safety_disclaimer': "HangarLink is a coordination tool only. No liability for incidents, accidents, or disputes. Users responsible for compliance."
+            'safety_disclaimer': "HangarLink is a coordination tool only. No liability for incidents, accidents, or disputes. Users responsible for compliance.",
+            'datetime': datetime.datetime
         }
 
     # ── Debug DB schema — admin-only, exposes column names for each table ──────
@@ -203,6 +207,7 @@ def create_app(config_class=Config):
 app = create_app()
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    from extensions import socketio
+    socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True, allow_unsafe_werkzeug=True)
 
 

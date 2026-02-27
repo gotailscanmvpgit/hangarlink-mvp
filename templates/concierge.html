@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bg-[#0b1120] min-h-screen text-white pt-10 pb-20">
+    <div class="max-w-4xl mx-auto px-6">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8 border-b border-gray-800 pb-6">
+            <div class="flex items-center">
+                <div
+                    class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-xl shadow-lg shadow-blue-500/30 mr-4">
+                    <i class="fas fa-robot text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-white">AI Concierge</h1>
+                    <p class="text-blue-400 font-medium">Short-Term & Event Parking Specialist</p>
+                </div>
+            </div>
+            <div
+                class="hidden md:flex items-center px-4 py-2 bg-green-500/10 border border-green-500/20 text-green-400 rounded-full text-sm font-bold shadow-lg">
+                <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                Grok AI Connected
+            </div>
+        </div>
+
+        <!-- Chat Container -->
+        <div
+            class="bg-[#1a202c] border border-gray-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[600px] relative">
+
+            <!-- Messages Area -->
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-6">
+
+                <!-- Welcome Message -->
+                <div class="flex items-start max-w-[85%]">
+                    <div
+                        class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shrink-0 mt-1">
+                        <i class="fas fa-robot text-white text-xs"></i>
+                    </div>
+                    <div
+                        class="ml-3 bg-gray-800 text-gray-100 p-4 rounded-2xl rounded-tl-none border border-gray-700 shadow-md">
+                        <p class="mb-2">👋 Welcome to <strong>HangarLinks AI</strong>!</p>
+                        <p class="text-sm text-gray-300">I specialize in finding transient overnight parking and helping
+                            owners optimize weekend rates.</p>
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <button
+                                onclick="document.getElementById('chat-input').value='Find overnight parking at CYTZ under $75'; sendMessage();"
+                                class="text-xs px-3 py-1.5 bg-blue-900/40 hover:bg-blue-600/40 border border-blue-500/30 rounded-full transition-colors">
+                                "Find overnight parking at CYTZ under $75"
+                            </button>
+                            <button
+                                onclick="document.getElementById('chat-input').value='Are there any event surges near KOSH?'; sendMessage();"
+                                class="text-xs px-3 py-1.5 bg-blue-900/40 hover:bg-blue-600/40 border border-blue-500/30 rounded-full transition-colors">
+                                "Event surges near KOSH?"
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Typing Indicator (Hidden by Default) -->
+            <div id="typing-indicator"
+                class="hidden absolute bottom-24 left-6 flex items-center gap-1 bg-gray-800 px-4 py-2 rounded-2xl rounded-tl-none border border-gray-700 w-fit">
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="p-4 bg-[#111827] border-t border-gray-800">
+                <form id="chat-form" class="relative flex items-center"
+                    onsubmit="event.preventDefault(); sendMessage();">
+                    <input type="text" id="chat-input" autocomplete="off"
+                        class="w-full bg-gray-800 border bg-transparent border-gray-700 text-white rounded-xl py-4 pl-4 pr-14 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder-gray-500 shadow-inner"
+                        placeholder="Ask me to find short-term parking...">
+                    <button type="submit"
+                        class="absolute right-2 top-2 bottom-2 w-10 bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex items-center justify-center transition-colors shadow-lg shadow-blue-600/30 group">
+                        <i class="fas fa-paper-plane group-hover:scale-110 transition-transform"></i>
+                    </button>
+                </form>
+                <div class="text-center mt-2">
+                    <span class="text-[10px] text-gray-500 uppercase tracking-widest font-semibold"><i
+                            class="fas fa-bolt text-yellow-500 mr-1"></i> Powered by Grok API (xAI)</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- SocketIO -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<script>
+    // Initialize SocketIO Chat
+    const socket = io();
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+    const typingIndicator = document.getElementById('typing-indicator');
+
+    // Maintain conversational history
+    let messageHistory = [];
+
+    // Auto-scroll to bottom Function
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Connect Event
+    socket.on('connect', () => {
+        console.log('Connected to Concierge WS');
+    });
+
+    // Handle Typing Indicator
+    socket.on('typing_status', (data) => {
+        if (data.isTyping) {
+            typingIndicator.classList.remove('hidden');
+            scrollToBottom();
+        } else {
+            typingIndicator.classList.add('hidden');
+        }
+    });
+
+    // Handle Incoming LLM/Rules Response
+    socket.on('chat_response', (data) => {
+        typingIndicator.classList.add('hidden');
+
+        // Add to history
+        messageHistory.push({ role: 'assistant', content: data.reply });
+
+        // Add to UI (convert markdown)
+        appendMessage('assistant', marked.parse(data.reply));
+    });
+
+    function sendMessage() {
+        const message = chatInput.value.trim();
+        if (!message) return;
+
+        // Disable input briefly
+        chatInput.value = '';
+        chatInput.disabled = true;
+        setTimeout(() => chatInput.disabled = false, 500);
+        chatInput.focus();
+
+        // Add to history & UI
+        messageHistory.push({ role: 'user', content: message });
+        appendMessage('user', message);
+
+        // Send payload via SocketIO
+        socket.emit('chat_message', {
+            message: message,
+            history: messageHistory
+        });
+    }
+
+    function appendMessage(role, contentMarkup) {
+        const msgDiv = document.createElement('div');
+
+        if (role === 'user') {
+            msgDiv.className = "flex items-start justify-end w-full pl-10 mb-6 animate-fade-in";
+            msgDiv.innerHTML = `
+                <div class="bg-blue-600 text-white p-4 rounded-2xl rounded-tr-none shadow-md max-w-[85%]">
+                    <p>${contentMarkup}</p>
+                </div>
+            `;
+        } else {
+            // Assistant
+            msgDiv.className = "flex items-start max-w-[85%] pr-10 mb-6 animate-fade-in";
+            // Check if string contains HTML links from markdown
+            msgDiv.innerHTML = `
+                <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shrink-0 mt-1">
+                    <i class="fas fa-robot text-white text-xs"></i>
+                </div>
+                <div class="ml-3 bg-gray-800 text-gray-100 p-4 rounded-2xl rounded-tl-none border border-gray-700 shadow-md prose prose-invert prose-sm max-w-none prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline">
+                    ${contentMarkup}
+                </div>
+            `;
+        }
+
+        chatMessages.appendChild(msgDiv);
+        scrollToBottom();
+
+        // Add styling dynamically to any newly rendered Markdown links
+        const newLinks = msgDiv.querySelectorAll('a');
+        newLinks.forEach(a => {
+            a.target = "_blank";
+        });
+    }
+</script>
+{% endblock %}

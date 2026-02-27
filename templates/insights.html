@@ -22,98 +22,127 @@
                 </span>
             </div>
         </div>
-
-        <!-- Key Metrics Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <!-- Metric 1 -->
-            <div class="bg-[#1a202c] rounded-2xl p-6 border border-gray-800 shadow-xl">
-                <div class="text-gray-400 text-sm font-medium mb-2 uppercase tracking-wider">Avg. Market Rate</div>
-                <div class="flex items-baseline">
-                    <span class="text-3xl font-bold text-white">$1,450</span>
-                    <span
-                        class="text-green-400 text-sm font-bold ml-3 bg-green-400/10 px-2 py-0.5 rounded flex items-center">
-                        <i class="fas fa-arrow-up mr-1"></i> 12%
-                    </span>
-                </div>
-                <p class="text-xs text-gray-500 mt-2">vs. last quarter at CYHM</p>
-            </div>
-
-            <!-- Metric 2 -->
-            <div class="bg-[#1a202c] rounded-2xl p-6 border border-gray-800 shadow-xl">
-                <div class="text-gray-400 text-sm font-medium mb-2 uppercase tracking-wider">Occupancy Rate</div>
-                <div class="flex items-baseline">
-                    <span class="text-3xl font-bold text-white">94%</span>
-                    <span
-                        class="text-green-400 text-sm font-bold ml-3 bg-green-400/10 px-2 py-0.5 rounded flex items-center">
-                        <i class="fas fa-arrow-up mr-1"></i> 2.4%
-                    </span>
-                </div>
-                <p class="text-xs text-gray-500 mt-2">Regional average is 88%</p>
-            </div>
-
-            <!-- Metric 3 -->
-            <div class="bg-[#1a202c] rounded-2xl p-6 border border-gray-800 shadow-xl">
-                <div class="text-gray-400 text-sm font-medium mb-2 uppercase tracking-wider">Demand Score</div>
-                <div class="flex items-baseline">
-                    <span class="text-3xl font-bold text-amber-400">{{ demand_score }}/10</span>
-                    <span class="text-amber-400 text-sm font-bold ml-3 bg-amber-400/10 px-2 py-0.5 rounded">High</span>
-                </div>
-                <p class="text-xs text-gray-500 mt-2">Based on search volume</p>
-            </div>
-
-            <!-- Metric 4 -->
-            <div class="bg-[#1a202c] rounded-2xl p-6 border border-gray-800 shadow-xl">
-                <div class="text-gray-400 text-sm font-medium mb-2 uppercase tracking-wider">My Efficiency</div>
-                <div class="flex items-baseline">
-                    <span class="text-3xl font-bold text-blue-400">Top 5%</span>
-                </div>
-                <p class="text-xs text-gray-500 mt-2">Your pricing strategy is optimal</p>
-            </div>
-        </div>
-
-        <!-- Charts Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-            <!-- Price Trend Chart -->
-            <div class="bg-[#1a202c] rounded-2xl p-6 border border-gray-800 shadow-xl">
-                <h3 class="text-xl font-bold text-white mb-6">Price Trends (6 Months)</h3>
-                <div class="relative h-72">
-                    <canvas id="priceChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Occupancy Chart -->
-            <div class="bg-[#1a202c] rounded-2xl p-6 border border-gray-800 shadow-xl">
-                <h3 class="text-xl font-bold text-white mb-6">Occupancy Analysis</h3>
-                <div class="relative h-72">
-                    <canvas id="occupancyChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Insights Recommendations -->
-        <div class="bg-gradient-to-r from-blue-900/40 to-purple-900/40 rounded-2xl p-8 border border-blue-500/20">
-            <h3 class="text-xl font-bold text-white mb-4 flex items-center">
-                <i class="fas fa-lightbulb text-yellow-400 mr-3"></i> AI Recommendations
-            </h3>
-            <div class="space-y-4">
-                <div class="flex items-start gap-4">
-                    <div
-                        class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0 text-blue-400 font-bold">
-                        1</div>
-                    <p class="text-gray-300">Demand for heated hangars has increased by 15% this month. Consider adding
-                        insulation or heating upgrades to increase rental value by approx. $200/mo.</p>
-                </div>
-                <div class="flex items-start gap-4">
-                    <div
-                        class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0 text-blue-400 font-bold">
-                        2</div>
-                    <p class="text-gray-300">Your pricing is slightly below market average ($1,450). You could safely
-                        increase rates by 5-8% upon lease renewal without affecting occupancy.</p>
-                </div>
-            </div>
-        </div>
-
     </div>
+
+    <!-- Filters -->
+    <div class="mb-6">
+        <form method="GET" class="flex flex-wrap gap-4">
+            <select name="airport"
+                class="bg-[#1a202c] border border-gray-700 rounded-lg text-white px-4 py-2 text-sm focus:outline-none focus:border-blue-500"
+                onchange="this.form.submit()">
+                <option value="CYTZ" {% if airport_code=='CYTZ' %}selected{% endif %}>CYTZ - Billy Bishop</option>
+                <option value="KOSH" {% if airport_code=='KOSH' %}selected{% endif %}>KOSH - Wittman Regional</option>
+                <option value="CYHM" {% if airport_code=='CYHM' %}selected{% endif %}>CYHM - Hamilton</option>
+                <option value="KLAS" {% if airport_code=='KLAS' %}selected{% endif %}>KLAS - Harry Reid</option>
+            </select>
+            <select name="duration"
+                class="bg-[#1a202c] border border-gray-700 rounded-lg text-white px-4 py-2 text-sm focus:outline-none focus:border-blue-500"
+                onchange="this.form.submit()">
+                <option value="weekly" {% if duration=='weekly' %}selected{% endif %}>View Weekly Trends</option>
+                <option value="monthly" {% if duration=='monthly' %}selected{% endif %}>View Monthly Trends</option>
+            </select>
+        </form>
+    </div>
+
+    <!-- Key Metrics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        <!-- Metric 1 -->
+        <div class="bg-[#1a202c] rounded-2xl p-6 border border-gray-800 shadow-xl relative overflow-hidden">
+            {% if active_surges %}
+            <div
+                class="absolute top-0 right-0 bg-purple-600 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg shadow flex items-center">
+                <i class="fas fa-bolt mr-1"></i> +{{ active_surges[0].surge }}% Surge Active
+            </div>
+            {% endif %}
+            <div class="text-gray-400 text-sm font-medium mb-2 uppercase tracking-wider">Avg. Nightly Rate</div>
+            <div class="flex items-baseline">
+                <span class="text-3xl font-bold text-white">${{ avg_nightly_rate }}</span>
+                <span
+                    class="text-green-400 text-sm font-bold ml-3 bg-green-400/10 px-2 py-0.5 rounded flex items-center">
+                    <i class="fas fa-arrow-up mr-1"></i> {{ trend_pct }}%
+                </span>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">vs. last week at {{ airport_code }}</p>
+        </div>
+
+        <!-- Metric 2 -->
+        <div class="bg-[#1a202c] rounded-2xl p-6 border border-gray-800 shadow-xl">
+            <div class="text-gray-400 text-sm font-medium mb-2 uppercase tracking-wider">Weekend Occupancy</div>
+            <div class="flex items-baseline">
+                <span class="text-3xl font-bold text-white">{{ weekend_occupancy }}%</span>
+                <span
+                    class="text-green-400 text-sm font-bold ml-3 bg-green-400/10 px-2 py-0.5 rounded flex items-center">
+                    <i class="fas fa-arrow-up mr-1"></i> 2.4%
+                </span>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">Regional average is 88%</p>
+        </div>
+
+        <!-- Metric 3 -->
+        <div class="bg-[#1a202c] rounded-2xl p-6 border border-gray-800 shadow-xl">
+            <div class="text-gray-400 text-sm font-medium mb-2 uppercase tracking-wider">Demand Score</div>
+            <div class="flex items-baseline">
+                <span class="text-3xl font-bold text-amber-400">{{ demand_score }}/10</span>
+                <span class="text-amber-400 text-sm font-bold ml-3 bg-amber-400/10 px-2 py-0.5 rounded">High</span>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">Based on search volume</p>
+        </div>
+
+        <!-- Metric 4 -->
+        <div class="bg-[#1a202c] rounded-2xl p-6 border border-gray-800 shadow-xl">
+            <div class="text-gray-400 text-sm font-medium mb-2 uppercase tracking-wider">My Efficiency</div>
+            <div class="flex items-baseline">
+                <span class="text-3xl font-bold text-blue-400">Top 5%</span>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">Your pricing strategy is optimal</p>
+        </div>
+    </div>
+
+    <!-- Charts Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+        <!-- Price Trend Chart -->
+        <div class="bg-[#1a202c] rounded-2xl p-6 border border-gray-800 shadow-xl">
+            <h3 class="text-xl font-bold text-white mb-6">Short-Term Demand Trends (Nightly)</h3>
+            <div class="relative h-72">
+                <canvas id="priceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Occupancy Chart -->
+        <div class="bg-[#1a202c] rounded-2xl p-6 border border-gray-800 shadow-xl">
+            <h3 class="text-xl font-bold text-white mb-6">Occupancy Analysis</h3>
+            <div class="relative h-72">
+                <canvas id="occupancyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Insights Recommendations -->
+    <div class="bg-gradient-to-r from-blue-900/40 to-purple-900/40 rounded-2xl p-8 border border-blue-500/20">
+        <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+            <i class="fas fa-lightbulb text-yellow-400 mr-3"></i> Short-Term Optimization
+        </h3>
+        <div class="space-y-4">
+            <div class="flex items-start gap-4">
+                <div
+                    class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0 text-blue-400 font-bold">
+                    1</div>
+                <p class="text-gray-300">Transient demand for weekend parking has increased by 15% this month.
+                    Activate daily pricing loops on legacy spaces to unlock approx. $200/mo in extra margin vs.
+                    standard monthly.</p>
+            </div>
+            <div class="flex items-start gap-4">
+                <div
+                    class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0 text-blue-400 font-bold">
+                    2</div>
+                <p class="text-gray-300">Your average nightly booking is sitting slightly below market equilibrium
+                    ($85). You could safely increase daily rates by 5-8% during premium transit weekends without
+                    affecting occupancy.</p>
+            </div>
+        </div>
+    </div>
+
+</div>
 </div>
 
 <!-- Chart.js -->
@@ -124,9 +153,9 @@
     new Chart(ctxPrice, {
         type: 'line',
         data: {
-            labels: {{ months | safe }},
+            labels: {{ labels | safe }},
         datasets: [{
-            label: 'Market Average',
+            label: 'Market Nightly Avg',
             data: {{ market_prices | safe }},
         borderColor: '#60A5FA', // Blue 400
         backgroundColor: 'rgba(96, 165, 250, 0.1)',
@@ -134,7 +163,7 @@
         fill: true
             },
         {
-            label: 'Your Portfolio',
+            label: 'Your Portfolio Avg',
             data: {{ my_prices | safe }},
         borderColor: '#34D399', // Emerald 400
         backgroundColor: 'rgba(52, 211, 153, 0.0)',
@@ -166,7 +195,7 @@
     new Chart(ctxOcc, {
         type: 'bar',
         data: {
-            labels: {{ months | safe }},
+            labels: {{ labels | safe }},
         datasets: [{
             label: 'Regional Occupancy %',
             data: {{ occupancy | safe }},

@@ -2,6 +2,20 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_caching import Cache
+try:
+    from flask_socketio import SocketIO
+    socketio = SocketIO(cors_allowed_origins="*")
+except ImportError:
+    class DummySocketIO:
+        def init_app(self, app, **kwargs): pass
+        def on(self, *args, **kwargs):
+            def decorator(f): return f
+            return decorator
+        def emit(self, *args, **kwargs): pass
+        def run(self, app, **kwargs): 
+            app.run(host=kwargs.get('host'), port=kwargs.get('port'), debug=kwargs.get('debug'))
+    socketio = DummySocketIO()
+    print("Warning: flask_socketio not installed. Real-time chat disabled.")
 
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address

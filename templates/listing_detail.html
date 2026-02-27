@@ -137,14 +137,23 @@
                         {% endif %}
                     </div>
 
-                    {% if listing.is_premium_listing %}
-                    <div class="absolute top-4 right-4 z-40">
-                        <span
-                            class="bg-amber-100/90 backdrop-blur text-amber-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm border border-amber-200">
-                            <i class="fas fa-crown text-amber-600 mr-1.5"></i>Premium
-                        </span>
-                    </div>
-                    {% endif %}
+                    {% if listing.min_stay_nights <= 7 %} <!-- Short term priority badge -->
+                        <div class="absolute top-14 left-4 z-40 mt-1">
+                            <span
+                                class="bg-blue-600/90 text-white backdrop-blur text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">
+                                <i class="fas fa-calendar-alt mr-1.5"></i>Available for Short-Term
+                            </span>
+                        </div>
+                        {% endif %}
+
+                        {% if listing.is_premium_listing %}
+                        <div class="absolute top-4 right-4 z-40">
+                            <span
+                                class="bg-amber-100/90 backdrop-blur text-amber-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm border border-amber-200">
+                                <i class="fas fa-crown text-amber-600 mr-1.5"></i>Premium
+                            </span>
+                        </div>
+                        {% endif %}
                 </div>
             </div>
 
@@ -316,531 +325,749 @@
                     <!-- Price Card -->
                     <div
                         class="w-full sm:w-auto text-left sm:text-right bg-blue-50/50 dark:bg-blue-900/10 p-5 sm:p-0 rounded-xl sm:rounded-none shadow-lg sm:shadow-none border sm:border-none border-blue-100 dark:border-blue-800/50">
-                        <div class="text-3xl sm:text-4xl font-bold text-blue-600 mb-1 sm:mb-0">${{
-                            listing.price_month|int }}</div>
-                        <div class="text-sm font-medium text-gray-600 dark:text-gray-400">per month</div>
-                        <div
-                            class="text-xs text-gray-500 mt-2 sm:mt-1 bg-white/50 sm:bg-transparent dark:bg-dark-900/50 sm:dark:bg-transparent p-2 sm:p-0 rounded-lg sm:rounded-none">
-                            + 8% fee (${{ (listing.price_month * 0.08)|int }}) on booking
-                        </div>
+
+                        {% if listing.min_stay_nights <= 7 and listing.price_night %} <div
+                            class="text-3xl sm:text-4xl font-bold text-blue-600 mb-1 sm:mb-0">${{
+                            listing.price_night|int }}</div>
+                    <div class="text-sm font-medium text-gray-600 dark:text-gray-400">per night</div>
+                    <div
+                        class="text-xs text-gray-500 mt-2 sm:mt-1 bg-white/50 sm:bg-transparent dark:bg-dark-900/50 sm:dark:bg-transparent p-2 sm:p-0 rounded-lg sm:rounded-none">
+                        (${{ listing.price_month|int }} / month equivalent)
                     </div>
-                </div>
-
-                <hr class="border-gray-200 dark:border-gray-700 my-6">
-
-                <div>
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-platinum-100 mb-4">Description</h2>
-                    <p class="text-gray-600 dark:text-platinum-300 leading-relaxed whitespace-pre-line">
-                        {{ listing.description or 'No description provided.' }}
-                    </p>
-                </div>
-
-                <hr class="border-gray-200 dark:border-gray-700 my-6">
-
-                <div>
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-platinum-100 mb-4">Features</h2>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="flex items-center text-gray-700 dark:text-platinum-200">
-                            <i class="fas fa-check-circle text-green-600 mr-3"></i>
-                            <span>{{ listing.size_sqft|int }} square feet</span>
-                        </div>
-                        <div class="flex items-center text-gray-700 dark:text-platinum-200">
-                            <i class="fas fa-check-circle text-green-600 mr-3"></i>
-                            <span>{% if listing.covered %}Covered hangar{% else %}Outdoor tie-down{% endif %}</span>
-                        </div>
-                        <div class="flex items-center text-gray-700 dark:text-platinum-200">
-                            <i class="fas fa-check-circle text-green-600 mr-3"></i>
-                            <span>{{ listing.airport_icao }} location</span>
-                        </div>
-                        <div class="flex items-center text-gray-700 dark:text-platinum-200">
-                            <i class="fas fa-check-circle text-green-600 mr-3"></i>
-                            <span>Active listing</span>
-                        </div>
+                    {% else %}
+                    <div class="text-3xl sm:text-4xl font-bold text-blue-600 mb-1 sm:mb-0">${{ listing.price_month|int
+                        }}</div>
+                    <div class="text-sm font-medium text-gray-600 dark:text-gray-400">per month</div>
+                    <div
+                        class="text-xs text-gray-500 mt-2 sm:mt-1 bg-white/50 sm:bg-transparent dark:bg-dark-900/50 sm:dark:bg-transparent p-2 sm:p-0 rounded-lg sm:rounded-none">
+                        + 8% platform fee
                     </div>
+                    {% endif %}
                 </div>
             </div>
 
-            <!-- Aircraft Size Comparison Tool -->
-            <div
-                class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8 mb-8 mt-8 animate-fade-in-up">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-platinum-100 mb-6 flex items-center">
-                    <i class="fas fa-plane-arrival text-blue-600 mr-2 text-3xl"></i> Aircraft Fit Comparison
+            <hr class="border-gray-200 dark:border-gray-700 my-6">
+
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-platinum-100 mb-4">Description</h2>
+                <p class="text-gray-600 dark:text-platinum-300 leading-relaxed whitespace-pre-line">
+                    {{ listing.description or 'No description provided.' }}
+                </p>
+            </div>
+
+            <hr class="border-gray-200 dark:border-gray-700 my-6">
+
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-platinum-100 mb-4">Features</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex items-center text-gray-700 dark:text-platinum-200">
+                        <i class="fas fa-check-circle text-green-600 mr-3"></i>
+                        <span>{{ listing.size_sqft|int }} square feet</span>
+                    </div>
+                    <div class="flex items-center text-gray-700 dark:text-platinum-200">
+                        <i class="fas fa-check-circle text-green-600 mr-3"></i>
+                        <span>{% if listing.covered %}Covered hangar{% else %}Outdoor tie-down{% endif %}</span>
+                    </div>
+                    <div class="flex items-center text-gray-700 dark:text-platinum-200">
+                        <i class="fas fa-check-circle text-green-600 mr-3"></i>
+                        <span>{{ listing.airport_icao }} location</span>
+                    </div>
+                    <div class="flex items-center text-gray-700 dark:text-platinum-200">
+                        <i class="fas fa-check-circle text-green-600 mr-3"></i>
+                        <span>Active listing</span>
+                    </div>
+
+                    <!-- Practical Features -->
+                    {% if listing.door_type %}
+                    <div class="flex items-center text-gray-700 dark:text-platinum-200">
+                        <i class="fas fa-door-open text-blue-500 mr-3"></i>
+                        <span>Door Operation: <strong class="ml-1">{{ listing.door_type }}</strong></span>
+                    </div>
+                    {% endif %}
+
+                    {% if listing.access_24_7 %}
+                    <div class="flex items-center text-gray-700 dark:text-platinum-200">
+                        <i class="fas fa-key text-blue-500 mr-3"></i>
+                        <span>24/7 Access</span>
+                    </div>
+                    {% endif %}
+
+                    {% if listing.is_heated %}
+                    <div class="flex items-center text-gray-700 dark:text-platinum-200">
+                        <i class="fas fa-thermometer-half text-red-500 mr-3"></i>
+                        <span>Heated</span>
+                    </div>
+                    {% endif %}
+
+                    {% if listing.battery_tender %}
+                    <div class="flex items-center text-gray-700 dark:text-platinum-200">
+                        <i class="fas fa-car-battery text-green-500 mr-3"></i>
+                        <span>Battery Tender</span>
+                    </div>
+                    {% endif %}
+
+                    {% if listing.engine_heater %}
+                    <div class="flex items-center text-gray-700 dark:text-platinum-200">
+                        <i class="fas fa-fire-alt text-orange-500 mr-3"></i>
+                        <span>Engine Heater Plug</span>
+                    </div>
+                    {% endif %}
+
+                    <!-- Pilot safety requests -->
+                    {% if listing.snow_removal %}
+                    <div class="flex items-center text-gray-700 dark:text-platinum-200">
+                        <i class="fas fa-snowflake text-blue-300 mr-3 text-lg drop-shadow-sm"></i>
+                        <span class="font-bold">Winter-Ready Hangar</span>
+                    </div>
+                    {% endif %}
+
+                    {% if listing.hurricane_tiedowns %}
+                    <div class="flex items-center text-gray-700 dark:text-platinum-200">
+                        <i class="fas fa-wind text-gray-500 mr-3 text-lg drop-shadow-sm"></i>
+                        <span class="font-bold">Hurricane-Rated Tie-Downs</span>
+                    </div>
+                    {% endif %}
+
+                    {% if listing.insurance_active %}
+                    <div class="flex items-center text-green-700 dark:text-green-400">
+                        <i class="fas fa-file-contract mr-3 text-lg drop-shadow-sm"></i>
+                        <span class="font-bold">Short-Term Insurance Provided</span>
+                    </div>
+                    {% endif %}
+
+                    {% if listing.ramp_cam_url %}
+                    <div class="flex items-center text-red-600 dark:text-red-400">
+                        <i class="fas fa-video mr-3 text-lg drop-shadow-sm"></i>
+                        <span class="font-bold">Live Ramp Cam (Premium)</span>
+                    </div>
+                    {% endif %}
+
+                    <!-- Corporate Jet Safety Features -->
+                    {% if listing.tail_height_clearance %}
+                    <div class="flex items-center text-gray-700 dark:text-platinum-200">
+                        <i class="fas fa-arrows-alt-v text-blue-500 mr-3"></i>
+                        <span>{{ listing.tail_height_clearance }} ft Tail Clearance</span>
+                    </div>
+                    {% endif %}
+
+                    {% if listing.floor_loading_pcn %}
+                    <div class="flex items-center text-gray-700 dark:text-platinum-200">
+                        <i class="fas fa-weight-hanging text-blue-500 mr-3"></i>
+                        <span>{{ listing.floor_loading_pcn }}</span>
+                    </div>
+                    {% endif %}
+
+                    {% if listing.gpu_power_available %}
+                    <div class="flex items-center text-gray-700 dark:text-platinum-200">
+                        <i class="fas fa-plug text-blue-500 mr-3 text-lg"></i>
+                        <span class="font-bold">GPU Power (400Hz/28V)</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if listing.nfpa_409_compliant %}
+            <div class="mt-6">
+                <div
+                    class="inline-flex items-center bg-gradient-to-r from-amber-200 to-yellow-400 dark:from-yellow-600 dark:to-amber-800 text-amber-900 dark:text-white px-5 py-3 rounded-full shadow-lg border border-yellow-400 uppercase tracking-wider font-extrabold text-sm hover:scale-105 transition-transform cursor-default">
+                    <i class="fas fa-fire-extinguisher mr-2 text-lg"></i>
+                    NFPA 409 Compliant - Gold Standard Safety
+                </div>
+            </div>
+            {% endif %}
+
+            {% if listing.door_type in ['Electric', 'Hydraulic', 'Bi-Fold (Electric)'] %}
+            <div class="mt-4">
+                <div
+                    class="inline-flex items-center bg-gradient-to-r from-yellow-300 to-amber-500 dark:from-yellow-600 dark:to-amber-700 text-amber-900 dark:text-white px-5 py-3 rounded-full shadow-lg border border-yellow-500 uppercase tracking-wider font-extrabold text-sm hover:scale-105 transition-transform cursor-default">
+                    <i class="fas fa-magic mr-2 text-lg"></i>
+                    Gold Standard Operation – Easy & Safe
+                </div>
+            </div>
+            {% endif %}
+
+            {% if listing.ramp_cam_url %}
+            <hr class="border-gray-200 dark:border-gray-700 my-6">
+            <!-- Ramp Cam Module -->
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-platinum-100 mb-4 flex items-center">
+                    <i class="fas fa-video text-red-500 mr-2"></i>Live Ramp Cam (Premium)
                 </h2>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                {% if has_access %}
+                <div
+                    class="bg-blue-50 dark:bg-dark-800 rounded-xl p-6 border-2 border-green-500 shadow-inner flex flex-col sm:flex-row items-center justify-between">
                     <div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                            Select your aircraft to compare its footprint against this <strong>{{ listing.size_sqft|int
-                                }} sq
-                                ft</strong> space.
-                        </p>
-
-                        <label for="aircraft-selector"
-                            class="block text-sm font-medium text-gray-700 dark:text-platinum-200 mb-2 font-mono uppercase tracking-wider">Select
-                            Model</label>
-                        <select id="aircraft-selector"
-                            class="w-full bg-[#001F3F] dark:bg-[#2D2D2D] text-[#FAFAFA] border border-gray-300 dark:border-gray-700 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none mb-6 appearance-none shadow-sm cursor-pointer transition-all hover:bg-[#002b5a] dark:hover:bg-[#3d3d3d]">
-                            <option value="" class="bg-[#001F3F] dark:bg-[#2D2D2D]">-- Choose an aircraft --</option>
-                            {% for category, aircrafts in aircraft_sizes.items() %}
-                            <optgroup label="{{ category }}"
-                                class="bg-[#001F3F] dark:bg-[#2D2D2D] text-blue-400 font-bold">
-                                {% for name, specs in aircrafts.items() %}
-                                <option value="{{ name }}" data-length="{{ specs.length }}"
-                                    data-wingspan="{{ specs.wingspan }}" data-height="{{ specs.height }}"
-                                    class="bg-white dark:bg-dark-800 text-gray-900 dark:text-white">
-                                    {{ name }}
-                                </option>
-                                {% endfor %}
-                            </optgroup>
-                            {% endfor %}
-                        </select>
-
-                        <div id="aircraft-specs"
-                            class="hidden space-y-3 bg-blue-50/50 dark:bg-blue-900/10 p-5 rounded-2xl border border-blue-100 dark:border-blue-800/50 backdrop-blur-sm shadow-inner transition-all duration-300">
-                            <div class="flex justify-between text-sm items-center">
-                                <span class="text-gray-500 dark:text-gray-400 font-medium">Length:</span>
-                                <span
-                                    class="font-bold text-gray-900 dark:text-platinum-100 bg-white dark:bg-dark-800 px-2 py-1 rounded-md shadow-sm"
-                                    id="spec-length">-</span>
-                            </div>
-                            <div class="flex justify-between text-sm items-center">
-                                <span class="text-gray-500 dark:text-gray-400 font-medium">Wingspan:</span>
-                                <span
-                                    class="font-bold text-gray-900 dark:text-platinum-100 bg-white dark:bg-dark-800 px-2 py-1 rounded-md shadow-sm"
-                                    id="spec-wingspan">-</span>
-                            </div>
-                            <div class="flex justify-between text-sm items-center">
-                                <span class="text-gray-500 dark:text-gray-400 font-medium">Height:</span>
-                                <span
-                                    class="font-bold text-gray-900 dark:text-platinum-100 bg-white dark:bg-dark-800 px-2 py-1 rounded-md shadow-sm"
-                                    id="spec-height">-</span>
-                            </div>
-                            <div
-                                class="flex justify-between text-sm pt-3 border-t border-blue-200 dark:border-blue-800/50 items-center">
-                                <span
-                                    class="text-gray-500 dark:text-gray-400 font-bold uppercase text-[10px] tracking-tighter">Required
-                                    Area:</span>
-                                <span class="font-black text-blue-600 dark:text-blue-400 text-lg"
-                                    id="spec-footprint">-</span>
-                            </div>
-                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1"><i
+                                class="fas fa-unlock text-green-500 mr-2"></i>Access Granted</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Your active reservation enables 24-hour
+                            live security feed access.</p>
                     </div>
-
+                    <a href="{{ listing.ramp_cam_url }}" target="_blank"
+                        class="mt-4 sm:mt-0 inline-flex items-center justify-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all hover:scale-105">
+                        <i class="fas fa-play-circle mr-2"></i>View Live Feed
+                    </a>
+                </div>
+                {% else %}
+                <div
+                    class="bg-gray-100 dark:bg-dark-800 rounded-xl p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 relative overflow-hidden group">
                     <div
-                        class="relative h-72 bg-gray-50 dark:bg-dark-800/50 rounded-2xl flex items-center justify-center overflow-hidden p-6 border-2 border-dashed border-gray-200 dark:border-gray-700/50 group transition-all">
-
-                        <!-- Visual Title -->
-                        <div
-                            class="absolute top-3 left-1/2 -translate-x-1/2 text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] whitespace-nowrap">
-                            Scale Visualization</div>
-
-                        <!-- Hangar Representation -->
-                        <div id="hangar-box"
-                            class="absolute bg-white dark:bg-dark-900/80 border-2 border-blue-500/50 shadow-2xl flex items-center justify-center rounded-sm transition-all duration-500"
-                            style="width: 85%; height: 85%;">
-                            <span
-                                class="text-[9px] text-blue-600/20 uppercase font-black text-center p-2 leading-tight">
-                                {{ listing.size_sqft|int }} SQ FT<br>MAX CLEARANCE
-                            </span>
+                        class="absolute inset-0 bg-black/5 dark:bg-white/5 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center">
+                        <i
+                            class="fas fa-lock text-4xl text-gray-500 dark:text-gray-400 mb-3 group-hover:scale-110 transition-transform"></i>
+                        <span
+                            class="bg-gray-900/90 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg border border-gray-700">
+                            Protected Resource. Become a tenant to unlock.
+                        </span>
+                    </div>
+                    <!-- Mockup blur background -->
+                    <div
+                        class="opacity-30 blur-sm pointer-events-none flex flex-col sm:flex-row items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1"><i
+                                    class="fas fa-shield-alt text-blue-500 mr-2"></i>Security Active</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">24-hour live security feed active at
+                                this hangar.</p>
                         </div>
-
-                        <!-- Aircraft Representation -->
-                        <div id="aircraft-box"
-                            class="absolute bg-blue-600/30 border-2 border-blue-500 shadow-[0_0_20px_rgba(37,99,235,0.2)] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] hidden z-10 flex items-center justify-center rounded-xs backdrop-blur-[1px]">
-                            <div class="w-full h-full flex items-center justify-center relative overflow-hidden">
-                                <!-- Top View SVG Icon -->
-                                <svg class="w-2/3 h-2/3 text-blue-700 dark:text-blue-400 drop-shadow-lg"
-                                    viewBox="0 0 24 24" fill="currentColor">
-                                    <path
-                                        d="M21,16L21,14L13,9L13,3.5A1.5,1.5 0 0,0 11.5,2A1.5,1.5 0 0,0 10,3.5L10,9L2,14L2,16L10,13.5L10,19L8,20.5L8,22L11.5,21L15,22L15,20.5L13,19L13,13.5L21,16Z" />
-                                </svg>
-                            </div>
-                        </div>
-
-                        <div id="placeholder-text" class="text-xs text-gray-400 text-center z-20 font-medium">
-                            <i class="fas fa-hand-pointer block text-2xl mb-2 opacity-50 animate-bounce"></i>
-                            Select an aircraft to<br>calculate fitment
-                        </div>
+                        <button
+                            class="mt-4 sm:mt-0 inline-flex items-center justify-center px-6 py-3 bg-red-600 text-white font-bold rounded-lg opacity-50">
+                            <i class="fas fa-play-circle mr-2"></i>View Feed
+                        </button>
                     </div>
                 </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
 
-                <div id="fit-status"
-                    class="mt-8 hidden p-4 rounded-2xl text-center text-sm font-bold animate-fade-in-up border-2 shadow-sm transition-all">
-                    <!-- Status injected here -->
+        <!-- Aircraft Size Comparison Tool -->
+        <div
+            class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8 mb-8 mt-8 animate-fade-in-up">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-platinum-100 mb-6 flex items-center">
+                <i class="fas fa-plane-arrival text-blue-600 mr-2 text-3xl"></i> Aircraft Fit Comparison
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        Select your aircraft to compare its footprint against this <strong>{{ listing.size_sqft|int
+                            }} sq
+                            ft</strong> space.
+                    </p>
+
+                    <label for="aircraft-selector"
+                        class="block text-sm font-medium text-gray-700 dark:text-platinum-200 mb-2 font-mono uppercase tracking-wider">Select
+                        Model</label>
+                    <select id="aircraft-selector"
+                        class="w-full bg-[#001F3F] dark:bg-[#2D2D2D] text-[#FAFAFA] border border-gray-300 dark:border-gray-700 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none mb-6 appearance-none shadow-sm cursor-pointer transition-all hover:bg-[#002b5a] dark:hover:bg-[#3d3d3d]">
+                        <option value="" class="bg-[#001F3F] dark:bg-[#2D2D2D]">-- Choose an aircraft --</option>
+                        {% for category, aircrafts in aircraft_sizes.items() %}
+                        <optgroup label="{{ category }}" class="bg-[#001F3F] dark:bg-[#2D2D2D] text-blue-400 font-bold">
+                            {% for name, specs in aircrafts.items() %}
+                            <option value="{{ name }}" data-length="{{ specs.length }}"
+                                data-wingspan="{{ specs.wingspan }}" data-height="{{ specs.height }}"
+                                class="bg-white dark:bg-dark-800 text-gray-900 dark:text-white">
+                                {{ name }}
+                            </option>
+                            {% endfor %}
+                        </optgroup>
+                        {% endfor %}
+                    </select>
+
+                    <div id="aircraft-specs"
+                        class="hidden space-y-3 bg-blue-50/50 dark:bg-blue-900/10 p-5 rounded-2xl border border-blue-100 dark:border-blue-800/50 backdrop-blur-sm shadow-inner transition-all duration-300">
+                        <div class="flex justify-between text-sm items-center">
+                            <span class="text-gray-500 dark:text-gray-400 font-medium">Length:</span>
+                            <span
+                                class="font-bold text-gray-900 dark:text-platinum-100 bg-white dark:bg-dark-800 px-2 py-1 rounded-md shadow-sm"
+                                id="spec-length">-</span>
+                        </div>
+                        <div class="flex justify-between text-sm items-center">
+                            <span class="text-gray-500 dark:text-gray-400 font-medium">Wingspan:</span>
+                            <span
+                                class="font-bold text-gray-900 dark:text-platinum-100 bg-white dark:bg-dark-800 px-2 py-1 rounded-md shadow-sm"
+                                id="spec-wingspan">-</span>
+                        </div>
+                        <div class="flex justify-between text-sm items-center">
+                            <span class="text-gray-500 dark:text-gray-400 font-medium">Height:</span>
+                            <span
+                                class="font-bold text-gray-900 dark:text-platinum-100 bg-white dark:bg-dark-800 px-2 py-1 rounded-md shadow-sm"
+                                id="spec-height">-</span>
+                        </div>
+                        <div
+                            class="flex justify-between text-sm pt-3 border-t border-blue-200 dark:border-blue-800/50 items-center">
+                            <span
+                                class="text-gray-500 dark:text-gray-400 font-bold uppercase text-[10px] tracking-tighter">Required
+                                Area:</span>
+                            <span class="font-black text-blue-600 dark:text-blue-400 text-lg"
+                                id="spec-footprint">-</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div
-                    class="mt-6 flex items-center justify-center space-x-6 text-[10px] text-gray-400 font-medium border-t border-gray-100 dark:border-gray-800 pt-4">
-                    <span class="flex items-center"><i class="fas fa-info-circle mr-1 text-blue-500"></i> Footprint
-                        calculation based on L × W</span>
-                    <span class="flex items-center"><i class="fas fa-exclamation-triangle mr-1 text-amber-500"></i>
-                        Check tail height for hangar clearance</span>
+                    class="relative h-72 bg-gray-50 dark:bg-dark-800/50 rounded-2xl flex items-center justify-center overflow-hidden p-6 border-2 border-dashed border-gray-200 dark:border-gray-700/50 group transition-all">
+
+                    <!-- Visual Title -->
+                    <div
+                        class="absolute top-3 left-1/2 -translate-x-1/2 text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] whitespace-nowrap">
+                        Scale Visualization</div>
+
+                    <!-- Hangar Representation -->
+                    <div id="hangar-box"
+                        class="absolute bg-white dark:bg-dark-900/80 border-2 border-blue-500/50 shadow-2xl flex items-center justify-center rounded-sm transition-all duration-500"
+                        style="width: 85%; height: 85%;">
+                        <span class="text-[9px] text-blue-600/20 uppercase font-black text-center p-2 leading-tight">
+                            {{ listing.size_sqft|int }} SQ FT<br>MAX CLEARANCE
+                        </span>
+                    </div>
+
+                    <!-- Aircraft Representation -->
+                    <div id="aircraft-box"
+                        class="absolute bg-blue-600/30 border-2 border-blue-500 shadow-[0_0_20px_rgba(37,99,235,0.2)] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] hidden z-10 flex items-center justify-center rounded-xs backdrop-blur-[1px]">
+                        <div class="w-full h-full flex items-center justify-center relative overflow-hidden">
+                            <!-- Top View SVG Icon -->
+                            <svg class="w-2/3 h-2/3 text-blue-700 dark:text-blue-400 drop-shadow-lg" viewBox="0 0 24 24"
+                                fill="currentColor">
+                                <path
+                                    d="M21,16L21,14L13,9L13,3.5A1.5,1.5 0 0,0 11.5,2A1.5,1.5 0 0,0 10,3.5L10,9L2,14L2,16L10,13.5L10,19L8,20.5L8,22L11.5,21L15,22L15,20.5L13,19L13,13.5L21,16Z" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div id="placeholder-text" class="text-xs text-gray-400 text-center z-20 font-medium">
+                        <i class="fas fa-hand-pointer block text-2xl mb-2 opacity-50 animate-bounce"></i>
+                        Select an aircraft to<br>calculate fitment
+                    </div>
                 </div>
             </div>
+
+            <div id="fit-status"
+                class="mt-8 hidden p-4 rounded-2xl text-center text-sm font-bold animate-fade-in-up border-2 shadow-sm transition-all">
+                <!-- Status injected here -->
+            </div>
+
+            <div
+                class="mt-6 flex items-center justify-center space-x-6 text-[10px] text-gray-400 font-medium border-t border-gray-100 dark:border-gray-800 pt-4">
+                <span class="flex items-center"><i class="fas fa-info-circle mr-1 text-blue-500"></i> Footprint
+                    calculation based on L × W</span>
+                <span class="flex items-center"><i class="fas fa-exclamation-triangle mr-1 text-amber-500"></i>
+                    Check tail height for hangar clearance</span>
+            </div>
+        </div>
+
+        <script>
+            document.getElementById('aircraft-selector').addEventListener('change', function () {
+                const selected = this.options[this.selectedIndex];
+                const specs = document.getElementById('aircraft-specs');
+                const aircraftBox = document.getElementById('aircraft-box');
+                const placeholder = document.getElementById('placeholder-text');
+                const status = document.getElementById('fit-status');
+
+                if (!selected.value) {
+                    specs.classList.add('hidden');
+                    aircraftBox.classList.add('hidden');
+                    placeholder.classList.remove('hidden');
+                    status.classList.add('hidden');
+                    return;
+                }
+
+                const L = parseFloat(selected.getAttribute('data-length'));
+                const W = parseFloat(selected.getAttribute('data-wingspan'));
+                const H = parseFloat(selected.getAttribute('data-height'));
+                const area = L * W;
+                const hangarArea = {{ listing.size_sqft| int
+            }};
+
+            // Update specs
+            specs.classList.remove('hidden');
+            placeholder.classList.add('hidden');
+            document.getElementById('spec-length').textContent = L + ' ft';
+            document.getElementById('spec-wingspan').textContent = W + ' ft';
+            document.getElementById('spec-height').textContent = H + ' ft';
+            document.getElementById('spec-footprint').textContent = Math.round(area) + ' sq ft';
+
+            // Update visualization
+            const hangarSide = Math.sqrt(hangarArea);
+
+            // Scale factor: hangarSide corresponds to 85% of container
+            let boxL = (L / hangarSide) * 85;
+            let boxW = (W / hangarSide) * 85;
+
+            // Cap visual size
+            boxL = Math.min(boxL, 120);
+            boxW = Math.min(boxW, 120);
+
+            aircraftBox.style.width = boxW + '%';
+            aircraftBox.style.height = boxL + '%';
+            aircraftBox.classList.remove('hidden');
+
+            // Update status
+            status.classList.remove('hidden');
+            if (area > hangarArea) {
+                status.className = 'mt-8 p-4 rounded-2xl text-center text-sm font-bold bg-red-50 text-red-700 border-red-100 dark:bg-red-900/10 dark:text-red-400 dark:border-red-900/50';
+                status.innerHTML = '<i class="fas fa-times-circle mr-2 text-xl align-middle"></i> OVER CAPACITY: Footprint exceeds available square footage.';
+            } else if (area > hangarArea * 0.85) {
+                status.className = 'mt-8 p-4 rounded-2xl text-center text-sm font-bold bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/10 dark:text-amber-400 dark:border-amber-900/50';
+                status.innerHTML = '<i class="fas fa-exclamation-triangle mr-2 text-xl align-middle"></i> TIGHT TOLERANCE: Fits with minimal margin. Exercise caution.';
+            } else {
+                status.className = 'mt-8 p-4 rounded-2xl text-center text-sm font-bold bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/10 dark:text-emerald-400 dark:border-emerald-900/50';
+                status.innerHTML = '<i class="fas fa-check-circle mr-2 text-xl align-middle"></i> GUARANTEED FIT: footprint fits comfortably in this space.';
+            }
+                });
+        </script>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="lg:col-span-1 space-y-6">
+
+        <!-- Health Score & Availability (New Feature) -->
+        <div
+            class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 overflow-hidden relative">
+            <!-- Health Score Badge -->
+            <div class="absolute top-0 right-0 p-4">
+                {% set score = listing.health_score %}
+                {% set color = 'green' if score >= 80 else 'yellow' if score >= 60 else 'red' %}
+                <div class="group relative">
+                    <div
+                        class="w-16 h-16 rounded-full border-4 border-{{ color }}-500 flex items-center justify-center bg-white dark:bg-dark-800 shadow-lg transform rotate-12 group-hover:rotate-0 transition-all">
+                        <span class="text-xl font-bold text-{{ color }}-600">{{ score }}</span>
+                    </div>
+                    <div
+                        class="absolute bottom-full right-0 mb-2 w-48 bg-gray-900 text-white text-xs rounded p-2 hidden group-hover:block z-50 shadow-xl">
+                        <div class="font-bold border-b border-gray-700 pb-1 mb-1">Hangar Health Score</div>
+                        <div>Score: {{ score }}/100</div>
+                        <div class="text-gray-300">Trust Rating: {{ 'Excellent' if score >= 80 else 'Good' if score
+                            >= 60 else 'Needs Info' }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-lg font-bold text-gray-900 dark:text-platinum-100 mb-4">Availability</h3>
+
+            {% if listing.availability_start %}
+            <div class="mb-4">
+                <div class="flex items-center text-sm text-gray-600 dark:text-gray-300 mb-1">
+                    <i class="fas fa-calendar-check text-green-500 mr-2"></i>
+                    <span class="font-semibold">Available:</span>
+                </div>
+                <div class="pl-6 text-gray-800 dark:text-platinum-100 font-medium">
+                    {{ listing.availability_start.strftime('%b %d') }}
+                    {% if listing.availability_end %} - {{ listing.availability_end.strftime('%b %d, %Y') }}{% else
+                    %} onwards{% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div class="text-sm text-gray-500 italic mb-4">Contact owner for availability.</div>
+            {% endif %}
+
+            {% if current_user.is_authenticated and current_user.id != listing.owner_id %}
+            <!-- Book Viewing Button -->
+            <form action="{{ url_for('main.book_viewing', listing_id=listing.id) }}" method="POST" class="mt-4">
+                <div class="flex space-x-2 mb-2">
+                    <input type="date" name="viewing_date" required
+                        class="w-2/3 bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm focus:ring-blue-500">
+                    <input type="time" name="viewing_time"
+                        class="w-1/3 bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm focus:ring-blue-500">
+                </div>
+                <button type="submit"
+                    class="w-full bg-white border-2 border-blue-600 text-blue-600 font-bold py-2 rounded-lg hover:bg-blue-50 transition-colors">
+                    <i class="fas fa-eye mr-2"></i>Request Viewing
+                </button>
+            </form>
+            {% endif %}
+        </div>
+
+        <!-- Contact Owner Card -->
+        <div
+            class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 sticky top-24">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-platinum-100 mb-4">Contact Owner</h3>
+
+            <div class="mb-6 flex items-start space-x-4">
+                <div
+                    class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                    {{ listing.owner.email[0].upper() }}
+                </div>
+                <div>
+                    <div class="font-semibold text-gray-900 dark:text-platinum-100">{{
+                        listing.owner.email.split('@')[0] }}</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 capitalize mb-1">{{ listing.owner.role }}
+                    </div>
+
+                    <!-- Reputation Score -->
+                    <div
+                        class="flex items-center text-xs text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded-full w-max border border-yellow-100 dark:border-yellow-900">
+                        <i class="fas fa-star mr-1"></i>
+                        <span class="font-bold mr-1">{{ listing.owner.reputation_score|round(1) }}</span>
+                        <span class="text-gray-400 dark:text-gray-500">({{ listing.owner.rentals_count }}
+                            deals)</span>
+                    </div>
+                </div>
+            </div>
+
+            {% if current_user.is_authenticated %}
+            {% if current_user.id == listing.owner_id %}
+            <a href="{{ url_for('main.edit_listing', id=listing.id) }}"
+                class="block w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-xl text-center shadow-lg hover:shadow-xl transition-all hover-lift mb-3">
+                <i class="fas fa-edit mr-2"></i>Edit Listing
+            </a>
+            {% else %}
+            <a href="{{ url_for('main.message_user', user_id=listing.owner_id, listing_id=listing.id) }}"
+                class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl text-center shadow-lg hover:shadow-xl transition-all hover-lift mb-3">
+                <i class="fas fa-envelope mr-2"></i>Message Owner
+            </a>
+
+            <button onclick="reportListing({{ listing.id }})"
+                class="w-full text-center bg-white dark:bg-dark-800 text-gray-500 hover:text-red-500 font-medium py-3 px-6 rounded-xl border border-gray-200 dark:border-gray-700 transition-colors text-sm">
+                <i class="fas fa-flag mr-2"></i>Report Suspicious Listing
+            </button>
+
+            {% if listing.status == 'Active' %}
+            <form action="{{ url_for('main.book_listing', listing_id=listing.id) }}" method="POST" class="mt-3">
+
+                <!-- Airbnb Style Date Selection -->
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Check-in</label>
+                        <input type="date" id="booking_start" name="start_date" required
+                            min="{{ datetime.now().strftime('%Y-%m-%d') }}"
+                            class="w-full bg-gray-50 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm focus:ring-blue-500 dark:bg-dark-900 dark:text-white"
+                            onchange="calculateDates()">
+                    </div>
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Checkout</label>
+                        <input type="date" id="booking_end" name="end_date" required
+                            class="w-full bg-gray-50 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm focus:ring-blue-500 dark:bg-dark-900 dark:text-white"
+                            disabled>
+                    </div>
+                </div>
+
+                <div class="text-xs text-gray-500 mb-4 bg-gray-100 dark:bg-dark-800 p-2 rounded flex items-center">
+                    <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+                    <span>Minimum stay: <strong>{{ listing.min_stay_nights }} nights</strong> <br>Nightly rate:
+                        <strong>${{ listing.price_night|default('?', true) }}</strong></span>
+                </div>
+
+                <!-- Insurance Add-on -->
+                <div
+                    class="mb-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-xl p-3">
+                    <label class="flex items-start cursor-pointer">
+                        <input type="checkbox" name="add_insurance"
+                            class="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300 dark:border-gray-600">
+                        <div class="ml-3">
+                            <span class="block text-sm font-bold text-gray-900 dark:text-white">Add Liability
+                                Insurance</span>
+                            <span class="block text-xs text-gray-500 dark:text-gray-400">Short-term coverage via
+                                <span class="font-bold text-blue-600">Avemco</span>.</span>
+                            <span class="block text-xs font-mono text-gray-500 mt-1">+$45 base + $15/day</span>
+                            <div class="flex gap-2 mt-2 opacity-60 grayscale hover:grayscale-0 transition-all">
+                                <div class="h-4 bg-gray-400 w-12 rounded"></div>
+                                <div class="h-4 bg-gray-400 w-12 rounded"></div>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+
+                <button type="submit"
+                    class="block w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-xl text-center shadow-lg hover:shadow-xl transition-all hover-lift">
+                    <i class="fas fa-bolt mr-2 text-yellow-300"></i>Reserve Now
+                </button>
+                <p class="text-xs text-center text-gray-500 mt-2 flex items-center justify-center">
+                    <i class="fas fa-lock mr-1 text-green-500"></i>Secured by Stripe Escrow
+                </p>
+            </form>
 
             <script>
-                document.getElementById('aircraft-selector').addEventListener('change', function () {
-                    const selected = this.options[this.selectedIndex];
-                    const specs = document.getElementById('aircraft-specs');
-                    const aircraftBox = document.getElementById('aircraft-box');
-                    const placeholder = document.getElementById('placeholder-text');
-                    const status = document.getElementById('fit-status');
+                function calculateDates() {
+                    const startInput = document.getElementById('booking_start');
+                    const endInput = document.getElementById('booking_end');
+                    const minNights = parseInt('{{ listing.min_stay_nights|default(1) }}', 10);
 
-                    if (!selected.value) {
-                        specs.classList.add('hidden');
-                        aircraftBox.classList.add('hidden');
-                        placeholder.classList.remove('hidden');
-                        status.classList.add('hidden');
-                        return;
-                    }
+                    if (startInput.value) {
+                        const startDate = new Date(startInput.value);
+                        // Add minimum nights
+                        startDate.setDate(startDate.getDate() + minNights);
 
-                    const L = parseFloat(selected.getAttribute('data-length'));
-                    const W = parseFloat(selected.getAttribute('data-wingspan'));
-                    const H = parseFloat(selected.getAttribute('data-height'));
-                    const area = L * W;
-                    const hangarArea = {{ listing.size_sqft| int
-                }};
+                        // Format back to YYYY-MM-DD
+                        const minEndDateStr = startDate.toISOString().split('T')[0];
 
-                // Update specs
-                specs.classList.remove('hidden');
-                placeholder.classList.add('hidden');
-                document.getElementById('spec-length').textContent = L + ' ft';
-                document.getElementById('spec-wingspan').textContent = W + ' ft';
-                document.getElementById('spec-height').textContent = H + ' ft';
-                document.getElementById('spec-footprint').textContent = Math.round(area) + ' sq ft';
+                        endInput.disabled = false;
+                        endInput.min = minEndDateStr;
 
-                // Update visualization
-                const hangarSide = Math.sqrt(hangarArea);
-
-                // Scale factor: hangarSide corresponds to 85% of container
-                let boxL = (L / hangarSide) * 85;
-                let boxW = (W / hangarSide) * 85;
-
-                // Cap visual size
-                boxL = Math.min(boxL, 120);
-                boxW = Math.min(boxW, 120);
-
-                aircraftBox.style.width = boxW + '%';
-                aircraftBox.style.height = boxL + '%';
-                aircraftBox.classList.remove('hidden');
-
-                // Update status
-                status.classList.remove('hidden');
-                if (area > hangarArea) {
-                    status.className = 'mt-8 p-4 rounded-2xl text-center text-sm font-bold bg-red-50 text-red-700 border-red-100 dark:bg-red-900/10 dark:text-red-400 dark:border-red-900/50';
-                    status.innerHTML = '<i class="fas fa-times-circle mr-2 text-xl align-middle"></i> OVER CAPACITY: Footprint exceeds available square footage.';
-                } else if (area > hangarArea * 0.85) {
-                    status.className = 'mt-8 p-4 rounded-2xl text-center text-sm font-bold bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/10 dark:text-amber-400 dark:border-amber-900/50';
-                    status.innerHTML = '<i class="fas fa-exclamation-triangle mr-2 text-xl align-middle"></i> TIGHT TOLERANCE: Fits with minimal margin. Exercise caution.';
-                } else {
-                    status.className = 'mt-8 p-4 rounded-2xl text-center text-sm font-bold bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/10 dark:text-emerald-400 dark:border-emerald-900/50';
-                    status.innerHTML = '<i class="fas fa-check-circle mr-2 text-xl align-middle"></i> GUARANTEED FIT: footprint fits comfortably in this space.';
-                }
-                });
-            </script>
-        </div>
-
-        <!-- Sidebar -->
-        <div class="lg:col-span-1 space-y-6">
-
-            <!-- Health Score & Availability (New Feature) -->
-            <div
-                class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 overflow-hidden relative">
-                <!-- Health Score Badge -->
-                <div class="absolute top-0 right-0 p-4">
-                    {% set score = listing.health_score %}
-                    {% set color = 'green' if score >= 80 else 'yellow' if score >= 60 else 'red' %}
-                    <div class="group relative">
-                        <div
-                            class="w-16 h-16 rounded-full border-4 border-{{ color }}-500 flex items-center justify-center bg-white dark:bg-dark-800 shadow-lg transform rotate-12 group-hover:rotate-0 transition-all">
-                            <span class="text-xl font-bold text-{{ color }}-600">{{ score }}</span>
-                        </div>
-                        <div
-                            class="absolute bottom-full right-0 mb-2 w-48 bg-gray-900 text-white text-xs rounded p-2 hidden group-hover:block z-50 shadow-xl">
-                            <div class="font-bold border-b border-gray-700 pb-1 mb-1">Hangar Health Score</div>
-                            <div>Score: {{ score }}/100</div>
-                            <div class="text-gray-300">Trust Rating: {{ 'Excellent' if score >= 80 else 'Good' if score
-                                >= 60 else 'Needs Info' }}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <h3 class="text-lg font-bold text-gray-900 dark:text-platinum-100 mb-4">Availability</h3>
-
-                {% if listing.availability_start %}
-                <div class="mb-4">
-                    <div class="flex items-center text-sm text-gray-600 dark:text-gray-300 mb-1">
-                        <i class="fas fa-calendar-check text-green-500 mr-2"></i>
-                        <span class="font-semibold">Available:</span>
-                    </div>
-                    <div class="pl-6 text-gray-800 dark:text-platinum-100 font-medium">
-                        {{ listing.availability_start.strftime('%b %d') }}
-                        {% if listing.availability_end %} - {{ listing.availability_end.strftime('%b %d, %Y') }}{% else
-                        %} onwards{% endif %}
-                    </div>
-                </div>
-                {% else %}
-                <div class="text-sm text-gray-500 italic mb-4">Contact owner for availability.</div>
-                {% endif %}
-
-                {% if current_user.is_authenticated and current_user.id != listing.owner_id %}
-                <!-- Book Viewing Button -->
-                <form action="{{ url_for('main.book_viewing', listing_id=listing.id) }}" method="POST" class="mt-4">
-                    <div class="flex space-x-2 mb-2">
-                        <input type="date" name="viewing_date" required
-                            class="w-2/3 bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm focus:ring-blue-500">
-                        <input type="time" name="viewing_time"
-                            class="w-1/3 bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm focus:ring-blue-500">
-                    </div>
-                    <button type="submit"
-                        class="w-full bg-white border-2 border-blue-600 text-blue-600 font-bold py-2 rounded-lg hover:bg-blue-50 transition-colors">
-                        <i class="fas fa-eye mr-2"></i>Request Viewing
-                    </button>
-                </form>
-                {% endif %}
-            </div>
-
-            <!-- Contact Owner Card -->
-            <div
-                class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 sticky top-24">
-                <h3 class="text-xl font-bold text-gray-900 dark:text-platinum-100 mb-4">Contact Owner</h3>
-
-                <div class="mb-6 flex items-start space-x-4">
-                    <div
-                        class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-                        {{ listing.owner.email[0].upper() }}
-                    </div>
-                    <div>
-                        <div class="font-semibold text-gray-900 dark:text-platinum-100">{{
-                            listing.owner.email.split('@')[0] }}</div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 capitalize mb-1">{{ listing.owner.role }}
-                        </div>
-
-                        <!-- Reputation Score -->
-                        <div
-                            class="flex items-center text-xs text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded-full w-max border border-yellow-100 dark:border-yellow-900">
-                            <i class="fas fa-star mr-1"></i>
-                            <span class="font-bold mr-1">{{ listing.owner.reputation_score|round(1) }}</span>
-                            <span class="text-gray-400 dark:text-gray-500">({{ listing.owner.rentals_count }}
-                                deals)</span>
-                        </div>
-                    </div>
-                </div>
-
-                {% if current_user.is_authenticated %}
-                {% if current_user.id == listing.owner_id %}
-                <a href="{{ url_for('main.edit_listing', id=listing.id) }}"
-                    class="block w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-xl text-center shadow-lg hover:shadow-xl transition-all hover-lift mb-3">
-                    <i class="fas fa-edit mr-2"></i>Edit Listing
-                </a>
-                {% else %}
-                <a href="{{ url_for('main.message_user', user_id=listing.owner_id, listing_id=listing.id) }}"
-                    class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl text-center shadow-lg hover:shadow-xl transition-all hover-lift mb-3">
-                    <i class="fas fa-envelope mr-2"></i>Message Owner
-                </a>
-
-                <button onclick="reportListing({{ listing.id }})"
-                    class="w-full text-center bg-white dark:bg-dark-800 text-gray-500 hover:text-red-500 font-medium py-3 px-6 rounded-xl border border-gray-200 dark:border-gray-700 transition-colors text-sm">
-                    <i class="fas fa-flag mr-2"></i>Report Suspicious Listing
-                </button>
-
-                {% if listing.status == 'Active' %}
-                <form action="{{ url_for('main.book_listing', listing_id=listing.id) }}" method="POST" class="mt-3">
-
-                    <!-- Insurance Add-on -->
-                    <div
-                        class="mb-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-xl p-3">
-                        <label class="flex items-start cursor-pointer">
-                            <input type="checkbox" name="add_insurance"
-                                class="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300 dark:border-gray-600">
-                            <div class="ml-3">
-                                <span class="block text-sm font-bold text-gray-900 dark:text-white">Add Liability
-                                    Insurance</span>
-                                <span class="block text-xs text-gray-500 dark:text-gray-400">Short-term coverage via
-                                    <span class="font-bold text-blue-600">Avemco</span>.</span>
-                                <span class="block text-xs font-mono text-gray-500 mt-1">+$45 base + $15/day</span>
-                                <div class="flex gap-2 mt-2 opacity-60 grayscale hover:grayscale-0 transition-all">
-                                    <!-- Placeholder Logos -->
-                                    <div class="h-4 bg-gray-400 w-12 rounded"></div>
-                                    <div class="h-4 bg-gray-400 w-12 rounded"></div>
-                                </div>
-                            </div>
-                        </label>
-                    </div>
-
-                    <button type="submit"
-                        class="block w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-xl text-center shadow-lg hover:shadow-xl transition-all hover-lift">
-                        <i class="fas fa-bolt mr-2 text-yellow-300"></i>Reserve Now
-                    </button>
-                    <p class="text-xs text-center text-gray-500 mt-2 flex items-center justify-center">
-                        <i class="fas fa-lock mr-1 text-green-500"></i>Secure payment via Stripe Escrow
-                    </p>
-                </form>
-                {% elif listing.status == 'Rented' %}
-                <div
-                    class="mt-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 text-center">
-                    <div class="font-bold text-green-800 dark:text-green-300 flex items-center justify-center mb-1">
-                        <i class="fas fa-shield-alt mr-2 text-xl"></i> HangarLinks Guaranteed
-                    </div>
-                    <p class="text-xs text-green-700 dark:text-green-400">Protected booking. Liability coverage active.
-                    </p>
-                </div>
-                {% endif %}
-                {% endif %}
-                {% else %}
-                <!-- Guest Message Form (New Feature) -->
-                <form action="{{ url_for('main.contact_guest', listing_id=listing.id) }}" method="POST"
-                    class="space-y-3 mt-4">
-                    <div>
-                        <label class="sr-only">Your Email</label>
-                        <input type="email" name="guest_email" required placeholder="Your Email Address"
-                            class="w-full bg-gray-50 dark:bg-dark-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm focus:ring-blue-500 dark:text-platinum-100">
-                    </div>
-                    <div>
-                        <label class="sr-only">Message</label>
-                        <textarea name="message" required rows="3" placeholder="Hi, is this space still available?"
-                            class="w-full bg-gray-50 dark:bg-dark-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm focus:ring-blue-500 dark:text-platinum-100"></textarea>
-                    </div>
-                    <button type="submit"
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl text-center shadow-lg hover:shadow-xl transition-all animate-pulse-subtle">
-                        <i class="fas fa-paper-plane mr-2"></i>Send Message as Guest
-                    </button>
-                </form>
-                <div class="text-center mt-3">
-                    <span class="text-gray-500 text-sm">or</span>
-                    <a href="{{ url_for('main.login', next=url_for('main.listing_detail', id=listing.id)) }}"
-                        class="text-blue-600 font-bold hover:underline text-sm ml-1">Login for full access</a>
-                </div>
-                {% endif %}
-
-                <!-- Badges -->
-                <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 space-y-3">
-                    <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                        <i class="fas fa-shield-alt w-6 text-green-500 text-center"></i>
-                        <span class="ml-2">Identity verified</span>
-                    </div>
-                    {% if listing.condition_verified %}
-                    <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                        <i class="fas fa-certificate w-6 text-yellow-500 text-center"></i>
-                        <span class="ml-2 font-bold text-gray-800 dark:text-gray-200">Condition Guaranteed</span>
-                    </div>
-                    {% endif %}
-                    {% if listing.health_score >= 80 %}
-                    <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                        <i class="fas fa-heart w-6 text-red-500 text-center"></i>
-                        <span class="ml-2">High Health Score ({{ listing.health_score }})</span>
-                    </div>
-                    {% endif %}
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-    <!-- Dynamic Map Location -->
-    <div class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
-        <h3 class="text-xl font-bold text-gray-900 dark:text-platinum-100 mb-4 flex items-center">
-            <i class="fas fa-map-marked-alt text-blue-600 mr-2"></i>Location at {{ listing.airport_icao }}
-        </h3>
-        <div id="map" style="height: 300px; width: 100%;" class="rounded-xl"></div>
-    </div>
-
-    <!-- Nearby FBOs & Fuel Widget -->
-    <div class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
-        <h3 class="text-xl font-bold text-gray-900 dark:text-platinum-100 mb-4 flex items-center">
-            <i class="fas fa-gas-pump text-blue-600 mr-2"></i>Nearby Fuel & FBOs
-        </h3>
-        <div class="space-y-4">
-            <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <div class="flex justify-between items-center mb-1">
-                    <span class="font-bold text-gray-800 dark:text-gray-200">Signature Flight Support</span>
-                    <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">Primary</span>
-                </div>
-                <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">122.95 MHz</div>
-                <div class="flex justify-between text-sm">
-                    <span class="text-green-600 font-semibold">Jet A: $6.50/gal</span>
-                    <span class="text-blue-600 font-semibold">100LL: $7.20/gal</span>
-                </div>
-            </div>
-        </div>
-        <a href="#" class="block text-center text-sm text-blue-600 hover:text-blue-800 mt-4 font-medium">View All FBOs
-            at {{ listing.airport_icao }}</a>
-    </div>
-
-    <!-- Featured Partner Ad -->
-    {% set detail_ads = get_ads('listing_detail') %}
-    {% if detail_ads %}
-    <a href="{{ detail_ads[0].link_url }}" target="_blank"
-        class="block bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 mb-6 overflow-hidden relative group hover:border-blue-400 transition-colors">
-        <div
-            class="absolute top-0 right-0 bg-gray-100 dark:bg-gray-800 text-gray-500 text-[10px] px-2 py-0.5 rounded-bl uppercase tracking-wider font-bold">
-            Sponsored</div>
-        <div class="flex items-start">
-            <div class="flex-shrink-0 mr-4">
-                <img src="{{ detail_ads[0].image_url }}" alt="{{ detail_ads[0].title }}"
-                    class="w-16 h-16 object-cover rounded-lg border border-gray-200">
-            </div>
-            <div>
-                <span class="text-blue-600 font-bold uppercase tracking-widest text-xs mb-1 block">Featured
-                    Partner</span>
-                <h4
-                    class="text-base font-bold text-gray-900 dark:text-white mb-1 group-hover:text-blue-600 transition-colors">
-                    {{ detail_ads[0].title }}</h4>
-                <div class="text-gray-500 text-sm flex items-center group-hover:underline">Visit Website <i
-                        class="fas fa-arrow-right ml-1 text-xs"></i></div>
-            </div>
-        </div>
-    </a>
-    {% endif %}
-
-    <!-- Share This Listing -->
-    <div class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6">
-        <h3 class="text-xl font-bold text-gray-900 dark:text-platinum-100 mb-4">Share This Listing</h3>
-        <div class="grid grid-cols-4 gap-3">
-            <a href="https://wa.me/?text=Check out this hangar at {{ listing.airport_icao }}: {{ url_for('main.listing_detail', id=listing.id, _external=True) }}"
-                target="_blank"
-                class="flex flex-col items-center justify-center p-3 bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/40 rounded-xl transition-colors text-green-600">
-                <i class="fab fa-whatsapp text-2xl mb-1"></i>
-                <span class="text-xs font-semibold">WhatsApp</span>
-            </a>
-            <a href="mailto:?subject=Hangar Listing at {{ listing.airport_icao }}&body=Check out this listing: {{ url_for('main.listing_detail', id=listing.id, _external=True) }}"
-                class="flex flex-col items-center justify-center p-3 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 rounded-xl transition-colors text-blue-600">
-                <i class="fas fa-envelope text-2xl mb-1"></i>
-                <span class="text-xs font-semibold">Email</span>
-            </a>
-            <a href="https://twitter.com/intent/tweet?text=Found great hangar space at {{ listing.airport_icao }}!&url={{ url_for('main.listing_detail', id=listing.id, _external=True) }}"
-                target="_blank"
-                class="flex flex-col items-center justify-center p-3 bg-sky-50 hover:bg-sky-100 dark:bg-sky-900/20 dark:hover:bg-sky-900/40 rounded-xl transition-colors text-sky-500">
-                <i class="fab fa-twitter text-2xl mb-1"></i>
-                <span class="text-xs font-semibold">X</span>
-            </a>
-            <a href="sms:?body=Found a great hangar spot at {{ listing.airport_icao }}! {{ url_for('main.listing_detail', id=listing.id, _external=True) }}"
-                class="flex flex-col items-center justify-center p-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/40 rounded-xl transition-colors text-indigo-600">
-                <i class="fas fa-comment-alt text-2xl mb-1"></i>
-                <span class="text-xs font-semibold">Text</span>
-            </a>
-        </div>
-    </div>
-    <script>
-        function reportListing(id) {
-            const reason = prompt("Please tell us why you are reporting this listing (e.g. Scammer, Incorrect Details, Spam):");
-            if (reason) {
-                fetch(`/report-listing/${id}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ reason: reason })
-                })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.status === 'ok') {
-                            alert("Thank you. Our safety team has been notified and will review this listing.");
-                        } else {
-                            alert("Error submitting report. Please try again.");
+                        // If current end date is before min possible date, update it
+                        if (!endInput.value || endInput.value < minEndDateStr) {
+                            endInput.value = minEndDateStr;
                         }
-                    });
-            }
+                    }
+                }
+            </script>
+            {% elif listing.status == 'Rented' %}
+            <div
+                class="mt-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 text-center">
+                <div class="font-bold text-green-800 dark:text-green-300 flex items-center justify-center mb-1">
+                    <i class="fas fa-shield-alt mr-2 text-xl"></i> HangarLinks Guaranteed
+                </div>
+                <p class="text-xs text-green-700 dark:text-green-400">Protected booking. Liability coverage active.
+                </p>
+            </div>
+            {% endif %}
+            {% endif %}
+            {% else %}
+            <!-- Guest Message Form (New Feature) -->
+            <form action="{{ url_for('main.contact_guest', listing_id=listing.id) }}" method="POST"
+                class="space-y-3 mt-4">
+                <div>
+                    <label class="sr-only">Your Email</label>
+                    <input type="email" name="guest_email" required placeholder="Your Email Address"
+                        class="w-full bg-gray-50 dark:bg-dark-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm focus:ring-blue-500 dark:text-platinum-100">
+                </div>
+                <div>
+                    <label class="sr-only">Message</label>
+                    <textarea name="message" required rows="3" placeholder="Hi, is this space still available?"
+                        class="w-full bg-gray-50 dark:bg-dark-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm focus:ring-blue-500 dark:text-platinum-100"></textarea>
+                </div>
+                <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl text-center shadow-lg hover:shadow-xl transition-all animate-pulse-subtle">
+                    <i class="fas fa-paper-plane mr-2"></i>Send Message as Guest
+                </button>
+            </form>
+            <div class="text-center mt-3">
+                <span class="text-gray-500 text-sm">or</span>
+                <a href="{{ url_for('main.login', next=url_for('main.listing_detail', id=listing.id)) }}"
+                    class="text-blue-600 font-bold hover:underline text-sm ml-1">Login for full access</a>
+            </div>
+            {% endif %}
+
+            <!-- Badges -->
+            <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 space-y-3">
+                <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                    <i class="fas fa-shield-alt w-6 text-green-500 text-center"></i>
+                    <span class="ml-2">Identity verified</span>
+                </div>
+                {% if listing.condition_verified %}
+                <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                    <i class="fas fa-certificate w-6 text-yellow-500 text-center"></i>
+                    <span class="ml-2 font-bold text-gray-800 dark:text-gray-200">Condition Guaranteed</span>
+                </div>
+                {% endif %}
+                {% if listing.health_score >= 80 %}
+                <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                    <i class="fas fa-heart w-6 text-red-500 text-center"></i>
+                    <span class="ml-2">High Health Score ({{ listing.health_score }})</span>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Dynamic Map Location -->
+<div class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
+    <h3 class="text-xl font-bold text-gray-900 dark:text-platinum-100 mb-4 flex items-center">
+        <i class="fas fa-map-marked-alt text-blue-600 mr-2"></i>Location at {{ listing.airport_icao }}
+    </h3>
+    <div id="map" style="height: 300px; width: 100%;" class="rounded-xl"></div>
+</div>
+
+<!-- Nearby FBOs & Fuel Widget -->
+<div class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
+    <h3 class="text-xl font-bold text-gray-900 dark:text-platinum-100 mb-4 flex items-center">
+        <i class="fas fa-gas-pump text-blue-600 mr-2"></i>Nearby Fuel & FBOs
+    </h3>
+    <div class="space-y-4">
+        <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div class="flex justify-between items-center mb-1">
+                <span class="font-bold text-gray-800 dark:text-gray-200">Signature Flight Support</span>
+                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">Primary</span>
+            </div>
+            <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">122.95 MHz</div>
+            <div class="flex justify-between text-sm">
+                <span class="text-green-600 font-semibold">Jet A: $6.50/gal</span>
+                <span class="text-blue-600 font-semibold">100LL: $7.20/gal</span>
+            </div>
+        </div>
+    </div>
+    <a href="#" class="block text-center text-sm text-blue-600 hover:text-blue-800 mt-4 font-medium">View All FBOs
+        at {{ listing.airport_icao }}</a>
+</div>
+
+<!-- Featured Partner Ad -->
+{% set detail_ads = get_ads('listing_detail') %}
+{% if detail_ads %}
+<a href="{{ detail_ads[0].link_url }}" target="_blank"
+    class="block bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 mb-6 overflow-hidden relative group hover:border-blue-400 transition-colors">
+    <div
+        class="absolute top-0 right-0 bg-gray-100 dark:bg-gray-800 text-gray-500 text-[10px] px-2 py-0.5 rounded-bl uppercase tracking-wider font-bold">
+        Sponsored</div>
+    <div class="flex items-start">
+        <div class="flex-shrink-0 mr-4">
+            <img src="{{ detail_ads[0].image_url }}" alt="{{ detail_ads[0].title }}"
+                class="w-16 h-16 object-cover rounded-lg border border-gray-200">
+        </div>
+        <div>
+            <span class="text-blue-600 font-bold uppercase tracking-widest text-xs mb-1 block">Featured
+                Partner</span>
+            <h4
+                class="text-base font-bold text-gray-900 dark:text-white mb-1 group-hover:text-blue-600 transition-colors">
+                {{ detail_ads[0].title }}</h4>
+            <div class="text-gray-500 text-sm flex items-center group-hover:underline">Visit Website <i
+                    class="fas fa-arrow-right ml-1 text-xs"></i></div>
+        </div>
+    </div>
+</a>
+{% endif %}
+
+<!-- Share This Listing -->
+<div class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6">
+    <h3 class="text-xl font-bold text-gray-900 dark:text-platinum-100 mb-4">Share This Listing</h3>
+    <div class="grid grid-cols-4 gap-3">
+        <a href="https://wa.me/?text=Check out this hangar at {{ listing.airport_icao }}: {{ url_for('main.listing_detail', id=listing.id, _external=True) }}"
+            target="_blank"
+            class="flex flex-col items-center justify-center p-3 bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/40 rounded-xl transition-colors text-green-600">
+            <i class="fab fa-whatsapp text-2xl mb-1"></i>
+            <span class="text-xs font-semibold">WhatsApp</span>
+        </a>
+        <a href="mailto:?subject=Hangar Listing at {{ listing.airport_icao }}&body=Check out this listing: {{ url_for('main.listing_detail', id=listing.id, _external=True) }}"
+            class="flex flex-col items-center justify-center p-3 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 rounded-xl transition-colors text-blue-600">
+            <i class="fas fa-envelope text-2xl mb-1"></i>
+            <span class="text-xs font-semibold">Email</span>
+        </a>
+        <a href="https://twitter.com/intent/tweet?text=Found great hangar space at {{ listing.airport_icao }}!&url={{ url_for('main.listing_detail', id=listing.id, _external=True) }}"
+            target="_blank"
+            class="flex flex-col items-center justify-center p-3 bg-sky-50 hover:bg-sky-100 dark:bg-sky-900/20 dark:hover:bg-sky-900/40 rounded-xl transition-colors text-sky-500">
+            <i class="fab fa-twitter text-2xl mb-1"></i>
+            <span class="text-xs font-semibold">X</span>
+        </a>
+        <a href="sms:?body=Found a great hangar spot at {{ listing.airport_icao }}! {{ url_for('main.listing_detail', id=listing.id, _external=True) }}"
+            class="flex flex-col items-center justify-center p-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/40 rounded-xl transition-colors text-indigo-600">
+            <i class="fas fa-comment-alt text-2xl mb-1"></i>
+            <span class="text-xs font-semibold">Text</span>
+        </a>
+    </div>
+</div>
+<script>
+    function reportListing(id) {
+        const reason = prompt("Please tell us why you are reporting this listing (e.g. Scammer, Incorrect Details, Spam):");
+        if (reason) {
+            fetch(`/report-listing/${id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason: reason })
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        alert("Thank you. Our safety team has been notified and will review this listing.");
+                    } else {
+                        alert("Error submitting report. Please try again.");
+                    }
+                });
         }
-    </script>
+    }
+</script>
 </div>
 </div>
 </div>

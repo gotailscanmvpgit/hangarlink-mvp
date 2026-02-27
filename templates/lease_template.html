@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>HangarLinks Short-Term Aircraft Parking Lease Agreement</title>
+    <style>
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #1a56db;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1a56db;
+            margin-bottom: 5px;
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            color: #1f2937;
+        }
+
+        .grid {
+            display: table;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .row {
+            display: table-row;
+        }
+
+        .cell {
+            display: table-cell;
+            padding: 10px;
+            border: 1px solid #e5e7eb;
+            vertical-align: top;
+            width: 50%;
+        }
+
+        .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #6b7280;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .value {
+            font-size: 14px;
+            color: #111827;
+            font-weight: 500;
+        }
+
+        .terms {
+            font-size: 12px;
+            text-align: justify;
+        }
+
+        .terms p {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .signature-section {
+            margin-top: 40px;
+            display: table;
+            width: 100%;
+        }
+
+        .signature-box {
+            display: table-cell;
+            width: 45%;
+            padding: 20px;
+            background-color: #f9fafb;
+            border: 1px dashed #d1d5db;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .signature-status {
+            font-weight: bold;
+            color: #0e9f6e;
+            font-size: 18px;
+            margin: 15px 0;
+            border: 2px solid #0e9f6e;
+            padding: 10px;
+            display: inline-block;
+            transform: rotate(-5deg);
+            letter-spacing: 2px;
+        }
+
+        .signature-pending {
+            color: #d97706;
+            border-color: #d97706;
+        }
+
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 10px;
+            color: #9ca3af;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="logo">HANGARLINKS</div>
+        <div class="title">Short-Term Aircraft Parking Lease</div>
+        <div style="font-size: 12px; color: #6b7280; margin-top: 5px;">Agreement ID: #HL-{{ booking.id }}-{{
+            booking.created_at.strftime('%Y') }}</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">1. Parties</div>
+        <div class="grid">
+            <div class="row">
+                <div class="cell">
+                    <span class="label">Owner (Lessor)</span>
+                    <span class="value">{{ owner.first_name }} {{ owner.last_name }}<br>{{ owner.email }}</span>
+                </div>
+                <div class="cell">
+                    <span class="label">Renter (Lessee)</span>
+                    <span class="value">{{ renter.first_name }} {{ renter.last_name }}<br>{{ renter.email }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">2. Term & Location</div>
+        <div class="grid">
+            <div class="row">
+                <div class="cell">
+                    <span class="label">Lease Start</span>
+                    <span class="value">{{ booking.start_date.strftime('%B %d, %Y') }}</span>
+                </div>
+                <div class="cell">
+                    <span class="label">Lease End</span>
+                    <span class="value">{{ booking.end_date.strftime('%B %d, %Y') }}</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="cell" colspan="2" style="width: 100%;">
+                    <span class="label">Facility Location</span>
+                    <span class="value">Airport ICAO: {{ listing.airport_icao }}<br>Space Specification: {{
+                        listing.size_sqft }} sq ft {% if listing.covered %}Covered Hangar{% else %}Outdoor Hub/Ramp{%
+                        endif %}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">3. Financial Consideration</div>
+        <div class="grid">
+            <div class="row">
+                <div class="cell">
+                    <span class="label">Total Lease Amount</span>
+                    <span class="value">${{ booking.total_price }} USD</span>
+                </div>
+                <div class="cell">
+                    <span class="label">Payment Status</span>
+                    <span class="value" style="color: #0e9f6e;">Held in Escrow (Stripe)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section terms">
+        <div class="section-title">4. Terms and Conditions (Platform Assured)</div>
+        <p><strong>Use of Premises:</strong> Lessee shall use the designated parking or hangar space strictly for the
+            storage of the designated aircraft and related aviation equipment. No commercial maintenance operations,
+            hazardous material storage, or vehicle storage is permitted unless explicitly granted in writing by the
+            Owner.</p>
+        <p><strong>Platform Escrow:</strong> Payment is collected and secured by HangarLinks.com acting as the verified
+            payment gateway. Funds are disbursed to the Owner 24 hours after the successful commencement of the lease
+            period.</p>
+        <p><strong>Liability & Insurance:</strong> The Lessee carries sole liability for their aircraft. HangarLinks
+            explicitly does not hold liability for physical damage implicitly occurring on premises. Both parties
+            acknowledge compliance with FAA regulations regarding aircraft operation on airport property.</p>
+        <p><strong>Facility Rules:</strong> The Lessee agrees to abide by all local FBO and airport regulations (AOA
+            rules), maintaining a clean footprint and ensuring hangar boundaries are respected.</p>
+    </div>
+
+    <div class="signature-section">
+        <div class="signature-box" style="margin-right: 5%;">
+            <span class="label">Lessor (Owner) Digital Signature</span>
+            {% if booking.owner_signed %}
+            <div class="signature-status">SIGNED & VALIDATED</div>
+            <div style="font-size: 11px; color: #6b7280;">Secure Token Match: {{ booking.sign_token_owner[:8] }}...
+            </div>
+            {% else %}
+            <div class="signature-status signature-pending">PENDING E-SIGNATURE</div>
+            {% endif %}
+            <div style="margin-top: 15px; border-top: 1px solid #d1d5db; padding-top: 10px;">
+                <strong>{{ owner.first_name }} {{ owner.last_name }}</strong>
+            </div>
+        </div>
+
+        <div class="signature-box">
+            <span class="label">Lessee (Renter) Digital Signature</span>
+            {% if booking.renter_signed %}
+            <div class="signature-status">SIGNED & VALIDATED</div>
+            <div style="font-size: 11px; color: #6b7280;">Secure Token Match: {{ booking.sign_token_renter[:8] }}...
+            </div>
+            {% else %}
+            <div class="signature-status signature-pending">PENDING E-SIGNATURE</div>
+            {% endif %}
+            <div style="margin-top: 15px; border-top: 1px solid #d1d5db; padding-top: 10px;">
+                <strong>{{ renter.first_name }} {{ renter.last_name }}</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Automatically generated and verified digitally by HangarLinks.com on {{ current_time }}<br>
+        Document Hash Verification: {{ booking.id }}-{{ booking.sign_token_owner }}-{{ booking.sign_token_renter }}
+    </div>
+
+</body>
+
+</html>

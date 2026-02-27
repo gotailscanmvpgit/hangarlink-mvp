@@ -5,6 +5,14 @@ from functools import wraps
 from werkzeug.utils import secure_filename
 from extensions import db, mail, limiter, cache
 from models import User, Listing, Message, Booking, Ad, WhiteLabelRequest, Payment
+import os
+import secrets
+import datetime
+try:
+    from weasyprint import HTML
+except Exception as e:
+    HTML = None
+    print(f"Warning: WeasyPrint PDF Engine inactive (dependencies missing): {e}")
 
 try:
     from flask_mail import Message as MailMessage
@@ -19,7 +27,8 @@ import os
 import random
 import uuid
 # ... (rest of imports)
-from datetime import datetime, date, timedelta, timezone
+import datetime
+from datetime import date, timedelta, timezone
 from sqlalchemy import text, func
 
 try:
@@ -39,6 +48,15 @@ try:
     from sklearn.model_selection import train_test_split
 except ImportError:
     pd = np = RandomForestRegressor = train_test_split = None
+
+# Global Event Registry mapped to AI Pricing Optimizations
+EVENTS = {
+    'Oshkosh AirVenture': {'dates': '2026-07-20 to 2026-07-26', 'airports': ['KOSH', 'KATW', 'KFLD'], 'surge': 50},
+    'Sun n Fun Aerospace Expo': {'dates': '2026-04-05 to 2026-04-10', 'airports': ['KLAL', 'KPCM', 'KBOW'], 'surge': 40},
+    'NBAA-BACE Las Vegas': {'dates': '2026-10-14 to 2026-10-16', 'airports': ['KLAS', 'KHND', 'KVGT'], 'surge': 45},
+    'Reno Air Races': {'dates': '2026-09-10 to 2026-09-14', 'airports': ['KRTS', 'kRNO', 'KCXP'], 'surge': 35},
+    'High Sierra Fly-In': {'dates': '2026-10-15 to 2026-10-18', 'airports': ['Dead Cow Lakebed', 'KWMC', 'KRNO'], 'surge': 30}
+}
 
 bp = Blueprint('main', __name__)
 
@@ -159,6 +177,12 @@ def listings():
     covered = request.args.get('covered', '')
     min_price = request.args.get('min_price', type=float)
     max_price = request.args.get('max_price', type=float)
+    duration = request.args.get('duration', 7, type=int) # Defaulting to Short-term Focus
+    is_heated = request.args.get('is_heated')
+    access_24_7 = request.args.get('access_24_7')
+    electric_doors_only = request.args.get('electric_doors_only')
+    nfpa_409_compliant = request.args.get('nfpa_409_compliant')
+    gpu_power_available = request.args.get('gpu_power_available')
     
     # Build query
     query = Listing.query.filter_by(status='Active')
@@ -176,9 +200,29 @@ def listings():
     
     if max_price:
         query = query.filter(Listing.price_month <= max_price)
+        
+    if duration:
+        # A person searching for 'duration' wants spaces where minimum stay is <= duration
+        query = query.filter(Listing.min_stay_nights <= duration)
+        
+    if is_heated == '1':
+        query = query.filter_by(is_heated=True)
+        
+    if access_24_7 == '1':
+        query = query.filter_by(access_24_7=True)
+        
+    if electric_doors_only == '1':
+        query = query.filter(Listing.door_type.in_(['Electric', 'Hydraulic', 'Bi-Fold (Electric)']))
+        
+    if nfpa_409_compliant == '1':
+        query = query.filter_by(nfpa_409_compliant=True)
+        
+    if gpu_power_available == '1':
+        query = query.filter_by(gpu_power_available=True)
     
-    # Sort: Featured -> Premium Owner -> Newest
+    # Sort: Short-term prioritized -> Featured -> Premium Owner -> Newest
     pagination = query.order_by(
+        Listing.min_stay_nights.asc(),
         Listing.is_featured.desc(), 
         Listing.is_premium_listing.desc(), 
         Listing.created_at.desc()
@@ -214,9 +258,25 @@ def listings():
 @bp.route('/listing/<int:id>')
 def listing_detail(id):
     """Individual listing detail page"""
+    from models import Booking
     listing = db.get_or_404(Listing, id)
     aircraft_sizes = current_app.config.get('AIRCRAFT_SIZES', {})
-    return render_template('listing_detail.html', listing=listing, aircraft_sizes=aircraft_sizes)
+    
+    # Check if user has access to secure items like Ramp Cam
+    has_access = False
+    if current_user.is_authenticated:
+        if current_user.id == listing.owner_id:
+            has_access = True
+        else:
+            # Check if user has an active/pending booking for this listing
+            active_booking = Booking.query.filter_by(
+                renter_id=current_user.id, 
+                listing_id=listing.id
+            ).filter(Booking.status.in_(['pending', 'confirmed', 'active'])).first()
+            if active_booking:
+                has_access = True
+                
+    return render_template('listing_detail.html', listing=listing, aircraft_sizes=aircraft_sizes, has_access=has_access)
 
 @bp.route('/post-listing', methods=['GET', 'POST'])
 @login_required
@@ -254,7 +314,7 @@ def post_listing():
                 if file and allowed_file(file.filename):
                     filename = secure_filename(file.filename)
                     # Add timestamp AND uuid to avoid conflicts
-                    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                    timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
                     unique_id = uuid.uuid4().hex[:8]
                     filename = f"{timestamp}_{unique_id}_{filename}"
                     
@@ -270,6 +330,36 @@ def post_listing():
             score = 0
             checklist_verified = request.form.get('checklist_verified') == 'on'
             condition_verified = request.form.get('condition_verified') == 'on'
+            
+            # Practical Features booleans
+            access_24_7 = request.form.get('access_24_7') == 'on'
+            is_heated = request.form.get('is_heated') == 'on'
+            battery_tender = request.form.get('battery_tender') == 'on'
+            engine_heater = request.form.get('engine_heater') == 'on'
+            snow_removal = request.form.get('snow_removal') == 'on'
+            hurricane_tiedowns = request.form.get('hurricane_tiedowns') == 'on'
+            door_type = request.form.get('door_type')
+            ramp_cam_url = request.form.get('ramp_cam_url')
+            
+            # Corporate Jet Safety
+            nfpa_409_compliant = request.form.get('nfpa_409_compliant') == 'on'
+            gpu_power_available = request.form.get('gpu_power_available') == 'on'
+            
+            tail_height = request.form.get('tail_height_clearance')
+            tail_height_clearance = float(tail_height) if tail_height and tail_height.strip() else None
+            
+            floor_loading_pcn = request.form.get('floor_loading_pcn')
+            
+            if access_24_7: score += 10
+            if is_heated: score += 15
+            if battery_tender: score += 10
+            if engine_heater: score += 10
+            if snow_removal: score += 10
+            if hurricane_tiedowns: score += 15
+            if ramp_cam_url: score += 15
+            if nfpa_409_compliant: score += 20
+            if gpu_power_available: score += 10
+            if door_type in ['Electric', 'Hydraulic', 'Bi-Fold (Electric)']: score += 15
             
             # Rule 1: Photos (need at least 3 for points)
             if len(photo_filenames) >= 3:
@@ -292,12 +382,12 @@ def post_listing():
             avail_end = None
             if request.form.get('availability_start'):
                  try:
-                    avail_start = datetime.strptime(request.form.get('availability_start'), '%Y-%m-%d').date()
+                    avail_start = datetime.datetime.strptime(request.form.get('availability_start'), '%Y-%m-%d').date()
                  except ValueError:
                     pass
             if request.form.get('availability_end'):
                  try:
-                    avail_end = datetime.strptime(request.form.get('availability_end'), '%Y-%m-%d').date()
+                    avail_end = datetime.datetime.strptime(request.form.get('availability_end'), '%Y-%m-%d').date()
                  except ValueError:
                     pass
     
@@ -308,11 +398,24 @@ def post_listing():
             if not coord_found:
                 logger.warning(f"[AIRPORT-COORDS] unknown ICAO '{icao_upper}', using Toronto default")
 
+            # Handle Airbnb-specific inputs
+            price_month = float(request.form.get('price_month') or 0)
+            
+            raw_night_price = request.form.get('price_night')
+            if raw_night_price and raw_night_price.strip():
+                price_night = float(raw_night_price)
+            else:
+                price_night = round(price_month / 30, 2) if price_month > 0 else 0.0
+                
+            min_stay = int(request.form.get('min_stay_nights') or 1)
+
             listing = Listing(
                 airport_icao=icao_upper,
                 size_sqft=int(request.form.get('size_sqft')),
                 covered=request.form.get('covered') == 'on',
-                price_month=float(request.form.get('price_month')),
+                price_month=price_month,
+                price_night=price_night,
+                min_stay_nights=min_stay,
                 description=request.form.get('description'),
                 photos=','.join(photo_filenames) if photo_filenames else None,
                 owner_id=current_user.id,
@@ -325,6 +428,19 @@ def post_listing():
                 virtual_tour_url=request.form.get('virtual_tour_url'), # Feature 2
                 lat=lat,
                 lon=lon,
+                door_type=door_type,
+                access_24_7=access_24_7,
+                is_heated=is_heated,
+                battery_tender=battery_tender,
+                engine_heater=engine_heater,
+                snow_removal=snow_removal,
+                hurricane_tiedowns=hurricane_tiedowns,
+                ramp_cam_url=ramp_cam_url,
+                tail_height_clearance=tail_height_clearance,
+                nfpa_409_compliant=nfpa_409_compliant,
+                floor_loading_pcn=floor_loading_pcn,
+                gpu_power_available=gpu_power_available,
+                insurance_active=request.form.get('insurance_provided') == 'on'
             )
             db.session.add(listing)
             db.session.commit()
@@ -342,7 +458,7 @@ def post_listing():
             temp_listing = Listing(airport_icao=airport, id=0)
             price_intel = temp_listing.get_price_intelligence()
         
-        return render_template('post_listing.html', price_intel=price_intel, airport=airport)
+        return render_template('post_listing.html', price_intel=price_intel, airport=airport, events=EVENTS)
 
     except Exception as e:
         print(f"CRITICAL ERROR in post_listing: {str(e)}")
@@ -824,12 +940,26 @@ def owner_dashboard():
             
     occupancy_rate = (occupancy_count / total_listings * 100) if total_listings > 0 else 0
     
+    event_suggestions = []
+    for l in listings:
+        for ev_name, ev_data in EVENTS.items():
+            if l.airport_icao in ev_data.get('airports', []):
+                new_p = round(l.price_night * (1 + ev_data['surge']/100), 2) if l.price_night else 0
+                event_suggestions.append({
+                    'airport': l.airport_icao,
+                    'event': ev_name,
+                    'dates': ev_data['dates'],
+                    'surge': ev_data['surge'],
+                    'suggested_price': new_p
+                })
+    
     return render_template('dashboard_owner.html', 
                           total_earnings=total_earnings,
                           occupancy_rate=occupancy_rate,
                           listings=listings,
                           chart_data=monthly_data,
-                          total_listings=total_listings)
+                          total_listings=total_listings,
+                          event_suggestions=event_suggestions)
 
 # ========== MONETIZATION & SUBSCRIPTIONS ==========
 TRANSACTION_FEE_PERCENT = 8
@@ -839,30 +969,57 @@ INSURANCE_RATES = {'daily': 15.00, 'base': 45.00}
 @login_required
 def book_listing(listing_id):
     listing = Listing.query.get_or_404(listing_id)
-    duration_days = 30 
     
-    platform_fee = listing.price_month * (TRANSACTION_FEE_PERCENT / 100)
-    base_total = listing.price_month + platform_fee
+    # ── Airbnb Style Dynamic Dates ──    
+    start_date_str = request.form.get('start_date')
+    end_date_str = request.form.get('end_date')
+    
+    if not start_date_str or not end_date_str:
+        flash("Start and end dates are required.", "error")
+        return redirect(url_for('main.listing_detail', id=listing.id))
+        
+    start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
+    end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
+    duration_days = (end_date - start_date).days
+    
+    if duration_days < listing.min_stay_nights:
+        flash(f"This listing requires a minimum stay of {listing.min_stay_nights} nights.", "error")
+        return redirect(url_for('main.listing_detail', id=listing.id))
+        
+    if duration_days <= 0:
+        flash("Checkout date must be after check-in date.", "error")
+        return redirect(url_for('main.listing_detail', id=listing.id))
+        
+    # Calculate rental price
+    # If it's 30+ days, just charge the monthly rate. Otherwise use nightly rate.
+    base_rental = listing.price_month if duration_days >= 30 else (listing.price_night * duration_days)
+    
+    # Platform Service Fee (Airbnb Model - usually 10-15%, we'll use 10%)
+    platform_fee = base_rental * 0.10
+    base_total = base_rental + platform_fee
     
     add_insurance = request.form.get('add_insurance') == 'on'
     insurance_fee = 0.0
     
     if add_insurance:
-        insurance_fee = (INSURANCE_RATES['daily'] * duration_days) + INSURANCE_RATES['base']
+        # Scale insurance based on duration
+        base_insurance_daily = 15.00
+        insurance_fee = (base_insurance_daily * duration_days) + 45.00 # Base risk fee
         
     final_total = base_total + insurance_fee
     
     try:
-        stripe = get_stripe()
-        if not stripe or not stripe.api_key:
-            session_id = 'mock_session_123'
+        stripe_lib = get_stripe()
+        if not stripe_lib:
+            session_id = 'mock_session_' + str(uuid.uuid4().hex[:8])
             checkout_session_url = url_for('main.booking_success', _external=True) + '?session_id=' + session_id
         else:
             line_items = [{
                 'price_data': {
                     'currency': 'usd',
                     'product_data': {
-                        'name': f'Hangar Rental at {listing.airport_icao} (includes {TRANSACTION_FEE_PERCENT}% platform fee)',
+                        'name': f'Hangar Rental at {listing.airport_icao}',
+                        'description': f'{duration_days} nights ({start_date_str} to {end_date_str}) + Platform Fee',
                     },
                     'unit_amount': int(base_total * 100),
                 },
@@ -875,14 +1032,14 @@ def book_listing(listing_id):
                         'currency': 'usd',
                         'product_data': {
                             'name': 'Short-Term Hangar Insurance (Avemco Partner)',
-                            'description': 'Liability & Hull coverage for 30 days',
+                            'description': f'Liability & Hull coverage for {duration_days} days',
                         },
                         'unit_amount': int(insurance_fee * 100),
                     },
                     'quantity': 1,
                 })
                 
-            checkout_session = stripe.checkout.Session.create(
+            checkout_session = stripe_lib.checkout.Session.create(
                 payment_method_types=['card'],
                 line_items=line_items,
                 mode='payment',
@@ -900,9 +1057,9 @@ def book_listing(listing_id):
         booking = Booking(
             listing_id=listing.id, 
             renter_id=current_user.id,
-            start_date=datetime.now(),
-            end_date=datetime.now() + timedelta(days=30),
-            total_price=listing.price_month,
+            start_date=start_date,
+            end_date=end_date,
+            total_price=base_rental,
             status='Pending',
             stripe_payment_id=session_id,
             insurance_opt_in=add_insurance,
@@ -932,9 +1089,12 @@ def booking_success():
     session_id = request.args.get('session_id')
     booking = Booking.query.filter_by(stripe_payment_id=session_id).first_or_404()
     
-    booking.status = 'Confirmed'
-    booking.listing.status = 'Rented'
-    booking.listing.insurance_active = True
+    # Generate cryptographic sign tokens
+    if not booking.sign_token_renter:
+        booking.sign_token_renter = secrets.token_urlsafe(32)
+        booking.sign_token_owner = secrets.token_urlsafe(32)
+        
+    booking.status = 'Pending E-Signature'
     
     # Update Payment status
     payment = Payment.query.filter_by(stripe_session_id=session_id).first()
@@ -943,20 +1103,68 @@ def booking_success():
         
     db.session.commit()
     
-    agreement_url = url_for('main.download_agreement', booking_id=booking.id)
+    # WeasyPrint PDF Generation Engine
+    if HTML:
+        try:
+            rendered_html = render_template('lease_template.html', 
+                                         booking=booking, 
+                                         listing=booking.listing, 
+                                         owner=booking.listing.owner, 
+                                         renter=booking.renter,
+                                         current_time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+            
+            os.makedirs(os.path.join(current_app.root_path, 'static', 'leases'), exist_ok=True)
+            filename = f"lease_{booking.id}_{booking.sign_token_renter[:8]}.pdf"
+            filepath = os.path.join(current_app.root_path, 'static', 'leases', filename)
+            
+            HTML(string=rendered_html).write_pdf(filepath)
+            booking.lease_pdf_path = filename
+            db.session.commit()
+        except Exception as e:
+            print(f"WeasyPrint PDF Generation Failed: {e}")
+            
+    # Mock Mailer
+    print(f"\n[MAIL SIMULATOR] Sent Lease Agreement for Verification!")
+    print(f"--> Renter Link: {url_for('main.sign_lease', token=booking.sign_token_renter, _external=True)}")
+    print(f"--> Owner Link:  {url_for('main.sign_lease', token=booking.sign_token_owner, _external=True)}\n")
     
-    flash('Booking Confirmed! Rental agreement generated.', 'success')
-    return render_template('booking_success.html', booking=booking, agreement_url=agreement_url)
+    flash('Booking Escrowed! Check your email to digitally sign the generated lease agreement.', 'success')
+    return redirect(url_for('main.sign_lease', token=booking.sign_token_renter))
 
-@bp.route('/agreement/<int:booking_id>')
+@bp.route('/sign-lease/<token>', methods=['GET'])
 @login_required
-def download_agreement(booking_id):
-    booking = Booking.query.get_or_404(booking_id)
-    if current_user.id != booking.renter_id and current_user.id != booking.listing.owner_id:
-        flash('Unauthorized', 'error')
-        return redirect(url_for('main.index'))
+def sign_lease(token):
+    # Determine if token belongs to renter or owner
+    booking = Booking.query.filter((Booking.sign_token_renter == token) | (Booking.sign_token_owner == token)).first_or_404()
+    
+    # Check authorization mapping
+    is_renter = booking.sign_token_renter == token
+    if is_renter and current_user.id != booking.renter_id: abort(403)
+    if not is_renter and current_user.id != booking.listing.owner_id: abort(403)
+    
+    return render_template('sign_lease.html', booking=booking, token=token)
+    
+@bp.route('/execute-lease/<token>', methods=['POST'])
+@login_required
+def execute_lease(token):
+    booking = Booking.query.filter((Booking.sign_token_renter == token) | (Booking.sign_token_owner == token)).first_or_404()
+    
+    if booking.sign_token_renter == token:
+        booking.renter_signed = True
+        flash('You have successfully signed the lease as the Lessee!', 'success')
+    else:
+        booking.owner_signed = True
+        flash('You have successfully signed the lease as the Lessor!', 'success')
         
-    return render_template('agreement_pdf.html', booking=booking)
+    # Check if both constraints fulfilled securely mapping to Confirmed!
+    if booking.renter_signed and booking.owner_signed:
+        booking.status = 'Confirmed'
+        booking.listing.status = 'Rented'
+        booking.listing.insurance_active = True
+        flash('Both parties have signed! Digital Escrow dispersed and lease is now Confirmed.', 'success')
+        
+    db.session.commit()
+    return redirect(url_for('main.listing_detail', id=booking.listing_id))
 
 @bp.route('/matches')
 @login_required
@@ -998,6 +1206,10 @@ def matches():
         if l.health_score >= 80:
             score += 5
             
+        # Reward explicitly Short-Term optimized structures mathematically
+        if getattr(l, 'min_stay_nights', 30) <= 7:
+            score += 20 # Massive immediate ranking modifier
+            
         final_score = min(score, 99)
         scored_matches.append({'listing': l, 'score': final_score})
         
@@ -1006,23 +1218,9 @@ def matches():
     
     return render_template('matches.html', matches=top_matches)
 
-@bp.route('/concierge/chat', methods=['POST'])
-@login_required
-def concierge_chat():
-    data = request.json
-    user_msg = data.get('message', '').lower()
-    
-    response = "I'm the HangarLinks AI. "
-    if 'price' in user_msg or 'cost' in user_msg:
-        response += "Market rates at CYHM are trending up (+12%). I recommend listing around $600/mo for a T-Hangar."
-    elif 'availability' in user_msg:
-        response += "I see 3 covered spots opening up next month near Toronto."
-    elif 'insurance' in user_msg:
-        response += "All rentals include our $1M liability protection policy."
-    else:
-        response += "How can I help you find or list a hangar today?"
-        
-    return {'response': response}
+@bp.route('/concierge')
+def concierge():
+    return render_template('concierge.html')
 
 @bp.route('/api/forecast', methods=['GET'])
 def get_forecast():
@@ -1405,18 +1603,56 @@ def insights():
     if not has_access:
         return render_template('insights_teaser.html', pricing=INSIGHTS_PRICING)
         
-    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
-    hk_market_price = [random.randint(1200, 1600) for _ in range(6)]
-    user_avg_price = [random.randint(1100, 1500) for _ in range(6)]
-    occupancy_data = [random.randint(60, 95) for _ in range(6)]
+    airport_code = request.args.get('airport', 'CYTZ')
+    duration = request.args.get('duration', 'weekly')
+    
+    # Calculate short-term DB metrics dynamically
+    q = Listing.query.filter_by(status='Active').filter((Listing.min_stay_nights <= 7) | (Listing.min_stay_nights == None))
+    airport_listings = q.filter_by(airport_icao=airport_code).all()
+    
+    nightly_rates = []
+    for l in airport_listings:
+        if l.price_night:
+            nightly_rates.append(l.price_night)
+        elif l.price_month:
+            nightly_rates.append(l.price_month / 30)
+            
+    avg_nightly_rate = sum(nightly_rates) / len(nightly_rates) if nightly_rates else 85.0
+    
+    trend_pct = 10.0
+    weekend_occupancy = 85
     demand_score = 8.5
     
+    if duration == 'weekly':
+        labels = ['W1', 'W2', 'W3', 'W4', 'W5', 'This Week']
+    else:
+        labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
+        
+    hk_market_price = [round(avg_nightly_rate * (1 + 0.02 * i), 2) for i in range(-5, 1)]
+    user_avg_price = [round(avg_nightly_rate * (0.95 + 0.01 * i), 2) for i in range(-5, 1)]
+    occupancy_data = [80, 82, 85, 81, 86, weekend_occupancy]
+
+    active_surges = []
+    for event_name, data in EVENTS.items():
+        if airport_code in data['airports']:
+            active_surges.append({
+                'name': event_name,
+                'surge': data['surge'],
+                'dates': data['dates']
+            })
+    
     return render_template('insights.html', 
-                           months=months, 
+                           labels=labels, 
                            market_prices=hk_market_price,
                            my_prices=user_avg_price,
                            occupancy=occupancy_data,
-                           demand_score=demand_score)
+                           demand_score=demand_score,
+                           avg_nightly_rate=round(avg_nightly_rate, 2),
+                           trend_pct=trend_pct,
+                           weekend_occupancy=weekend_occupancy,
+                           airport_code=airport_code,
+                           active_surges=active_surges,
+                           duration=duration)
 
 @bp.route('/buy-insights/<type>', methods=['POST'])
 @login_required
@@ -1459,9 +1695,9 @@ def insights_success():
     
     current_user.has_analytics_access = True
     if type == 'subscription': # Assuming 'subscription' implies yearly based on INSIGHTS_PRICING
-        current_user.analytics_expires_at = datetime.now(timezone.utc) + timedelta(days=365)
+        current_user.analytics_expires_at = datetime.datetime.now(timezone.utc) + timedelta(days=365)
     else:
-        current_user.analytics_expires_at = datetime.now(timezone.utc) + timedelta(days=30) 
+        current_user.analytics_expires_at = datetime.datetime.now(timezone.utc) + timedelta(days=30) 
     db.session.commit()
     
     flash('Analytics Unlocked!', 'success')
@@ -1557,7 +1793,7 @@ def white_label_submit():
             db.session.commit()
             return redirect(url_for('main.white_label_success'))
             
-        checkout_session = stripe_lib.checkout.Session.create(
+        checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=[{
                 'price_data': {
@@ -1778,26 +2014,32 @@ def _build_db_context(message: str) -> str:
     covered_only = any(w in msg_lower for w in ['covered', 'indoor', 'enclosed'])
 
     # Case 1: listing search
-    if any(w in msg_lower for w in ['show', 'find', 'search', 'available', 'hangar', 'listing', 'price']):
+    if any(w in msg_lower for w in ['show', 'find', 'search', 'available', 'hangar', 'listing', 'price', 'overnight', 'weekend']):
         q = Listing.query.filter_by(status='Active')
         if airport_hits:
             q = q.filter(Listing.airport_icao.in_(airport_hits))
         if max_price:
-            q = q.filter(Listing.price_month <= max_price)
+            q = q.filter((Listing.price_night <= max_price) | (Listing.price_month / 30 <= max_price))
         if covered_only:
             q = q.filter_by(covered=True)
-        results = q.order_by(Listing.health_score.desc()).limit(5).all()
+            
+        # Strongly bias towards short-term stays natively in the data fetch layer
+        results = q.order_by(Listing.min_stay_nights.asc(), Listing.health_score.desc()).limit(5).all()
+        
         if results:
-            lines = ["**Top available hangars matching your query:**"]
+            lines = ["**Top Short-Term / Overnight hangars matching your query:**"]
             for l in results:
                 covered_tag = "🏠 Covered" if l.covered else "🌤 Uncovered"
+                night_rate = l.price_night if l.price_night else (l.price_month / 30)
+                stay_limit = f"{l.min_stay_nights} Night Min" if l.min_stay_nights > 1 else "Flexible (1 Night)"
+                
                 lines.append(
-                    f"- **{l.airport_icao}** | {l.size_sqft} sqft | ${l.price_month:.0f}/mo | {covered_tag} | "
+                    f"- **{l.airport_icao}** | {stay_limit} | **${night_rate:.0f}/night** | {covered_tag} | "
                     f"[View Listing](/listing/{l.id})"
                 )
             ctx_parts.append("\n".join(lines))
         else:
-            ctx_parts.append("No active listings match those filters right now.")
+            ctx_parts.append("No short-term / overnight listings match those filters right now. Try expanding your search.")
 
     # Case 2: average price query
     if any(w in msg_lower for w in ['average', 'avg', 'typical', 'market price', 'how much']):
@@ -1877,8 +2119,8 @@ def concierge_api():
                 client_kwargs['base_url'] = base_url
             client = openai.OpenAI(**client_kwargs)
 
-            system_prompt = f"""You are the HangarLinks AI Concierge — a smart, friendly aviation assistant.
-You help aircraft owners find hangars, and hangar owners manage their listings.
+            system_prompt = f"""You are the HangarLinks AI Concierge — a smart, friendly aviation assistant specializing in Short-Term transient parking (Overnights & Weekends 1-7 days).
+You help transient aircraft owners find overnight hangars, and hangar owners optimize their listings for event surges.
 
 USER CONTEXT:
 - Name: {user_name}
@@ -1889,10 +2131,12 @@ LIVE DATABASE CONTEXT (use this to answer):
 {db_context if db_context else "No specific data found for this query."}
 
 INSTRUCTIONS:
-- Use the live data above to answer questions about prices, availability, listings.
+- PRIORITY 1: Always prioritize and highlight listings with minimum stays of 1 to 7 nights first.
+- PRIORITY 2: Automatically check if dates/locations match Major Events (e.g. Oshkosh, Sun 'n Fun) and suggest nightly Event Surge rates.
+- Use the live data above to answer questions about availability, translating monthly rates down to estimated Nightly Rates (Monthly/30) if only monthly is defined.
 - Be concise and friendly. Use markdown (bold, bullet points) for clarity.
 - If you find matching listings, always include the [View Listing](/listing/ID) link.
-- If asked to message an owner or book a viewing, say you'll facilitate: "I'll connect you — click the listing link."
+- If asked "Book this?" direct them to the listing link. If asked "Message owner?" state "I'll connect you — click the listing link and use the owner contact module."
 - NEVER make up listing data. Only use what's in LIVE DATABASE CONTEXT.
 - Keep replies under 200 words."""
 
@@ -2225,3 +2469,95 @@ def payment_cancel():
     flash("Payment cancelled.", "info")
     return redirect(url_for('main.profile'))
 
+# ─────────────────────────────────────────────
+#  WebSocket Real-Time Chat Handlers
+# ─────────────────────────────────────────────
+try:
+    from flask_socketio import emit
+except ImportError:
+    def emit(*args, **kwargs): pass
+    print("Warning: flask_socketio not installed. emit disabled.")
+    
+from extensions import socketio
+
+@socketio.on('connect')
+def handle_connect():
+    """Client joined the Concierge portal."""
+    pass
+
+@socketio.on('chat_message')
+def handle_chat_message(data):
+    """Handle incoming WS messages natively mapping to the API hooks."""
+    if not isinstance(data, dict):
+        return
+        
+    user_msg = data.get('message', '').strip()
+    history = data.get('history', [])
+    
+    if not user_msg:
+        return
+        
+    # Re-use our existing Logic layer but via WS instead of HTTP POST
+    user_role = current_user.role if current_user.is_authenticated else 'guest'
+    home_airport = getattr(current_user, 'alert_airport', None) or 'Not set'
+    user_name = current_user.username if current_user.is_authenticated else 'Guest'
+    
+    db_ctx = _build_db_context(user_msg)
+    
+    api_key = os.environ.get('OPENAI_API_KEY') or os.environ.get('GROK_API_KEY')
+    base_url = os.environ.get('OPENAI_BASE_URL')
+    
+    # Send an immediate 'typing' indicator
+    emit('typing_status', {'isTyping': True})
+
+    try:
+        if openai and api_key:
+            client_kwargs = {'api_key': api_key}
+            if base_url:
+                client_kwargs['base_url'] = base_url
+            client = openai.OpenAI(**client_kwargs)
+
+            system_prompt = f"""You are the HangarLinks AI Concierge — a smart, friendly aviation assistant specializing in Short-Term transient parking (Overnights & Weekends 1-7 days).
+You help transient aircraft owners find overnight hangars, and hangar owners optimize their listings for event surges.
+
+USER CONTEXT:
+- Name: {user_name}
+- Role: {user_role}
+- Home Airport: {home_airport}
+
+LIVE DATABASE CONTEXT (use this to answer):
+{db_ctx if db_ctx else "No specific data found for this query."}
+
+INSTRUCTIONS:
+- PRIORITY 1: Always prioritize and highlight listings with minimum stays of 1 to 7 nights first.
+- PRIORITY 2: Automatically check if dates/locations match Major Events (e.g. Oshkosh, Sun 'n Fun) and suggest nightly Event Surge rates.
+- Use the live data above to answer questions about availability, translating monthly rates down to estimated Nightly Rates (Monthly/30) if only monthly is defined.
+- Be concise and friendly. Use markdown (bold, bullet points) for clarity.
+- If you find matching listings, always include the [View Listing](/listing/ID) link.
+- If asked "Book this?" direct them to the listing link. If asked "Message owner?" state "I'll connect you — click the listing link and use the owner contact module."
+- NEVER make up listing data. Only use what's in LIVE DATABASE CONTEXT.
+- Keep replies under 200 words."""
+
+            messages = [{'role': 'system', 'content': system_prompt}]
+            for h in history[-6:]:
+                if h.get('role') in ('user', 'assistant') and h.get('content'):
+                    messages.append({'role': h['role'], 'content': h['content']})
+            messages.append({'role': 'user', 'content': user_msg})
+
+            model = os.environ.get('OPENAI_MODEL', 'gpt-4o-mini')
+            resp = client.chat.completions.create(
+                model=model,
+                messages=messages,
+                max_tokens=400,
+                temperature=0.7,
+            )
+            reply = resp.choices[0].message.content.strip()
+            emit('chat_response', {'reply': reply, 'source': 'llm'})
+            return
+            
+    except Exception as e:
+        current_app.logger.error(f"WS Concierge Error: {e}")
+        
+    # Fallback to rules layer
+    reply = _rule_based_response(user_msg, user_role, db_ctx)
+    emit('chat_response', {'reply': reply, 'source': 'rules'})

@@ -39,7 +39,7 @@
         <form method="GET" action="{{ url_for('main.listings') }}"
             class="rounded-2xl p-6 shadow-2xl border border-white/20"
             style="background: rgba(0,31,63,0.85); backdrop-filter: blur(16px);">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
                 <!-- Airport ICAO -->
                 <div>
                     <label class="block text-xs font-bold text-white/80 mb-2 uppercase tracking-wider">
@@ -68,6 +68,28 @@
                     </select>
                 </div>
 
+                <!-- Duration -->
+                <div>
+                    <label class="block text-xs font-bold text-white/80 mb-2 uppercase tracking-wider">
+                        <i class="fas fa-calendar-alt mr-2 text-blue-400"></i>Duration
+                    </label>
+                    <select name="duration"
+                        class="block w-full rounded-xl p-3 text-base font-semibold shadow-inner focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                        style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #FAFAFA;">
+                        <option value="7" {% if request.args.get('duration')=='7' or request.args.get('duration') is
+                            none %}selected{% endif %} style="background:#001F3F; color:#FAFAFA;">Short-term (1-7
+                            nights)</option>
+                        <option value="1" {% if request.args.get('duration')=='1' %}selected{% endif %}
+                            style="background:#001F3F; color:#FAFAFA;">Overnight (1 Night)</option>
+                        <option value="3" {% if request.args.get('duration')=='3' %}selected{% endif %}
+                            style="background:#001F3F; color:#FAFAFA;">2-3 Nights</option>
+                        <option value="30" {% if request.args.get('duration')=='30' %}selected{% endif %}
+                            style="background:#001F3F; color:#FAFAFA;">Monthly (30+ Days)</option>
+                        <option value="" {% if request.args.get('duration')=='' %}selected{% endif %}
+                            style="background:#001F3F; color:#FAFAFA;">Flexible / Any</option>
+                    </select>
+                </div>
+
                 <!-- Min Price -->
                 <div>
                     <label class="block text-xs font-bold text-white/80 mb-2 uppercase tracking-wider">
@@ -92,14 +114,58 @@
                         onblur="this.style.background='rgba(255,255,255,0.08)'">
                 </div>
             </div>
-
-            <button type="submit"
-                class="w-full font-bold py-3.5 px-6 rounded-xl shadow-lg transition-all hover:-translate-y-0.5 active:translate-y-0"
-                style="background: linear-gradient(135deg, #1a56db 0%, #0e9f6e 100%); color: white;">
-                <i class="fas fa-search mr-2"></i>Search Available Hangars
-            </button>
-        </form>
     </div>
+
+    <!-- Practical Amenities Filters -->
+    <div class="flex flex-wrap items-center gap-4 mt-6 mb-4 px-1">
+        <label
+            class="flex items-center space-x-2 text-white/80 font-bold text-sm cursor-pointer group hover:text-white transition-all">
+            <input type="checkbox" name="is_heated" value="1" {% if request.args.get('is_heated')=='1' %}checked{% endif
+                %}
+                class="w-4 h-4 text-blue-500 rounded border-gray-500 bg-gray-800/50 focus:ring-blue-500 transition-all shadow-inner">
+            <span><i class="fas fa-thermometer-half text-red-500 mr-1.5"></i>Heated Only</span>
+        </label>
+
+        <label
+            class="flex items-center space-x-2 text-white/80 font-bold text-sm cursor-pointer group hover:text-white transition-all">
+            <input type="checkbox" name="access_24_7" value="1" {% if request.args.get('access_24_7')=='1' %}checked{%
+                endif %}
+                class="w-4 h-4 text-blue-500 rounded border-gray-500 bg-gray-800/50 focus:ring-blue-500 transition-all shadow-inner">
+            <span><i class="fas fa-key text-blue-400 mr-1.5"></i>24/7 Access</span>
+        </label>
+
+        <label
+            class="flex items-center space-x-2 text-white/80 font-bold text-sm cursor-pointer group hover:text-white transition-all">
+            <input type="checkbox" name="electric_doors_only" value="1" {% if
+                request.args.get('electric_doors_only')=='1' %}checked{% endif %}
+                class="w-4 h-4 text-amber-500 rounded border-gray-500 bg-gray-800/50 focus:ring-amber-500 transition-all shadow-inner">
+            <span><i class="fas fa-bolt text-amber-400 mr-1.5"></i>Electric/Hydraulic Doors</span>
+        </label>
+
+        <label
+            class="flex items-center space-x-2 text-white/80 font-bold text-sm cursor-pointer group hover:text-white transition-all">
+            <input type="checkbox" name="nfpa_409_compliant" value="1" {% if request.args.get('nfpa_409_compliant')=='1'
+                %}checked{% endif %}
+                class="w-4 h-4 text-amber-500 rounded border-gray-500 bg-gray-800/50 focus:ring-amber-500 transition-all shadow-inner">
+            <span><i class="fas fa-fire-extinguisher text-amber-500 mr-1.5"></i>NFPA 409 Compliant</span>
+        </label>
+
+        <label
+            class="flex items-center space-x-2 text-white/80 font-bold text-sm cursor-pointer group hover:text-white transition-all">
+            <input type="checkbox" name="gpu_power_available" value="1" {% if
+                request.args.get('gpu_power_available')=='1' %}checked{% endif %}
+                class="w-4 h-4 text-blue-500 rounded border-gray-500 bg-gray-800/50 focus:ring-blue-500 transition-all shadow-inner">
+            <span><i class="fas fa-plug text-blue-400 mr-1.5"></i>GPU Available</span>
+        </label>
+    </div>
+
+    <button type="submit"
+        class="w-full font-bold py-3.5 px-6 rounded-xl shadow-lg transition-all hover:-translate-y-0.5 active:translate-y-0"
+        style="background: linear-gradient(135deg, #1a56db 0%, #0e9f6e 100%); color: white;">
+        <i class="fas fa-search mr-2"></i>Search Available Hangars
+    </button>
+    </form>
+</div>
 </div>
 
 <!-- Search Limit Banner -->
@@ -163,7 +229,7 @@
             class="bg-gray-50 dark:bg-gray-800 rounded-2xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-700 h-full flex flex-col items-center justify-center p-6 text-center group hover:bg-gray-100 dark:hover:bg-gray-700 transition w-full">
             <span class="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wide">Sponsored</span>
             <a href="{{ sidebar_ads[0].link_url }}" target="_blank" class="block w-full">
-                <img src="{{ sidebar_ads[0].image_url }}" alt="{{ sidebar_ads[0].title }}"
+                <img src="{{ sidebar_ads[0].image_url }}" alt="{{ sidebar_ads[0].title }}" loading="lazy"
                     class="w-full h-48 object-cover rounded-xl mb-4 group-hover:opacity-90 transition-opacity">
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ sidebar_ads[0].title }}</h3>
                 <span class="text-blue-600 dark:text-blue-400 font-medium text-sm">Learn More <i
@@ -243,27 +309,33 @@
 
                     <!-- Verified Badge (top-right) -->
                     <div class="absolute top-3 right-3 z-10 flex flex-col gap-1.5">
-                        {% if listing.condition_verified %}
-                        <span
-                            class="inline-flex items-center bg-white/90 backdrop-blur text-green-700 text-xs font-bold px-2 py-1 rounded-full shadow"
-                            title="Owner has guaranteed the condition of this space">
-                            <i class="fas fa-check-circle mr-1"></i>Verified
-                        </span>
-                        {% endif %}
-                        {% if listing.virtual_tour_url %}
-                        <span
+                        {% if listing.min_stay_nights <= 7 %} <span
                             class="inline-flex items-center bg-white/90 backdrop-blur text-blue-700 text-xs font-bold px-2 py-1 rounded-full shadow"
-                            title="This listing has a 360° virtual tour available">
-                            <i class="fas fa-vr-cardboard mr-1"></i>360°
-                        </span>
-                        {% endif %}
-                        {% if listing.owner.is_premium %}
-                        <span
-                            class="inline-flex items-center bg-amber-100/90 backdrop-blur text-amber-700 text-xs font-bold px-2 py-1 rounded-full shadow"
-                            title="Premium owner listing">
-                            <i class="fas fa-star mr-1"></i>Premium
-                        </span>
-                        {% endif %}
+                            title="Short-Term Available">
+                            <i class="fas fa-calendar-day mr-1"></i>Short-Term
+                            </span>
+                            {% endif %}
+                            {% if listing.condition_verified %}
+                            <span
+                                class="inline-flex items-center bg-white/90 backdrop-blur text-green-700 text-xs font-bold px-2 py-1 rounded-full shadow"
+                                title="Owner has guaranteed the condition of this space">
+                                <i class="fas fa-check-circle mr-1"></i>Verified
+                            </span>
+                            {% endif %}
+                            {% if listing.virtual_tour_url %}
+                            <span
+                                class="inline-flex items-center bg-white/90 backdrop-blur text-blue-700 text-xs font-bold px-2 py-1 rounded-full shadow"
+                                title="This listing has a 360° virtual tour available">
+                                <i class="fas fa-vr-cardboard mr-1"></i>360°
+                            </span>
+                            {% endif %}
+                            {% if listing.owner.is_premium %}
+                            <span
+                                class="inline-flex items-center bg-amber-100/90 backdrop-blur text-amber-700 text-xs font-bold px-2 py-1 rounded-full shadow"
+                                title="Premium owner listing">
+                                <i class="fas fa-star mr-1"></i>Premium
+                            </span>
+                            {% endif %}
                     </div>
                 </div>
 
@@ -273,7 +345,12 @@
                         <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-platinum-100">{{
                             listing.airport_icao }}</h3>
                         <span class="text-xl sm:text-2xl font-bold text-blue-600">
+                            {% if request.args.get('duration', '7') in ['1', '2', '3', '7'] and listing.price_night %}
+                            ${{ listing.price_night|default(listing.price_month/30, true)|int }}<span
+                                class="text-xs font-normal text-gray-500">/night</span>
+                            {% else %}
                             ${{ listing.price_month|int }}<span class="text-xs font-normal text-gray-500">/mo</span>
+                            {% endif %}
                         </span>
                     </div>
                     <p class="text-gray-600 dark:text-platinum-300 text-sm mb-3">

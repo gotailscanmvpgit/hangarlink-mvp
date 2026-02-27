@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <div
+        class="bg-white dark:bg-dark-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+
+        <div class="bg-gradient-to-r from-blue-900 to-indigo-900 p-8 text-center relative overflow-hidden">
+            <div class="absolute inset-0 opacity-10"
+                style="background-image: url('https://www.transparenttextures.com/patterns/cubes.png');"></div>
+            <i class="fas fa-file-contract text-5xl text-blue-300 mb-4 animate-bounce"></i>
+            <h1 class="text-3xl font-extrabold text-white mb-2 relative z-10">Digital Lease Agreement</h1>
+            <p class="text-blue-200 text-lg relative z-10">Review and e-sign your short-term hangar lease.</p>
+        </div>
+
+        <div class="p-8">
+            <div
+                class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 bg-gray-50 dark:bg-dark-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-platinum-100"><i
+                            class="fas fa-plane mr-2 text-blue-500"></i>Reservation at {{ booking.listing.airport_icao
+                        }}</h2>
+                    <p class="text-gray-600 dark:text-gray-400 mt-1">
+                        {{ booking.start_date.strftime('%b %d, %Y') }} — {{ booking.end_date.strftime('%b %d, %Y') }}
+                    </p>
+                </div>
+                <div class="mt-4 md:mt-0 text-right">
+                    <span
+                        class="inline-flex items-center bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide">
+                        <i class="fas fa-hourglass-half mr-2 text-amber-500"></i>Awaiting E-Signature
+                    </span>
+                    <p class="text-sm font-bold text-gray-900 dark:text-platinum-100 mt-2">Total: ${{
+                        booking.total_price }}</p>
+                </div>
+            </div>
+
+            <!-- PDF Embed/Preview -->
+            <div
+                class="w-full h-96 bg-gray-200 dark:bg-dark-900 rounded-xl border-2 border-dashed border-gray-400 dark:border-gray-600 mb-8 flex flex-col items-center justify-center relative overflow-hidden group">
+                <i class="fas fa-file-pdf text-6xl text-red-500 mb-4 group-hover:scale-110 transition-transform"></i>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-platinum-200">Lease Document Generated</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 text-center px-4">Your official lease generated
+                    by WeasyPrint requires validation.</p>
+                {% if booking.lease_pdf_path %}
+                <a href="/static/leases/{{ booking.lease_pdf_path }}" target="_blank"
+                    class="mt-4 inline-flex items-center text-blue-600 hover:text-blue-800 font-bold bg-blue-50 dark:bg-blue-900/30 px-4 py-2 rounded-lg border border-blue-200 dark:border-blue-800 transition-colors">
+                    <i class="fas fa-external-link-alt mr-2"></i>Preview PDF
+                </a>
+                {% endif %}
+            </div>
+
+            <hr class="border-gray-200 dark:border-gray-700 my-8">
+
+            <div class="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-xl p-6 mb-8">
+                <h3 class="font-bold text-gray-900 dark:text-platinum-100 mb-2 flex items-center">
+                    <i class="fas fa-shield-alt text-blue-500 mr-2"></i>Consent & Terms
+                </h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                    By clicking to sign below, you consent to utilizing an electronic signature binding you to the terms
+                    embedded in the official lease agreement. The transaction funds will be safely held in Stripe Escrow
+                    pending final execution.
+                </p>
+            </div>
+
+            <form action="{{ url_for('main.execute_lease', token=token) }}" method="POST" class="text-center">
+                <button type="submit"
+                    class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-lg font-bold rounded-xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1">
+                    <i class="fas fa-signature mr-3 text-2xl"></i>SIGN LEASE NOW
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
