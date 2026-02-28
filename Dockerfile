@@ -67,5 +67,5 @@ EXPOSE 8000
 
 # Health check removed temporarily to isolate port issue
 
-# Start the application
-CMD gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 120 app:app
+# Start the application (1 worker to fit Railway memory limits)
+CMD gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 2 --timeout 120 --preload app:app
