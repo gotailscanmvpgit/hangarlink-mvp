@@ -120,21 +120,54 @@ def create_app(config_class=Config):
         # Reliable startup: create tables if they don't exist
         db.create_all()
 
-        # Dynamic Schema Patching (Zero Downtime / Render Live)
-        from sqlalchemy import text, inspect
+        # Dynamic Schema Patching — add ALL missing columns to live DB
+        from sqlalchemy import text, inspect as sa_inspect
         try:
-            inspector = inspect(db.engine)
-            existing_cols = [c['name'] for c in inspector.get_columns('listings')]
-            if 'available_sqft' not in existing_cols:
-                db.session.execute(text("ALTER TABLE listings ADD COLUMN available_sqft FLOAT"))
-                db.session.execute(text("UPDATE listings SET available_sqft = size_sqft WHERE available_sqft IS NULL"))
-                db.session.commit()
-                print("🚀 Successfully auto-migrated available_sqft column to live database.")
-            else:
-                # Backfill any NULLs
-                db.session.execute(text("UPDATE listings SET available_sqft = size_sqft WHERE available_sqft IS NULL"))
-                db.session.commit()
-                print("✅ available_sqft column already exists.")
+            inspector = sa_inspect(db.engine)
+            
+            # --- Listings table columns ---
+            existing_listing_cols = [c['name'] for c in inspector.get_columns('listings')]
+            listing_migrations = [
+                ('available_sqft', 'FLOAT'),
+                ('price_night', 'FLOAT DEFAULT 0.0'),
+                ('min_stay_nights', 'INTEGER DEFAULT 1'),
+                ('door_type', 'TEXT'),
+                ('access_24_7', 'BOOLEAN DEFAULT FALSE'),
+                ('is_heated', 'BOOLEAN DEFAULT FALSE'),
+                ('battery_tender', 'BOOLEAN DEFAULT FALSE'),
+                ('engine_heater', 'BOOLEAN DEFAULT FALSE'),
+                ('snow_removal', 'BOOLEAN DEFAULT FALSE'),
+                ('hurricane_tiedowns', 'BOOLEAN DEFAULT FALSE'),
+                ('ramp_cam_url', 'TEXT'),
+                ('tail_height_clearance', 'FLOAT'),
+                ('nfpa_409_compliant', 'BOOLEAN DEFAULT FALSE'),
+                ('floor_loading_pcn', 'TEXT'),
+                ('gpu_power_available', 'BOOLEAN DEFAULT FALSE'),
+            ]
+            for col_name, col_type in listing_migrations:
+                if col_name not in existing_listing_cols:
+                    db.session.execute(text(f"ALTER TABLE listings ADD COLUMN {col_name} {col_type}"))
+                    print(f"  ✅ Added listings.{col_name}")
+            
+            # Backfill available_sqft
+            db.session.execute(text("UPDATE listings SET available_sqft = size_sqft WHERE available_sqft IS NULL"))
+            
+            # --- Bookings table columns ---
+            existing_booking_cols = [c['name'] for c in inspector.get_columns('bookings')]
+            booking_migrations = [
+                ('owner_signed', 'BOOLEAN DEFAULT FALSE'),
+                ('renter_signed', 'BOOLEAN DEFAULT FALSE'),
+                ('lease_pdf_path', 'TEXT'),
+                ('sign_token_owner', 'TEXT'),
+                ('sign_token_renter', 'TEXT'),
+            ]
+            for col_name, col_type in booking_migrations:
+                if col_name not in existing_booking_cols:
+                    db.session.execute(text(f"ALTER TABLE bookings ADD COLUMN {col_name} {col_type}"))
+                    print(f"  ✅ Added bookings.{col_name}")
+            
+            db.session.commit()
+            print("🚀 Schema migration complete.")
         except Exception as migrate_err:
             print(f"⚠️ Schema migration note: {migrate_err}")
             try:
