@@ -994,11 +994,6 @@ def hangar_calculator():
                            avg_nightly=avg_nightly,
                            top_earner_avg=top_earner_avg)
 
-@bp.route('/space-calculator')
-def space_calculator():
-    """Alias for the hangar value calculator (linked from owner dashboard)."""
-    return redirect(url_for('main.hangar_calculator'))
-
 # ========== MONETIZATION & SUBSCRIPTIONS ==========
 TRANSACTION_FEE_PERCENT = 8
 INSURANCE_RATES = {'daily': 15.00, 'base': 45.00}
