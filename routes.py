@@ -963,6 +963,42 @@ def owner_dashboard():
                           total_listings=total_listings,
                           event_suggestions=event_suggestions)
 
+# ========== HANGAR VALUE CALCULATOR (Single-Player Revenue Estimator) ==========
+
+@bp.route('/dashboard/calculator')
+def hangar_calculator():
+    """
+    Hangar Value Calculator — lets owners estimate earnings even without renters.
+    Solves the chicken-and-egg problem by showing potential revenue.
+    """
+    # Pull market data from actual listings
+    all_listings = Listing.query.filter_by(status='Active').all()
+    market_listings = len(all_listings)
+
+    # Calculate average nightly rate from real data
+    nightly_rates = [l.price_night for l in all_listings if l.price_night and l.price_night > 0]
+    if nightly_rates:
+        avg_nightly = sum(nightly_rates) / len(nightly_rates)
+    else:
+        avg_nightly = 75.0  # Sensible default
+
+    # Top earner estimate (highest monthly × 12)
+    monthly_rates = [l.price_month for l in all_listings if l.price_month and l.price_month > 0]
+    if monthly_rates:
+        top_earner_avg = max(monthly_rates) * 12
+    else:
+        top_earner_avg = 18000.0
+
+    return render_template('calculator.html',
+                           market_listings=market_listings,
+                           avg_nightly=avg_nightly,
+                           top_earner_avg=top_earner_avg)
+
+@bp.route('/space-calculator')
+def space_calculator():
+    """Alias for the hangar value calculator (linked from owner dashboard)."""
+    return redirect(url_for('main.hangar_calculator'))
+
 # ========== MONETIZATION & SUBSCRIPTIONS ==========
 TRANSACTION_FEE_PERCENT = 8
 INSURANCE_RATES = {'daily': 15.00, 'base': 45.00}

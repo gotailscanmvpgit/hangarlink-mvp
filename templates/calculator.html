@@ -1,0 +1,404 @@
+{% extends "base.html" %}
+
+{% block title %}Hangar Value Calculator — HangarLinks{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+    .calc-glow {
+        box-shadow: 0 0 40px rgba(59, 130, 246, 0.08), 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .result-glow {
+        box-shadow: 0 0 60px rgba(34, 197, 94, 0.10), 0 12px 40px rgba(0, 0, 0, 0.25);
+    }
+
+    .pulse-green {
+        animation: pulseGreen 2s ease-in-out infinite;
+    }
+
+    @keyframes pulseGreen {
+
+        0%,
+        100% {
+            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.3);
+        }
+
+        50% {
+            box-shadow: 0 0 20px 6px rgba(34, 197, 94, 0.15);
+        }
+    }
+
+    .slide-up {
+        animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(24px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .counter {
+        transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        border: 3px solid #fff;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+    }
+
+    input[type=range]::-moz-range-thumb {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        border: 3px solid #fff;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+    }
+
+    input[type=range] {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #1e3a5f 0%, #3b82f6 100%);
+        outline: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+
+    <!-- Header -->
+    <div class="text-center mb-10 slide-up">
+        <div
+            class="inline-flex items-center gap-2 bg-blue-600/10 border border-blue-500/20 rounded-full px-4 py-1.5 mb-4">
+            <i class="fas fa-chart-line text-blue-400 text-sm"></i>
+            <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">Revenue Estimator</span>
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-3">
+            Hangar Value <span
+                class="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Calculator</span>
+        </h1>
+        <p class="text-gray-400 max-w-xl mx-auto text-sm sm:text-base">
+            See how much your empty hangar space could earn — even before your first renter.
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
+
+        <!-- ═══════ LEFT: INPUT FORM ═══════ -->
+        <div class="lg:col-span-2 slide-up" style="animation-delay: 0.1s;">
+            <div class="bg-dark-800 rounded-2xl border border-gray-700/50 p-6 calc-glow sticky top-24">
+                <h2 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                    <i class="fas fa-sliders-h text-blue-400"></i> Configure Your Hangar
+                </h2>
+
+                <!-- Airport ICAO -->
+                <div class="mb-5">
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                        <i class="fas fa-plane-departure mr-1 text-blue-400"></i> Airport ICAO
+                    </label>
+                    <input type="text" id="calc-icao" value="CYHM" maxlength="4" placeholder="e.g. KJFK"
+                        class="w-full bg-dark-900 border border-gray-600 rounded-xl px-4 py-3 text-white font-mono text-lg uppercase focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 transition-all placeholder-gray-600">
+                </div>
+
+                <!-- Hangar Size -->
+                <div class="mb-5">
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                        <i class="fas fa-ruler-combined mr-1 text-purple-400"></i> Hangar Size
+                    </label>
+                    <div class="flex items-center gap-3">
+                        <input type="range" id="calc-size" min="500" max="10000" step="100" value="2500"
+                            oninput="updateCalculation()">
+                        <span id="size-display" class="text-white font-bold text-lg min-w-[80px] text-right">2,500 <span
+                                class="text-xs text-gray-400">sq ft</span></span>
+                    </div>
+                    <div class="flex justify-between text-[10px] text-gray-500 mt-1 px-1">
+                        <span>500</span><span>5,000</span><span>10,000</span>
+                    </div>
+                </div>
+
+                <!-- Daily Rate -->
+                <div class="mb-5">
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                        <i class="fas fa-dollar-sign mr-1 text-green-400"></i> Nightly Rate
+                    </label>
+                    <div class="flex items-center gap-3">
+                        <input type="range" id="calc-rate" min="25" max="300" step="5" value="75"
+                            oninput="updateCalculation()">
+                        <span id="rate-display"
+                            class="text-green-400 font-bold text-lg min-w-[60px] text-right">$75</span>
+                    </div>
+                    <div class="flex justify-between text-[10px] text-gray-500 mt-1 px-1">
+                        <span>$25</span><span>$150</span><span>$300</span>
+                    </div>
+                </div>
+
+                <!-- Occupancy -->
+                <div class="mb-6">
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                        <i class="fas fa-calendar-check mr-1 text-amber-400"></i> Est. Bookings per Year
+                    </label>
+                    <div class="flex items-center gap-3">
+                        <input type="range" id="calc-bookings" min="5" max="100" step="1" value="20"
+                            oninput="updateCalculation()">
+                        <span id="bookings-display"
+                            class="text-amber-400 font-bold text-lg min-w-[50px] text-right">20</span>
+                    </div>
+                    <div class="flex justify-between text-[10px] text-gray-500 mt-1 px-1">
+                        <span>5</span><span>50</span><span>100</span>
+                    </div>
+                </div>
+
+                <!-- Market Data Hint -->
+                <div class="bg-blue-900/20 border border-blue-500/20 rounded-xl p-3 mb-4">
+                    <p class="text-[11px] text-blue-300 leading-relaxed">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Averages based on HangarLinks marketplace data across <strong>{{ market_listings }}</strong>
+                        active listings.
+                        Rates vary by region, hangar size, and amenities.
+                    </p>
+                </div>
+
+                <!-- Avg Rate Context -->
+                <div class="flex items-center justify-between text-xs text-gray-500 bg-dark-900 rounded-lg px-3 py-2">
+                    <span>Market Avg Nightly</span>
+                    <span class="font-bold text-white">${{ "{:.0f}".format(avg_nightly) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ RIGHT: RESULTS ═══════ -->
+        <div class="lg:col-span-3 space-y-6 slide-up" style="animation-delay: 0.2s;">
+
+            <!-- Headline Earnings Card -->
+            <div id="result-card" class="bg-dark-800 rounded-2xl border border-gray-700/50 p-6 sm:p-8 result-glow">
+                <div class="text-center mb-6">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Estimated Annual Revenue
+                    </p>
+                    <div class="flex items-center justify-center gap-1">
+                        <span class="text-green-400 text-2xl font-bold">$</span>
+                        <span id="annual-revenue"
+                            class="text-5xl sm:text-6xl font-extrabold text-white counter">1,500</span>
+                    </div>
+                    <p id="revenue-summary" class="text-gray-400 text-sm mt-3">
+                        At <strong class="text-white" id="sum-icao">CYHM</strong>, <strong class="text-green-400"
+                            id="sum-rate">$75</strong>/night × <strong class="text-amber-400"
+                            id="sum-bookings">20</strong> bookings/year
+                    </p>
+                </div>
+
+                <!-- Breakdown Grid -->
+                <div class="grid grid-cols-3 gap-3 mb-6">
+                    <div class="bg-dark-900 rounded-xl p-3 text-center">
+                        <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">Monthly</p>
+                        <p id="monthly-rev" class="text-lg font-bold text-white">$125</p>
+                    </div>
+                    <div class="bg-dark-900 rounded-xl p-3 text-center">
+                        <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">Per Sq Ft</p>
+                        <p id="per-sqft-rev" class="text-lg font-bold text-white">$0.60</p>
+                    </div>
+                    <div class="bg-dark-900 rounded-xl p-3 text-center">
+                        <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">5-Year</p>
+                        <p id="five-year-rev" class="text-lg font-bold text-blue-400">$7,500</p>
+                    </div>
+                </div>
+
+                <!-- Premium Upsell -->
+                <div
+                    class="bg-gradient-to-r from-amber-900/20 to-amber-800/10 border border-amber-500/20 rounded-xl p-3 flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-amber-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-crown text-amber-400"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-amber-300 font-bold">Premium listings earn 2.3× more</p>
+                        <p class="text-[11px] text-amber-400/60">Featured placement + priority in search results</p>
+                    </div>
+                    <span id="premium-rev"
+                        class="text-sm font-extrabold text-amber-400 ml-auto whitespace-nowrap">+$2,250</span>
+                </div>
+
+                <!-- CTA -->
+                <a href="{{ url_for('main.post_listing') }}" id="cta-link"
+                    class="block w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold py-4 px-6 rounded-xl text-center shadow-lg shadow-blue-600/20 hover:shadow-blue-500/40 transition-all hover:-translate-y-0.5 text-lg pulse-green">
+                    <i class="fas fa-rocket mr-2"></i>
+                    Ready to earn <span id="cta-amount">$1,500</span>? Post Your Hangar Now
+                </a>
+            </div>
+
+            <!-- Earnings Projection Chart -->
+            <div class="bg-dark-800 rounded-2xl border border-gray-700/50 p-6">
+                <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                    <i class="fas fa-chart-bar text-purple-400"></i> 5-Year Earnings Projection
+                </h3>
+                <div class="relative" style="height: 260px;">
+                    <canvas id="earningsChart"></canvas>
+                </div>
+                <p class="text-[10px] text-gray-600 mt-3 text-center">
+                    Assumes 5% annual rate growth based on aviation parking demand trends
+                </p>
+            </div>
+
+            <!-- Comparison Table -->
+            <div class="bg-dark-800 rounded-2xl border border-gray-700/50 p-6">
+                <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                    <i class="fas fa-balance-scale text-cyan-400"></i> How You Compare
+                </h3>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between bg-dark-900 rounded-xl px-4 py-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center">
+                                <i class="fas fa-warehouse text-red-400 text-xs"></i>
+                            </div>
+                            <span class="text-sm text-gray-300">Empty hangar (no listing)</span>
+                        </div>
+                        <span class="font-bold text-red-400">$0/yr</span>
+                    </div>
+                    <div
+                        class="flex items-center justify-between bg-dark-900 rounded-xl px-4 py-3 border border-blue-500/30">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                                <i class="fas fa-plane text-blue-400 text-xs"></i>
+                            </div>
+                            <span class="text-sm text-white font-bold">Your estimate</span>
+                        </div>
+                        <span id="compare-yours" class="font-bold text-blue-400">$1,500/yr</span>
+                    </div>
+                    <div class="flex items-center justify-between bg-dark-900 rounded-xl px-4 py-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                                <i class="fas fa-crown text-amber-400 text-xs"></i>
+                            </div>
+                            <span class="text-sm text-gray-300">Top earners on HangarLinks</span>
+                        </div>
+                        <span class="font-bold text-amber-400">${{ "{:,.0f}".format(top_earner_avg) }}/yr</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // ─── Chart Setup ───
+    const ctx = document.getElementById('earningsChart').getContext('2d');
+    const chartGradient = ctx.createLinearGradient(0, 0, 0, 260);
+    chartGradient.addColorStop(0, 'rgba(59, 130, 246, 0.6)');
+    chartGradient.addColorStop(1, 'rgba(139, 92, 246, 0.1)');
+
+    const earningsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5'],
+            datasets: [{
+                label: 'Projected Revenue',
+                data: [1500, 1575, 1654, 1736, 1823],
+                backgroundColor: chartGradient,
+                borderColor: 'rgba(59, 130, 246, 0.8)',
+                borderWidth: 1,
+                borderRadius: 8,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#0d1117',
+                    borderColor: 'rgba(59,130,246,0.3)',
+                    borderWidth: 1,
+                    titleFont: { family: 'Inter', weight: 'bold' },
+                    bodyFont: { family: 'Inter' },
+                    callbacks: {
+                        label: (ctx) => `$${ctx.parsed.y.toLocaleString()}`
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255,255,255,0.04)' },
+                    ticks: {
+                        color: '#6b7280',
+                        font: { family: 'Inter', size: 11 },
+                        callback: v => '$' + v.toLocaleString()
+                    }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#9ca3af', font: { family: 'Inter', size: 12, weight: 'bold' } }
+                }
+            }
+        }
+    });
+
+    // ─── Calculation Logic ───
+    function updateCalculation() {
+        const icao = document.getElementById('calc-icao').value.toUpperCase() || 'CYHM';
+        const size = parseInt(document.getElementById('calc-size').value);
+        const rate = parseInt(document.getElementById('calc-rate').value);
+        const bookings = parseInt(document.getElementById('calc-bookings').value);
+
+        // Core calculation
+        const annualRev = rate * bookings;
+        const monthlyRev = annualRev / 12;
+        const perSqft = annualRev / size;
+        const fiveYearRev = Math.round(annualRev * (1 + 1.05 + 1.1025 + 1.1576 + 1.2155));
+        const premiumBonus = Math.round(annualRev * 1.3);
+
+        // Update displays
+        document.getElementById('size-display').innerHTML = `${size.toLocaleString()} <span class="text-xs text-gray-400">sq ft</span>`;
+        document.getElementById('rate-display').textContent = `$${rate}`;
+        document.getElementById('bookings-display').textContent = bookings;
+        document.getElementById('annual-revenue').textContent = annualRev.toLocaleString();
+        document.getElementById('monthly-rev').textContent = `$${Math.round(monthlyRev).toLocaleString()}`;
+        document.getElementById('per-sqft-rev').textContent = `$${perSqft.toFixed(2)}`;
+        document.getElementById('five-year-rev').textContent = `$${fiveYearRev.toLocaleString()}`;
+        document.getElementById('premium-rev').textContent = `+$${premiumBonus.toLocaleString()}`;
+        document.getElementById('cta-amount').textContent = `$${annualRev.toLocaleString()}`;
+        document.getElementById('compare-yours').textContent = `$${annualRev.toLocaleString()}/yr`;
+
+        document.getElementById('sum-icao').textContent = icao;
+        document.getElementById('sum-rate').textContent = `$${rate}`;
+        document.getElementById('sum-bookings').textContent = bookings;
+
+        // Update chart with 5% annual growth
+        const projections = [];
+        let base = annualRev;
+        for (let i = 0; i < 5; i++) {
+            projections.push(Math.round(base));
+            base *= 1.05;
+        }
+        earningsChart.data.datasets[0].data = projections;
+        earningsChart.update('none');
+    }
+
+    // Re-calc on ICAO change
+    document.getElementById('calc-icao').addEventListener('input', updateCalculation);
+
+    // Initial calculation
+    updateCalculation();
+</script>
+{% endblock %}
