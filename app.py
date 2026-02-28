@@ -180,6 +180,30 @@ def create_app(config_class=Config):
             'datetime': datetime.datetime
         }
 
+    # ── Health Check — Railway uses this to verify the app is alive ──────
+    @app.route('/healthz')
+    def healthz():
+        """Bare-minimum health check that bypasses all DB logic."""
+        import traceback
+        status = {'alive': True, 'version': 'v2.2.0-secure'}
+        try:
+            from sqlalchemy import text, inspect as sa_inspect
+            insp = sa_inspect(db.engine)
+            tables = insp.get_table_names()
+            status['tables'] = tables
+            if 'listings' in tables:
+                cols = [c['name'] for c in insp.get_columns('listings')]
+                status['listing_columns'] = cols
+                status['has_available_sqft'] = 'available_sqft' in cols
+                count = db.session.execute(text("SELECT COUNT(*) FROM listings")).scalar()
+                status['listing_count'] = count
+            status['db'] = 'ok'
+        except Exception as e:
+            status['db'] = f'error: {e}'
+            status['traceback'] = traceback.format_exc()
+        from flask import jsonify
+        return jsonify(status)
+
     # ── Debug DB schema — admin-only, exposes column names for each table ──────
     @app.route('/debug-db')
     def debug_db():

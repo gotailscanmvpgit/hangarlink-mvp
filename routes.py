@@ -149,11 +149,12 @@ def index():
     except Exception as e:
         print(f"CRITICAL ERROR in index route: {str(e)}")
         import traceback
+        tb = traceback.format_exc()
         with open("error.log", "w") as f:
             f.write(str(e))
             f.write("\n")
-            traceback.print_exc(file=f)
-        return "<h1>HangarLinks is starting up. Please wait a moment or check back soon.</h1>", 500
+            f.write(tb)
+        return f"<h1>HangarLinks Error</h1><pre>{str(e)}\n\n{tb}</pre>", 500
 
 @bp.route('/health')
 def health():
