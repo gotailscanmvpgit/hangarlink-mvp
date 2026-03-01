@@ -276,8 +276,20 @@ def listing_detail(id):
             ).filter(Booking.status.in_(['pending', 'confirmed', 'active'])).first()
             if active_booking:
                 has_access = True
+    
+    # Fetch live weather for this airport
+    weather = None
+    try:
+        from weather_service import fetch_airport_weather
+        lat = listing.lat or 43.6275
+        lon = listing.lon or -79.3962
+        weather = fetch_airport_weather(lat, lon, listing.airport_icao or 'UNKN')
+    except Exception as e:
+        current_app.logger.warning(f"[WEATHER] Could not fetch weather: {e}")
                 
-    return render_template('listing_detail.html', listing=listing, aircraft_sizes=aircraft_sizes, has_access=has_access)
+    return render_template('listing_detail.html', listing=listing, 
+                           aircraft_sizes=aircraft_sizes, has_access=has_access,
+                           weather=weather)
 
 @bp.route('/post-listing', methods=['GET', 'POST'])
 @login_required
@@ -442,7 +454,8 @@ def post_listing():
                 nfpa_409_compliant=nfpa_409_compliant,
                 floor_loading_pcn=floor_loading_pcn,
                 gpu_power_available=gpu_power_available,
-                insurance_active=request.form.get('insurance_provided') == 'on'
+                insurance_active=request.form.get('insurance_provided') == 'on',
+                shuttle_info=request.form.get('shuttle_info', '').strip() or None
             )
             db.session.add(listing)
             db.session.commit()

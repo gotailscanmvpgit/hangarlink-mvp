@@ -143,6 +143,7 @@ def create_app(config_class=Config):
                 ('nfpa_409_compliant', 'BOOLEAN DEFAULT FALSE'),
                 ('floor_loading_pcn', 'TEXT'),
                 ('gpu_power_available', 'BOOLEAN DEFAULT FALSE'),
+                ('shuttle_info', 'VARCHAR(255)'),
             ]
             for col_name, col_type in listing_migrations:
                 if col_name not in existing_listing_cols:

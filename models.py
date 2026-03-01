@@ -142,6 +142,9 @@ class Listing(db.Model):
     report_count = db.Column(db.Integer, default=0)
     report_reason = db.Column(db.Text, nullable=True)
     
+    # Ground Logistics
+    shuttle_info = db.Column(db.String(255), nullable=True)  # e.g. "Free shuttle to terminal"
+    
     # Relationships
     bookings = db.relationship('Booking', backref='listing', lazy=True)
 
