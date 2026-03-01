@@ -22,3 +22,4 @@ python-dotenv
 pandas
 scikit-learn
 numpy
+requests==2.31.0
