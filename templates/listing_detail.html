@@ -880,7 +880,8 @@
                 const W = parseFloat(selected.getAttribute('data-wingspan'));
                 const H = parseFloat(selected.getAttribute('data-height'));
                 const area = L * W;
-                const hangarArea = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }};
+                const hangarArea = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }
+            };
 
 
             // Update specs
@@ -1121,7 +1122,8 @@
                     const option = selector.options[selector.selectedIndex];
                     // Using a 10% safety buffer explicitly here on required footprint
                     const sqftReq = parseFloat(option.getAttribute('data-sqft')) * 1.1;
-                    const availableSqft = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }};
+                    const availableSqft = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }
+                };
 
                 alertDiv.classList.remove('hidden');
 
@@ -1173,28 +1175,59 @@
             {% endif %}
             {% endif %}
             {% else %}
-            <!-- Guest Message Form (New Feature) -->
-            <form action="{{ url_for('main.contact_guest', listing_id=listing.id) }}" method="POST"
-                class="space-y-3 mt-4">
-                <div>
-                    <label class="sr-only">Your Email</label>
-                    <input type="email" name="guest_email" required placeholder="Your Email Address"
-                        class="w-full bg-gray-50 dark:bg-dark-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm focus:ring-blue-500 dark:text-platinum-100">
+            <!-- Guest Message Form (Premium UI) -->
+            <div
+                class="bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-dark-800 dark:via-dark-900 dark:to-indigo-950 rounded-2xl border border-blue-200 dark:border-indigo-800 shadow-xl overflow-hidden">
+                <!-- Header -->
+                <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+                    <h4 class="text-white font-bold text-lg flex items-center">
+                        <i class="fas fa-paper-plane mr-2 text-blue-200"></i>Quick Message
+                    </h4>
+                    <p class="text-blue-200 text-xs mt-0.5">No account needed — the owner will reply to your email</p>
                 </div>
-                <div>
-                    <label class="sr-only">Message</label>
-                    <textarea name="message" required rows="3" placeholder="Hi, is this space still available?"
-                        class="w-full bg-gray-50 dark:bg-dark-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm focus:ring-blue-500 dark:text-platinum-100"></textarea>
-                </div>
-                <button type="submit"
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl text-center shadow-lg hover:shadow-xl transition-all animate-pulse-subtle">
-                    <i class="fas fa-paper-plane mr-2"></i>Send Message as Guest
-                </button>
-            </form>
-            <div class="text-center mt-3">
-                <span class="text-gray-500 text-sm">or</span>
+                <form action="{{ url_for('main.contact_guest', listing_id=listing.id) }}" method="POST"
+                    class="p-6 space-y-4" id="guest-message-form">
+                    <div>
+                        <label for="guest_email"
+                            class="block text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider mb-1.5">
+                            <i class="fas fa-envelope text-blue-500 mr-1"></i>Your Email
+                        </label>
+                        <input type="email" id="guest_email" name="guest_email" required placeholder="pilot@example.com"
+                            class="w-full bg-white dark:bg-dark-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:text-platinum-100 transition-all placeholder-gray-400">
+                    </div>
+                    <div>
+                        <label for="guest_message"
+                            class="block text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider mb-1.5">
+                            <i class="fas fa-comment-dots text-blue-500 mr-1"></i>Message
+                        </label>
+                        <textarea id="guest_message" name="message" required rows="3" maxlength="500"
+                            placeholder="Hi, is this hangar space still available? I have a Cessna 182 that needs parking..."
+                            class="w-full bg-white dark:bg-dark-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:text-platinum-100 transition-all placeholder-gray-400 resize-none"
+                            oninput="document.getElementById('char-count').textContent = this.value.length"></textarea>
+                        <div class="flex justify-between mt-1">
+                            <span class="text-[10px] text-gray-400"><i
+                                    class="fas fa-shield-alt mr-1 text-green-500"></i>Anti-spam protected</span>
+                            <span class="text-[10px] text-gray-400"><span id="char-count">0</span>/500</span>
+                        </div>
+                    </div>
+                    <button type="submit"
+                        class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl text-center shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2">
+                        <i class="fas fa-paper-plane"></i>Send Message as Guest
+                    </button>
+                    <p class="text-[10px] text-gray-400 text-center">
+                        <i class="fas fa-lock text-green-500 mr-1"></i>Your email is only shared with the listing owner
+                    </p>
+                </form>
+            </div>
+            <div
+                class="text-center mt-4 bg-white dark:bg-dark-800 rounded-xl py-3 px-4 border border-gray-200 dark:border-gray-700">
+                <span class="text-gray-500 text-sm">Want full messaging features?</span>
                 <a href="{{ url_for('main.login', next=url_for('main.listing_detail', id=listing.id)) }}"
-                    class="text-blue-600 font-bold hover:underline text-sm ml-1">Login for full access</a>
+                    class="text-blue-600 font-bold hover:underline text-sm ml-1"><i
+                        class="fas fa-sign-in-alt mr-1"></i>Login</a>
+                <span class="text-gray-400 text-sm mx-1">or</span>
+                <a href="{{ url_for('main.register') }}" class="text-indigo-600 font-bold hover:underline text-sm"><i
+                        class="fas fa-user-plus mr-1"></i>Sign Up Free</a>
             </div>
             {% endif %}
 

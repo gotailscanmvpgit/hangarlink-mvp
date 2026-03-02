@@ -5,10 +5,10 @@ which would trigger _safe_migrate twice.
 """
 import os
 from app import app  # app is created once at module level in app.py
+from extensions import socketio  # Gunicorn accesses this via run:socketio
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     debug_mode = os.environ.get('FLASK_DEBUG', '0') == '1'
-    
-    from extensions import socketio
     socketio.run(app, host='0.0.0.0', port=port, debug=debug_mode, allow_unsafe_werkzeug=True)
+

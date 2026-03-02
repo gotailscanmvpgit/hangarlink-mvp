@@ -601,7 +601,8 @@ def messages():
     received = db.session.query(Message.sender_id).filter_by(receiver_id=current_user.id).distinct()
     
     partner_ids = set([r[0] for r in sent] + [r[0] for r in received])
-    partners = User.query.filter(User.id.in_(partner_ids)).all()
+    partner_ids.discard(None)  # Guest messages have sender_id=None
+    partners = User.query.filter(User.id.in_(partner_ids)).all() if partner_ids else []
     
     # Get last message with each partner
     conversations = []
@@ -627,7 +628,7 @@ def messages():
     # Sort by last message time
     conversations.sort(key=lambda x: (
         x['partner'].is_premium, 
-        x['last_message'].created_at if x['last_message'] else datetime.min
+        x['last_message'].created_at if x['last_message'] else datetime.datetime.min
     ), reverse=True)
     
     return render_template('messages.html', conversations=conversations)
@@ -1419,33 +1420,66 @@ def book_viewing(listing_id):
     return redirect(url_for('main.listing_detail', id=listing.id))
 
 @bp.route('/contact-guest/<int:listing_id>', methods=['POST'])
+@limiter.limit("5 per hour")
 def contact_guest(listing_id):
-    listing = Listing.query.get_or_404(listing_id)
-    
-    if current_user.is_authenticated:
-        return redirect(url_for('main.message_user', user_id=listing.owner_id, listing_id=listing.id))
-        
-    guest_email = request.form.get('guest_email')
-    message_content = request.form.get('message')
-    
-    if not guest_email or not message_content:
-        flash('Email and message are required', 'error')
+    """Guest (unauthenticated) contact form — no login required."""
+    print(f"DEBUG: Entering guest message route for listing_id={listing_id}")
+    try:
+        listing = Listing.query.get_or_404(listing_id)
+
+        # If user is logged in, redirect to the real messaging system
+        if current_user.is_authenticated:
+            return redirect(url_for('main.message_user', user_id=listing.owner_id, listing_id=listing.id))
+
+        guest_email = (request.form.get('guest_email') or '').strip()
+        message_content = (request.form.get('message') or '').strip()
+
+        print(f"DEBUG: guest_email='{guest_email}' message_len={len(message_content)}")
+
+        if not guest_email or not message_content:
+            flash('Email and message are required.', 'error')
+            return redirect(url_for('main.listing_detail', id=listing.id))
+
+        # Basic email format check
+        if '@' not in guest_email or '.' not in guest_email:
+            flash('Please enter a valid email address.', 'error')
+            return redirect(url_for('main.listing_detail', id=listing.id))
+
+        # Anti-spam: flag risky content
+        is_flagged = False
+        flag_reason = None
+        spam_words = ['western union', 'moneygram', 'gift card', 'wire transfer', 'zelle',
+                      'crypto', 'bitcoin', 'click here', 'act now', 'nigerian']
+        if any(word in message_content.lower() for word in spam_words):
+            is_flagged = True
+            flag_reason = 'Suspicious content in guest message'
+            print(f"DEBUG: Guest message flagged — {flag_reason}")
+
+        msg = Message(
+            sender_id=None,
+            receiver_id=listing.owner_id,
+            listing_id=listing.id,
+            content=f"[GUEST: {guest_email}] {message_content}",
+            is_guest=True,
+            guest_email=guest_email,
+            is_flagged=is_flagged,
+            flag_reason=flag_reason,
+            created_at=datetime.datetime.now(timezone.utc)
+        )
+        db.session.add(msg)
+        db.session.commit()
+        print(f"DEBUG: Guest message saved — id={msg.id}")
+
+        flash('Message sent! The owner will reply to your email.', 'success')
         return redirect(url_for('main.listing_detail', id=listing.id))
-    
-    msg = Message(
-        sender_id=None, 
-        receiver_id=listing.owner_id,
-        listing_id=listing.id,
-        content=f"[GUEST: {guest_email}] {message_content}",
-        is_guest=True,
-        guest_email=guest_email,
-        created_at=datetime.now(timezone.utc)
-    )
-    db.session.add(msg)
-    db.session.commit()
-    
-    flash('Message sent! The owner will reply to your email.', 'success')
-    return redirect(url_for('main.listing_detail', id=listing.id))
+
+    except Exception as e:
+        print(f"ERROR in contact_guest: {e}")
+        import traceback
+        traceback.print_exc()
+        db.session.rollback()
+        flash('Something went wrong sending your message. Please try again.', 'error')
+        return redirect(url_for('main.listing_detail', id=listing_id))
 
 @bp.route('/booking/complete/<int:booking_id>', methods=['POST'])
 @login_required

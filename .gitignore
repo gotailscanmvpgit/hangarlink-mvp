@@ -32,5 +32,8 @@ node_modules/
 .DS_Store
 Thumbs.db
 instance/
+*.db
+*.db.bak
+error.log
 .idea/
 .vscode/

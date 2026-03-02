@@ -167,6 +167,19 @@ def create_app(config_class=Config):
                     db.session.execute(text(f"ALTER TABLE bookings ADD COLUMN {col_name} {col_type}"))
                     print(f"  ✅ Added bookings.{col_name}")
             
+            # --- Messages table columns (guest messaging) ---
+            existing_msg_cols = [c['name'] for c in inspector.get_columns('messages')]
+            message_migrations = [
+                ('is_guest', 'BOOLEAN DEFAULT FALSE'),
+                ('guest_email', 'VARCHAR(120)'),
+                ('is_flagged', 'BOOLEAN DEFAULT FALSE'),
+                ('flag_reason', 'VARCHAR(100)'),
+            ]
+            for col_name, col_type in message_migrations:
+                if col_name not in existing_msg_cols:
+                    db.session.execute(text(f"ALTER TABLE messages ADD COLUMN {col_name} {col_type}"))
+                    print(f"  ✅ Added messages.{col_name}")
+
             db.session.commit()
             print("🚀 Schema migration complete.")
         except Exception as migrate_err:
