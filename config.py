@@ -28,13 +28,17 @@ class Config:
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
-    # DB Speed Optimization
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        'pool_size': 5,
-        'max_overflow': 10,
-        'pool_timeout': 30,
-        'pool_recycle': 1800
-    }
+    # DB Speed Optimization — only applies to PostgreSQL (SQLite ignores pool settings)
+    if raw_db_url:
+        SQLALCHEMY_ENGINE_OPTIONS = {
+            'pool_size': 5,
+            'max_overflow': 10,
+            'pool_timeout': 30,
+            'pool_recycle': 1800,
+            'pool_pre_ping': True,  # Detect stale connections automatically
+        }
+    else:
+        SQLALCHEMY_ENGINE_OPTIONS = {}  # SQLite doesn't support pool options
     
     # ... rest of the config ...
     

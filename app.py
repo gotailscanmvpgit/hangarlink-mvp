@@ -117,17 +117,44 @@ def create_app(config_class=Config):
 
     # All tables are created/updated via migrations or db.create_all() if needed
     with app.app_context():
-        # Reliable startup: create tables if they don't exist
-        db.create_all()
+        # ── Step 1: Create all tables (safe for both SQLite and PostgreSQL) ──
+        try:
+            db.create_all()
+            print("✅ [DB] db.create_all() completed — all model tables ensured.")
+        except Exception as create_err:
+            print(f"❌ [DB] db.create_all() FAILED: {create_err}")
+            import traceback
+            traceback.print_exc()
+            # Don't swallow — re-raise so Railway shows a clear crash reason
+            raise
 
-        # Dynamic Schema Patching — add ALL missing columns to live DB
+        # ── Step 2: Dynamic column patching (add any missing columns) ──
         from sqlalchemy import text, inspect as sa_inspect
         try:
             inspector = sa_inspect(db.engine)
-            
-            # --- Listings table columns ---
-            existing_listing_cols = [c['name'] for c in inspector.get_columns('listings')]
-            listing_migrations = [
+            is_postgres = 'postgresql' in str(db.engine.url).lower()
+
+            def safe_add_column(table, col_name, col_type):
+                """Add a column if it doesn't already exist. PG-safe."""
+                try:
+                    existing = [c['name'] for c in inspector.get_columns(table)]
+                    if col_name not in existing:
+                        db.session.execute(text(
+                            f"ALTER TABLE {table} ADD COLUMN {col_name} {col_type}"
+                        ))
+                        db.session.commit()
+                        print(f"  ✅ Added {table}.{col_name}")
+                except Exception as col_err:
+                    db.session.rollback()
+                    # PostgreSQL raises if column already exists — safe to ignore
+                    errmsg = str(col_err).lower()
+                    if 'already exists' in errmsg or 'duplicate column' in errmsg:
+                        print(f"  ℹ️  {table}.{col_name} already exists (skipped)")
+                    else:
+                        print(f"  ⚠️  Could not add {table}.{col_name}: {col_err}")
+
+            # --- Listings ---
+            for col_name, col_type in [
                 ('available_sqft', 'FLOAT'),
                 ('price_night', 'FLOAT DEFAULT 0.0'),
                 ('min_stay_nights', 'INTEGER DEFAULT 1'),
@@ -144,44 +171,39 @@ def create_app(config_class=Config):
                 ('floor_loading_pcn', 'TEXT'),
                 ('gpu_power_available', 'BOOLEAN DEFAULT FALSE'),
                 ('shuttle_info', 'VARCHAR(255)'),
-            ]
-            for col_name, col_type in listing_migrations:
-                if col_name not in existing_listing_cols:
-                    db.session.execute(text(f"ALTER TABLE listings ADD COLUMN {col_name} {col_type}"))
-                    print(f"  ✅ Added listings.{col_name}")
-            
+            ]:
+                safe_add_column('listings', col_name, col_type)
+
             # Backfill available_sqft
-            db.session.execute(text("UPDATE listings SET available_sqft = size_sqft WHERE available_sqft IS NULL"))
-            
-            # --- Bookings table columns ---
-            existing_booking_cols = [c['name'] for c in inspector.get_columns('bookings')]
-            booking_migrations = [
+            try:
+                db.session.execute(text(
+                    "UPDATE listings SET available_sqft = size_sqft "
+                    "WHERE available_sqft IS NULL"
+                ))
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+
+            # --- Bookings ---
+            for col_name, col_type in [
                 ('owner_signed', 'BOOLEAN DEFAULT FALSE'),
                 ('renter_signed', 'BOOLEAN DEFAULT FALSE'),
                 ('lease_pdf_path', 'TEXT'),
                 ('sign_token_owner', 'TEXT'),
                 ('sign_token_renter', 'TEXT'),
-            ]
-            for col_name, col_type in booking_migrations:
-                if col_name not in existing_booking_cols:
-                    db.session.execute(text(f"ALTER TABLE bookings ADD COLUMN {col_name} {col_type}"))
-                    print(f"  ✅ Added bookings.{col_name}")
-            
-            # --- Messages table columns (guest messaging) ---
-            existing_msg_cols = [c['name'] for c in inspector.get_columns('messages')]
-            message_migrations = [
+            ]:
+                safe_add_column('bookings', col_name, col_type)
+
+            # --- Messages (guest messaging) ---
+            for col_name, col_type in [
                 ('is_guest', 'BOOLEAN DEFAULT FALSE'),
                 ('guest_email', 'VARCHAR(120)'),
                 ('is_flagged', 'BOOLEAN DEFAULT FALSE'),
                 ('flag_reason', 'VARCHAR(100)'),
-            ]
-            for col_name, col_type in message_migrations:
-                if col_name not in existing_msg_cols:
-                    db.session.execute(text(f"ALTER TABLE messages ADD COLUMN {col_name} {col_type}"))
-                    print(f"  ✅ Added messages.{col_name}")
+            ]:
+                safe_add_column('messages', col_name, col_type)
 
-            db.session.commit()
-            print("🚀 Schema migration complete.")
+            print("🚀 [DB] Schema migration complete.")
         except Exception as migrate_err:
             print(f"⚠️ Schema migration note: {migrate_err}")
             try:
