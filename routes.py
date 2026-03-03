@@ -1090,9 +1090,10 @@ def book_listing(listing_id):
     insurance_fee = 0.0
     
     if add_insurance:
-        # Scale insurance based on duration
+        # Scale insurance based on duration (Min 45, Max 150)
         base_insurance_daily = 15.00
-        insurance_fee = (base_insurance_daily * duration_days) + 45.00 # Base risk fee
+        calculated_insurance = (base_insurance_daily * duration_days) + 45.00
+        insurance_fee = min(150.00, calculated_insurance)
         
     final_total = base_total + insurance_fee
     
@@ -1119,8 +1120,8 @@ def book_listing(listing_id):
                     'price_data': {
                         'currency': 'usd',
                         'product_data': {
-                            'name': 'Short-Term Hangar Insurance (Avemco Partner)',
-                            'description': f'Liability & Hull coverage for {duration_days} days',
+                            'name': 'Short-Term Hangar Insurance',
+                            'description': 'Liability, Theft, & Hull coverage',
                         },
                         'unit_amount': int(insurance_fee * 100),
                     },
@@ -1231,10 +1232,19 @@ def booking_success():
         except Exception as e:
             print(f"WeasyPrint PDF Generation Failed: {e}")
             
-    # Mock Mailer
+    # Mock Mailer for Lease
     print(f"\n[MAIL SIMULATOR] Sent Lease Agreement for Verification!")
     print(f"--> Renter Link: {url_for('main.sign_lease', token=booking.sign_token_renter, _external=True)}")
     print(f"--> Owner Link:  {url_for('main.sign_lease', token=booking.sign_token_owner, _external=True)}\n")
+    
+    # Mock Mailer for Insurance
+    if booking.insurance_opt_in:
+        print(f"\n[MAIL SIMULATOR] Sent Short-Term Insurance Policy Activation!")
+        print(f"--> To: {current_user.email}")
+        print(f"--> Subject: Your Avemco Short-Term Policy Details")
+        print(f"--> Body: Thank you for adding insurance to your HangarLinks booking.")
+        print(f"-->       Your {booking.listing.airport_icao} stay is protected. Policy value: ${booking.insurance_fee:.2f}.")
+        print(f"-->       Activate/View complete policy: https://www.avemco.com/hangarlinks/activate?booking={booking.id}\n")
     
     flash('Booking Escrowed! Check your email to digitally sign the generated lease agreement.', 'success')
     return redirect(url_for('main.sign_lease', token=booking.sign_token_renter))

@@ -880,7 +880,8 @@
                 const W = parseFloat(selected.getAttribute('data-wingspan'));
                 const H = parseFloat(selected.getAttribute('data-height'));
                 const area = L * W;
-                const hangarArea = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }};
+                const hangarArea = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }
+            };
 
 
 
@@ -1081,22 +1082,27 @@
 
                 <!-- Insurance Add-on -->
                 <div
-                    class="mb-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-xl p-3">
+                    class="mb-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-xl p-3 hover:border-blue-300 dark:hover:border-blue-600 transition-colors group relative">
                     <label class="flex items-start cursor-pointer">
-                        <input type="checkbox" name="add_insurance"
-                            class="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300 dark:border-gray-600">
+                        <input type="checkbox" name="add_insurance" checked
+                            class="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300 dark:border-gray-600 shadow-sm cursor-pointer">
                         <div class="ml-3">
-                            <span class="block text-sm font-bold text-gray-900 dark:text-white">Add Liability
-                                Insurance</span>
-                            <span class="block text-xs text-gray-500 dark:text-gray-400">Short-term coverage via
-                                <span class="font-bold text-blue-600">Avemco</span>.</span>
-                            <span class="block text-xs font-mono text-gray-500 mt-1">+$45 base + $15/day</span>
-                            <div class="flex gap-2 mt-2 opacity-60 grayscale hover:grayscale-0 transition-all">
-                                <div class="h-4 bg-gray-400 w-12 rounded"></div>
-                                <div class="h-4 bg-gray-400 w-12 rounded"></div>
-                            </div>
+                            <span class="block text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                Add Short-Term Insurance
+                                <i class="fas fa-shield-alt text-blue-500"></i>
+                            </span>
+                            <span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                Cover theft/damage/liability.
+                            </span>
+                            <span class="block text-xs font-semibold text-blue-600 dark:text-blue-400 mt-1">
+                                $45 – $150
+                            </span>
                         </div>
                     </label>
+                    <div
+                        class="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-3 py-1.5 rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-10 pointer-events-none">
+                        Provided by Avemco Partner
+                    </div>
                 </div>
 
                 <button type="submit" id="btn-reserve-now"
@@ -1123,7 +1129,8 @@
                     const option = selector.options[selector.selectedIndex];
                     // Using a 10% safety buffer explicitly here on required footprint
                     const sqftReq = parseFloat(option.getAttribute('data-sqft')) * 1.1;
-                    const availableSqft = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }};
+                    const availableSqft = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }
+                };
 
 
                 alertDiv.classList.remove('hidden');
