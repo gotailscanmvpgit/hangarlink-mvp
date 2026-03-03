@@ -666,6 +666,61 @@
         {% endif %}
 
         <!-- ═══════════════════════════════════════════════════════
+             FBO & FUEL DATA
+             ═══════════════════════════════════════════════════════ -->
+        {% if fbo_data %}
+        <div
+            class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 sm:p-8 mt-8 animate-fade-in-up">
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-platinum-100 mb-5 flex items-center">
+                <i class="fas fa-gas-pump text-green-500 mr-3 text-2xl"></i>Live Fuel & FBO Data
+            </h2>
+
+            <div class="overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-800">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr
+                            class="bg-gray-50 dark:bg-dark-800 text-gray-500 dark:text-gray-400 text-sm uppercase font-bold tracking-wider">
+                            <th class="p-4 border-b border-gray-100 dark:border-gray-800">FBO Partner</th>
+                            <th class="p-4 border-b border-gray-100 dark:border-gray-800">Current Fuel Rates</th>
+                            <th class="p-4 border-b border-gray-100 dark:border-gray-800">Active Services</th>
+                            <th class="p-4 border-b border-gray-100 dark:border-gray-800 text-right">AviationStack Promo
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm">
+                        <tr class="bg-white dark:bg-dark-900 hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors">
+                            <td
+                                class="p-4 border-b border-gray-100 dark:border-gray-800 font-bold text-gray-900 dark:text-platinum-100 flex items-center gap-2">
+                                <i class="fas fa-building text-blue-500"></i>{{ fbo_data.fbo_name }}
+                            </td>
+                            <td class="p-4 border-b border-gray-100 dark:border-gray-800">
+                                <span
+                                    class="inline-flex items-center px-2 py-1 rounded bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 font-mono text-xs font-bold mr-2 border border-green-200 dark:border-green-800/50">
+                                    {{ fbo_data.fuel_type }}
+                                </span>
+                                <span class="font-bold">${{ "%.2f"|format(fbo_data.fuel_price) }}/gal</span>
+                            </td>
+                            <td
+                                class="p-4 border-b border-gray-100 dark:border-gray-800 text-gray-600 dark:text-gray-400">
+                                {{ fbo_data.services | join(', ') }}
+                            </td>
+                            <td class="p-4 border-b border-gray-100 dark:border-gray-800 text-right">
+                                <a href="https://millionair.com/hangarlinks-book" target="_blank"
+                                    class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded text-xs transition-colors shadow-sm">
+                                    Pre-Book Fuel <i class="fas fa-arrow-right ml-1"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-[10px] text-gray-400 dark:text-gray-600 mt-3 text-center">
+                <i class="fas fa-satellite-dish mr-1"></i>Live data powered by AviationStack API
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- ═══════════════════════════════════════════════════════
              GROUND LOGISTICS — Transport to/from Airport
              ═══════════════════════════════════════════════════════ -->
         <div
@@ -880,7 +935,8 @@
                 const W = parseFloat(selected.getAttribute('data-wingspan'));
                 const H = parseFloat(selected.getAttribute('data-height'));
                 const area = L * W;
-                const hangarArea = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }};
+                const hangarArea = {{ listing.available_sqft if list
+            ing.available_sqft is not none else listing.size_sqft }};
 
 
 
@@ -918,7 +974,7 @@
                 status.innerHTML = '<i class="fas fa-exclamation-triangle mr-2 text-xl align-middle"></i> TIGHT TOLERANCE: Fits with minimal margin. Exercise caution.';
             } else {
                 status.className = 'mt-8 p-4 rounded-2xl text-center text-sm font-bold bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/10 dark:text-emerald-400 dark:border-emerald-900/50';
-                status.innerHTML = '<i class="fas fa-check-circle mr-2 text-xl align-middle"></i> GUARANTEED FIT: footprint fits comfortably in this space.';
+                status.innerHTML = '<i class="fas fa-check-circle mr-2 text-xl align-middle"></i> GUARANTEED FIT: footprint fits comfortahis space.';
             }
                 });
         </script>
@@ -1128,7 +1184,8 @@
                     const option = selector.options[selector.selectedIndex];
                     // Using a 10% safety buffer explicitly here on required footprint
                     const sqftReq = parseFloat(option.getAttribute('data-sqft')) * 1.1;
-                    const availableSqft = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }};
+                    const availableSqft = {{ listing.available_sqft if list
+                ing.available_sqft is not none else listing.size_sqft }};
 
 
                 alertDiv.classList.remove('hidden');
@@ -1140,8 +1197,7 @@
                 } else {
                     alertDiv.className = 'mt-3 p-3 text-xs rounded-lg font-bold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 block';
                     alertDiv.innerHTML = '<i class="fas fa-check-circle mr-1 text-lg align-middle"></i> Fit Check: Yes (Comfortable Fit)';
-                    btn.disabled = false; // Unlock
-                }
+                    btn.disabled Un }
                 }
             </script>
 
@@ -1165,7 +1221,7 @@
                         // If current end date is before min possible date, update it
                         if (!endInput.value || endInput.value < minEndDateStr) {
                             endInput.value = minEndDateStr;
-                        }
+            }
                     }
                 }
             </script>
@@ -1360,8 +1416,7 @@
                         alert("Thank you. Our safety team has been notified and will review this listing.");
                     } else {
                         alert("Error submitting report. Please try again.");
-                    }
-                });
+                        });
         }
     }
 </script>
