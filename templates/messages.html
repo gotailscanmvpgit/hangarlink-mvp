@@ -1,14 +1,14 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto px-6 lg:px-8 py-12">
     <div class="flex items-center justify-between mb-8">
         <h1 class="text-4xl font-bold text-gray-900 dark:text-platinum-100">Messages</h1>
         <span class="text-sm text-gray-500 dark:text-gray-400">
-            {{ conversations|length }} conversation{{ 's' if conversations|length != 1 else '' }}
+            {{ conversations|length }} conversation{{ 's' if conversations|length != 1 else 'y' }}
             {% if guest_messages %}
-            · <span class="text-amber-500 font-semibold">{{ guest_messages|length }} guest inquiry{{ 'ies' if
-                guest_messages|length != 1 else '' }}</span>
+            · <span class="text-amber-500 font-semibold">{{ guest_messages|length }} guest inquir{{ 'ies' if
+                guest_messages|length != 1 else 'y' }}</span>
             {% endif %}
         </span>
     </div>
@@ -37,7 +37,7 @@
                                 </h3>
                                 <span class="text-sm text-gray-500 dark:text-gray-400">
                                     {{ conv.last_message.created_at.strftime('%b %d, %I:%M %p') if conv.last_message
-                                    else '' }}
+                                    else 'y' }}
                                 </span>
                             </div>
                             <p class="text-gray-600 dark:text-platinum-300 text-sm line-clamp-1">
