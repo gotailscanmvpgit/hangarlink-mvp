@@ -621,43 +621,58 @@ def edit_listing(id):
 @bp.route('/messages')
 @login_required
 def messages():
-    """View all conversations"""
-    # Get unique conversation partners
-    sent = db.session.query(Message.receiver_id).filter_by(sender_id=current_user.id).distinct()
-    received = db.session.query(Message.sender_id).filter_by(receiver_id=current_user.id).distinct()
-    
-    partner_ids = set([r[0] for r in sent] + [r[0] for r in received])
-    partner_ids.discard(None)  # Guest messages have sender_id=None
-    partners = User.query.filter(User.id.in_(partner_ids)).all() if partner_ids else []
-    
-    # Get last message with each partner
-    conversations = []
-    for partner in partners:
-        last_message = Message.query.filter(
-            ((Message.sender_id == current_user.id) & (Message.receiver_id == partner.id)) |
-            ((Message.sender_id == partner.id) & (Message.receiver_id == current_user.id))
-        ).order_by(Message.created_at.desc()).first()
-        
-        # Count unread messages from this partner
-        unread_count = Message.query.filter_by(
-            sender_id=partner.id,
+    """View all conversations (user-to-user and guest inquiries)"""
+    try:
+        # ── User-to-user conversations ──────────────────────────────────────
+        sent = db.session.query(Message.receiver_id).filter_by(sender_id=current_user.id).distinct()
+        received = db.session.query(Message.sender_id).filter_by(receiver_id=current_user.id).distinct()
+
+        partner_ids = set([r[0] for r in sent] + [r[0] for r in received])
+        partner_ids.discard(None)  # Guest messages have sender_id=None — handled separately
+        partners = User.query.filter(User.id.in_(partner_ids)).all() if partner_ids else []
+
+        conversations = []
+        for partner in partners:
+            last_message = Message.query.filter(
+                ((Message.sender_id == current_user.id) & (Message.receiver_id == partner.id)) |
+                ((Message.sender_id == partner.id) & (Message.receiver_id == current_user.id))
+            ).order_by(Message.created_at.desc()).first()
+
+            unread_count = Message.query.filter_by(
+                sender_id=partner.id,
+                receiver_id=current_user.id,
+                read=False
+            ).count()
+
+            conversations.append({
+                'partner': partner,
+                'last_message': last_message,
+                'unread_count': unread_count
+            })
+
+        conversations.sort(key=lambda x: (
+            x['partner'].is_premium,
+            x['last_message'].created_at if x['last_message'] else datetime.datetime.min
+        ), reverse=True)
+
+        # ── Guest inquiries (sender_id=None, is_guest=True) ─────────────────
+        # Fetch all guest messages sent to this user's listings
+        guest_messages = Message.query.filter_by(
             receiver_id=current_user.id,
-            read=False
-        ).count()
-        
-        conversations.append({
-            'partner': partner,
-            'last_message': last_message,
-            'unread_count': unread_count
-        })
-    
-    # Sort by last message time
-    conversations.sort(key=lambda x: (
-        x['partner'].is_premium, 
-        x['last_message'].created_at if x['last_message'] else datetime.datetime.min
-    ), reverse=True)
-    
-    return render_template('messages.html', conversations=conversations)
+            is_guest=True
+        ).order_by(Message.created_at.desc()).all()
+
+    except Exception as e:
+        print(f"ERROR in messages(): {e}")
+        import traceback; traceback.print_exc()
+        db.session.rollback()
+        conversations = []
+        guest_messages = []
+
+    return render_template('messages.html',
+                           conversations=conversations,
+                           guest_messages=guest_messages)
+
 
 @bp.route('/message/<int:user_id>', methods=['GET', 'POST'])
 @login_required

@@ -1,67 +1,154 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-6 lg:px-8 py-12">
-    <h1 class="text-4xl font-bold text-gray-900 dark:text-platinum-100 mb-8">Messages</h1>
+<div class="max-w-4xl mx-auto px-6 lg:px-8 py-12">
+    <div class="flex items-center justify-between mb-8">
+        <h1 class="text-4xl font-bold text-gray-900 dark:text-platinum-100">Messages</h1>
+        <span class="text-sm text-gray-500 dark:text-gray-400">
+            {{ conversations|length }} conversation{{ 's' if conversations|length != 1 else '' }}
+            {% if guest_messages %}
+            · <span class="text-amber-500 font-semibold">{{ guest_messages|length }} guest inquiry{{ 'ies' if
+                guest_messages|length != 1 else '' }}</span>
+            {% endif %}
+        </span>
+    </div>
 
     {% if conversations %}
-    <div
-        class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 divide-y divide-gray-200 dark:divide-gray-700">
-        {% for conv in conversations %}
-        <a href="{{ url_for('main.message_user', user_id=conv.partner.id) }}"
-            class="block p-6 hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center flex-1">
-                    <!-- Avatar -->
-                    <div
-                        class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
-                        {{ conv.partner.email[0].upper() }}
-                    </div>
-
-                    <!-- Message Info -->
-                    <div class="ml-4 flex-1">
-                        <div class="flex items-center justify-between mb-1">
-                            <h3 class="font-bold text-gray-900 dark:text-platinum-100">
-                                {{ conv.partner.email.split('@')[0] }}
-                            </h3>
-                            <span class="text-sm text-gray-500 dark:text-gray-400">
-                                {{ conv.last_message.created_at.strftime('%b %d, %I:%M %p') if conv.last_message else ''
-                                }}
+    <!-- ── User-to-user conversations ── -->
+    <div class="mb-8">
+        <h2 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+            <i class="fas fa-comments text-blue-500"></i> Conversations
+        </h2>
+        <div
+            class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 divide-y divide-gray-200 dark:divide-gray-700">
+            {% for conv in conversations %}
+            <a href="{{ url_for('main.message_user', user_id=conv.partner.id) }}"
+                class="block p-6 hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center flex-1">
+                        <div
+                            class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
+                            {{ conv.partner.email[0].upper() }}
+                        </div>
+                        <div class="ml-4 flex-1">
+                            <div class="flex items-center justify-between mb-1">
+                                <h3 class="font-bold text-gray-900 dark:text-platinum-100">
+                                    {{ conv.partner.email.split('@')[0] }}
+                                </h3>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">
+                                    {{ conv.last_message.created_at.strftime('%b %d, %I:%M %p') if conv.last_message
+                                    else '' }}
+                                </span>
+                            </div>
+                            <p class="text-gray-600 dark:text-platinum-300 text-sm line-clamp-1">
+                                {% if conv.last_message %}
+                                {% if conv.last_message.sender_id == current_user.id %}
+                                <span class="text-gray-500">You:</span>
+                                {% endif %}
+                                {{ conv.last_message.content }}
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% if conv.unread_count > 0 %}
+                        <div class="ml-4">
+                            <span
+                                class="inline-flex items-center justify-center w-6 h-6 bg-blue-600 text-white text-xs font-bold rounded-full">
+                                {{ conv.unread_count }}
                             </span>
                         </div>
-                        <p class="text-gray-600 dark:text-platinum-300 text-sm line-clamp-1">
-                            {% if conv.last_message %}
-                            {% if conv.last_message.sender_id == current_user.id %}
-                            <span class="text-gray-500">You:</span>
-                            {% endif %}
-                            {{ conv.last_message.content }}
-                            {% endif %}
-                        </p>
+                        {% endif %}
                     </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 
-                    <!-- Unread Badge -->
-                    {% if conv.unread_count > 0 %}
-                    <div class="ml-4">
-                        <span
-                            class="inline-flex items-center justify-center w-6 h-6 bg-blue-600 text-white text-xs font-bold rounded-full">
-                            {{ conv.unread_count }}
-                        </span>
+    {% if guest_messages %}
+    <!-- ── Guest Inquiries ── -->
+    <div class="mb-8">
+        <h2 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+            <i class="fas fa-user-clock text-amber-500"></i> Guest Inquiries
+            <span
+                class="ml-2 text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full">
+                {{ guest_messages|length }} new
+            </span>
+        </h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            These are messages from non-registered users. Reply directly to their email.
+        </p>
+        <div class="space-y-4">
+            {% for gm in guest_messages %}
+            <div
+                class="bg-white dark:bg-dark-900 rounded-2xl shadow border border-amber-200 dark:border-amber-800/40 p-5
+                        {% if gm.is_flagged %}border-l-4 border-l-red-500{% else %}border-l-4 border-l-amber-400{% endif %}">
+                <div class="flex items-start justify-between gap-4">
+                    <!-- Icon + email -->
+                    <div class="flex items-center gap-3 flex-shrink-0">
+                        <div
+                            class="w-11 h-11 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            {{ gm.guest_email[0].upper() if gm.guest_email else '?' }}
+                        </div>
+                        <div>
+                            <p class="font-bold text-gray-900 dark:text-platinum-100 text-sm">{{ gm.guest_email or
+                                'Unknown' }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                {{ gm.created_at.strftime('%b %d %Y, %I:%M %p') if gm.created_at else 'Unknown time' }}
+                            </p>
+                        </div>
                     </div>
+                    <!-- Flagged badge -->
+                    {% if gm.is_flagged %}
+                    <span
+                        class="text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-2 py-1 rounded-full flex-shrink-0">
+                        ⚠️ Flagged
+                    </span>
                     {% endif %}
                 </div>
+
+                <!-- Message content (strip the [GUEST: email] prefix for display) -->
+                <div class="mt-3 bg-gray-50 dark:bg-dark-800 rounded-xl p-4">
+                    <p class="text-gray-800 dark:text-platinum-200 text-sm leading-relaxed">
+                        {% set content = gm.content %}
+                        {% if content.startswith('[GUEST:') and ']' in content %}
+                        {{ content.split('] ', 1)[1] if '] ' in content else content }}
+                        {% else %}
+                        {{ content }}
+                        {% endif %}
+                    </p>
+                </div>
+
+                <!-- Listing info + Reply button -->
+                <div class="mt-3 flex items-center justify-between">
+                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                        {% if gm.listing_id %}
+                        <a href="{{ url_for('main.listing_detail', id=gm.listing_id) }}"
+                            class="text-blue-500 hover:underline">
+                            <i class="fas fa-home mr-1"></i>View Listing #{{ gm.listing_id }}
+                        </a>
+                        {% endif %}
+                    </div>
+                    <a href="mailto:{{ gm.guest_email }}?subject=Re: Your HangarLinks Inquiry&body=Hi,%0A%0AThank you for your inquiry about my hangar listing on HangarLinks.%0A%0A"
+                        class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors shadow">
+                        <i class="fas fa-reply"></i> Reply via Email
+                    </a>
+                </div>
             </div>
-        </a>
-        {% endfor %}
+            {% endfor %}
+        </div>
     </div>
-    {% else %}
-    <!-- No Messages -->
+    {% endif %}
+
+    {% if not conversations and not guest_messages %}
+    <!-- ── Empty State ── -->
     <div class="text-center py-16">
         <div class="w-24 h-24 bg-gray-100 dark:bg-dark-800 rounded-full flex items-center justify-center mx-auto mb-6">
             <i class="fas fa-envelope text-gray-400 text-4xl"></i>
         </div>
         <h2 class="text-3xl font-bold text-gray-900 dark:text-platinum-100 mb-4">No messages yet</h2>
         <p class="text-gray-600 dark:text-platinum-300 mb-8">
-            Start a conversation by contacting a listing owner
+            Start a conversation by contacting a listing owner, or wait for guest inquiries on your listings.
         </p>
         <a href="{{ url_for('main.listings') }}"
             class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all hover-lift">
