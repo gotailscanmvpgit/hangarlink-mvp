@@ -165,96 +165,113 @@ def health():
         return {"status": "error", "database": str(e)}, 500
 
 @bp.route('/listings')
-@cache.cached(timeout=300, query_string=True)
 def listings():
     """Search and browse all listings"""
-    # Check search limit for free-tier renters
+    print("DEBUG: /listings route entered")
+
+    # Safely check search limit (never let this crash the page)
     search_limited = False
-    if not check_search_limit():
-        search_limited = True
-    
+    try:
+        if not check_search_limit():
+            search_limited = True
+    except Exception as lim_err:
+        print(f"WARN: check_search_limit failed: {lim_err}")
+
     airport = request.args.get('airport', '').strip().upper()
     radius = request.args.get('radius', 250, type=int)
     covered = request.args.get('covered', '')
     min_price = request.args.get('min_price', type=float)
     max_price = request.args.get('max_price', type=float)
-    duration = request.args.get('duration', 7, type=int) # Defaulting to Short-term Focus
+    duration = request.args.get('duration', 7, type=int)
     is_heated = request.args.get('is_heated')
     access_24_7 = request.args.get('access_24_7')
     electric_doors_only = request.args.get('electric_doors_only')
     nfpa_409_compliant = request.args.get('nfpa_409_compliant')
     gpu_power_available = request.args.get('gpu_power_available')
-    
-    # Build query
-    query = Listing.query.filter_by(status='Active')
-    
-    if airport:
-        query = query.filter_by(airport_icao=airport)
-    
-    if covered == 'yes':
-        query = query.filter_by(covered=True)
-    elif covered == 'no':
-        query = query.filter_by(covered=False)
-    
-    if min_price:
-        query = query.filter(Listing.price_month >= min_price)
-    
-    if max_price:
-        query = query.filter(Listing.price_month <= max_price)
-        
-    if duration:
-        # A person searching for 'duration' wants spaces where minimum stay is <= duration
-        query = query.filter(Listing.min_stay_nights <= duration)
-        
-    if is_heated == '1':
-        query = query.filter_by(is_heated=True)
-        
-    if access_24_7 == '1':
-        query = query.filter_by(access_24_7=True)
-        
-    if electric_doors_only == '1':
-        query = query.filter(Listing.door_type.in_(['Electric', 'Hydraulic', 'Bi-Fold (Electric)']))
-        
-    if nfpa_409_compliant == '1':
-        query = query.filter_by(nfpa_409_compliant=True)
-        
-    if gpu_power_available == '1':
-        query = query.filter_by(gpu_power_available=True)
-    
-    # Sort: Short-term prioritized -> Featured -> Premium Owner -> Newest
-    pagination = query.order_by(
-        Listing.min_stay_nights.asc(),
-        Listing.is_featured.desc(), 
-        Listing.is_premium_listing.desc(), 
-        Listing.created_at.desc()
-    ).paginate(page=request.args.get('page', 1, type=int), per_page=20, error_out=False)
-    
-    listings = pagination.items
-    
-    # Calculate markers for search results
-    markers = []
-    for l in listings:
-        if l.lat is not None and l.lon is not None:
-            markers.append({
-                'id': l.id,
-                'lat': l.lat,
-                'lon': l.lon,
-                'title': f"{l.airport_icao} Hangar",
-                'icao': l.airport_icao,
-                'price': f"${int(l.price_month)}",
-                'is_premium': l.is_premium_listing or (l.owner and l.owner.is_premium)
-            })
 
-    return render_template('listings.html', 
-                         listings=listings, 
-                         pagination=pagination,
-                         airport=airport, 
-                         radius=radius,
-                         covered=covered,
-                         min_price=min_price,
-                         max_price=max_price,
-                         search_limited=search_limited,
-                         markers=markers)
+    def _run_query():
+        q = Listing.query.filter_by(status='Active')
+        if airport:
+            q = q.filter_by(airport_icao=airport)
+        if covered == 'yes':
+            q = q.filter_by(covered=True)
+        elif covered == 'no':
+            q = q.filter_by(covered=False)
+        if min_price:
+            q = q.filter(Listing.price_month >= min_price)
+        if max_price:
+            q = q.filter(Listing.price_month <= max_price)
+        if duration:
+            q = q.filter(Listing.min_stay_nights <= duration)
+        if is_heated == '1':
+            q = q.filter_by(is_heated=True)
+        if access_24_7 == '1':
+            q = q.filter_by(access_24_7=True)
+        if electric_doors_only == '1':
+            q = q.filter(Listing.door_type.in_(['Electric', 'Hydraulic', 'Bi-Fold (Electric)']))
+        if nfpa_409_compliant == '1':
+            q = q.filter_by(nfpa_409_compliant=True)
+        if gpu_power_available == '1':
+            q = q.filter_by(gpu_power_available=True)
+        return q.order_by(
+            Listing.min_stay_nights.asc(),
+            Listing.is_featured.desc(),
+            Listing.is_premium_listing.desc(),
+            Listing.created_at.desc()
+        ).paginate(page=request.args.get('page', 1, type=int), per_page=20, error_out=False)
+
+    try:
+        pagination = _run_query()
+    except Exception as db_err:
+        print(f"ERROR: listings DB query failed: {db_err}")
+        # Self-heal: ensure tables exist then retry once
+        try:
+            from extensions import db as _db
+            _db.create_all()
+            db.session.rollback()
+            print("INFO: db.create_all() self-heal triggered, retrying query...")
+            pagination = _run_query()
+        except Exception as retry_err:
+            import traceback
+            traceback.print_exc()
+            print(f"FATAL: listings retry also failed: {retry_err}")
+            flash('Database is temporarily unavailable. Please try again in a moment.', 'error')
+            return render_template('listings.html',
+                                   listings=[], pagination=None,
+                                   airport=airport, radius=radius,
+                                   covered=covered, min_price=min_price,
+                                   max_price=max_price,
+                                   search_limited=search_limited,
+                                   markers=[]), 503
+
+    listings_items = pagination.items
+    markers = []
+    for l in listings_items:
+        if l.lat is not None and l.lon is not None:
+            try:
+                markers.append({
+                    'id': l.id,
+                    'lat': l.lat,
+                    'lon': l.lon,
+                    'title': f"{l.airport_icao} Hangar",
+                    'icao': l.airport_icao,
+                    'price': f"${int(l.price_month)}",
+                    'is_premium': l.is_premium_listing or (l.owner and l.owner.is_premium)
+                })
+            except Exception:
+                pass
+
+    print(f"DEBUG: /listings returning {len(listings_items)} results")
+    return render_template('listings.html',
+                           listings=listings_items,
+                           pagination=pagination,
+                           airport=airport,
+                           radius=radius,
+                           covered=covered,
+                           min_price=min_price,
+                           max_price=max_price,
+                           search_limited=search_limited,
+                           markers=markers)
 
 @bp.route('/listing/<int:id>')
 def listing_detail(id):
@@ -1632,25 +1649,32 @@ def cancel_subscription():
     return redirect(url_for('main.pricing'))
 
 def check_search_limit():
-    if not current_user.is_authenticated:
-        return True 
-    if current_user.subscription_tier == 'premium':
-        return True 
-    if current_user.role != 'renter':
-        return True 
-    
-    today = date.today()
-    if current_user.search_reset_date != today:
-        current_user.search_count_today = 0
-        current_user.search_reset_date = today
+    """Rate-limit free renters. Returns True = allowed, False = blocked."""
+    try:
+        if not current_user.is_authenticated:
+            return True
+        if getattr(current_user, 'subscription_tier', None) == 'premium':
+            return True
+        if getattr(current_user, 'role', 'renter') != 'renter':
+            return True
+
+        today = date.today()
+        reset_date = getattr(current_user, 'search_reset_date', None)
+        if reset_date != today:
+            current_user.search_count_today = 0
+            current_user.search_reset_date = today
+            db.session.commit()
+
+        if getattr(current_user, 'search_count_today', 0) >= 5:
+            return False
+
+        current_user.search_count_today = getattr(current_user, 'search_count_today', 0) + 1
         db.session.commit()
-    
-    if current_user.search_count_today >= 5:
-        return False
-    
-    current_user.search_count_today += 1
-    db.session.commit()
-    return True
+        return True
+    except Exception as e:
+        print(f"WARN: check_search_limit error (allowing): {e}")
+        db.session.rollback()
+        return True  # Fail open — don't block users on DB errors
 
 SPONSORED_TIERS = {
     'silver': {'price': 4900, 'name': 'Silver Featured', 'days': 30, 'boost': '2x'},

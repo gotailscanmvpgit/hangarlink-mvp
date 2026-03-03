@@ -295,6 +295,37 @@ def create_app(config_class=Config):
         except Exception as e:
             return jsonify({'error': str(e)}), 500
 
+    # ── Emergency DB init — force create_all() from browser ──────────────
+    @app.route('/init-db')
+    def init_db_route():
+        """Emergency: force db.create_all(). Requires SECRET_KEY as query param."""
+        from flask import request as freq, jsonify
+        import traceback
+        secret = freq.args.get('key', '')
+        if secret != app.config.get('SECRET_KEY', 'no-key'):
+            return 'Forbidden — pass ?key=YOUR_SECRET_KEY', 403
+        result = {
+            'db_url': str(db.engine.url).replace(
+                str(db.engine.url).split('@')[0] if '@' in str(db.engine.url) else '',
+                '***'
+            ),
+        }
+        try:
+            db.create_all()
+            from sqlalchemy import inspect as sa_inspect
+            insp = sa_inspect(db.engine)
+            tables = insp.get_table_names()
+            result['status'] = 'ok'
+            result['tables'] = tables
+            result['table_count'] = len(tables)
+            print(f"✅ [init-db] Tables after create_all: {tables}")
+        except Exception as e:
+            result['status'] = 'error'
+            result['error'] = str(e)
+            result['traceback'] = traceback.format_exc()
+            print(f"❌ [init-db] FAILED: {e}")
+        return jsonify(result)
+
     # Error handlers
     @app.errorhandler(404)
     def not_found_error(error):
