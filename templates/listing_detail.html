@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
 {% block extra_head %}
 <script>
@@ -880,8 +880,8 @@
                 const W = parseFloat(selected.getAttribute('data-wingspan'));
                 const H = parseFloat(selected.getAttribute('data-height'));
                 const area = L * W;
-                const hangarArea = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }
-            };
+                const hangarArea = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }};
+
 
 
 
