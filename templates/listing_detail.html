@@ -935,8 +935,8 @@
                 const W = parseFloat(selected.getAttribute('data-wingspan'));
                 const H = parseFloat(selected.getAttribute('data-height'));
                 const area = L * W;
-                const hangarArea = {{ listing.available_sqft if list
-            ing.available_sqft is not none else listing.size_sqft }};
+                const hangarArea = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }
+            };
 
 
 
@@ -1184,8 +1184,8 @@
                     const option = selector.options[selector.selectedIndex];
                     // Using a 10% safety buffer explicitly here on required footprint
                     const sqftReq = parseFloat(option.getAttribute('data-sqft')) * 1.1;
-                    const availableSqft = {{ listing.available_sqft if list
-                ing.available_sqft is not none else listing.size_sqft }};
+                    const availableSqft = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }
+                };
 
 
                 alertDiv.classList.remove('hidden');
@@ -1197,7 +1197,7 @@
                 } else {
                     alertDiv.className = 'mt-3 p-3 text-xs rounded-lg font-bold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 block';
                     alertDiv.innerHTML = '<i class="fas fa-check-circle mr-1 text-lg align-middle"></i> Fit Check: Yes (Comfortable Fit)';
-                    btn.disabled Un }
+                    btn.disabled = false;
                 }
             </script>
 
@@ -1221,7 +1221,7 @@
                         // If current end date is before min possible date, update it
                         if (!endInput.value || endInput.value < minEndDateStr) {
                             endInput.value = minEndDateStr;
-            }
+                        }
                     }
                 }
             </script>
@@ -1416,7 +1416,7 @@
                         alert("Thank you. Our safety team has been notified and will review this listing.");
                     } else {
                         alert("Error submitting report. Please try again.");
-                        });
+                    });
         }
     }
 </script>
