@@ -884,6 +884,7 @@
             };
 
 
+
             // Update specs
             specs.classList.remove('hidden');
             placeholder.classList.add('hidden');
@@ -1124,6 +1125,7 @@
                     const sqftReq = parseFloat(option.getAttribute('data-sqft')) * 1.1;
                     const availableSqft = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }
                 };
+
 
                 alertDiv.classList.remove('hidden');
 
