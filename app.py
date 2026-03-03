@@ -122,11 +122,10 @@ def create_app(config_class=Config):
             db.create_all()
             print("✅ [DB] db.create_all() completed — all model tables ensured.")
         except Exception as create_err:
-            print(f"❌ [DB] db.create_all() FAILED: {create_err}")
+            # Log loudly but DON'T crash — routes self-heal on first request
+            print(f"❌ [DB] db.create_all() FAILED (app will self-heal per-request): {create_err}")
             import traceback
             traceback.print_exc()
-            # Don't swallow — re-raise so Railway shows a clear crash reason
-            raise
 
         # ── Step 2: Dynamic column patching (add any missing columns) ──
         from sqlalchemy import text, inspect as sa_inspect
