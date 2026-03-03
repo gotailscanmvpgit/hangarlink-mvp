@@ -276,37 +276,46 @@ def listings():
 @bp.route('/listing/<int:id>')
 def listing_detail(id):
     """Individual listing detail page"""
+    import traceback as _tb
     from models import Booking
-    listing = db.get_or_404(Listing, id)
-    aircraft_sizes = current_app.config.get('AIRCRAFT_SIZES', {})
-    
-    # Check if user has access to secure items like Ramp Cam
-    has_access = False
-    if current_user.is_authenticated:
-        if current_user.id == listing.owner_id:
-            has_access = True
-        else:
-            # Check if user has an active/pending booking for this listing
-            active_booking = Booking.query.filter_by(
-                renter_id=current_user.id, 
-                listing_id=listing.id
-            ).filter(Booking.status.in_(['pending', 'confirmed', 'active'])).first()
-            if active_booking:
-                has_access = True
-    
-    # Fetch live weather for this airport
-    weather = None
+    print(f"DEBUG: listing_detail entered for id={id}")
     try:
-        from weather_service import fetch_airport_weather
-        lat = listing.lat or 43.6275
-        lon = listing.lon or -79.3962
-        weather = fetch_airport_weather(lat, lon, listing.airport_icao or 'UNKN')
+        listing = db.get_or_404(Listing, id)
+        aircraft_sizes = current_app.config.get('AIRCRAFT_SIZES', {})
+
+        # Check if user has access to secure items like Ramp Cam
+        has_access = False
+        if current_user.is_authenticated:
+            if current_user.id == listing.owner_id:
+                has_access = True
+            else:
+                active_booking = Booking.query.filter_by(
+                    renter_id=current_user.id,
+                    listing_id=listing.id
+                ).filter(Booking.status.in_(['pending', 'confirmed', 'active'])).first()
+                if active_booking:
+                    has_access = True
+
+        # Fetch live weather for this airport
+        weather = None
+        try:
+            from weather_service import fetch_airport_weather
+            lat = listing.lat or 43.6275
+            lon = listing.lon or -79.3962
+            weather = fetch_airport_weather(lat, lon, listing.airport_icao or 'UNKN')
+        except Exception as we:
+            current_app.logger.warning(f"[WEATHER] Could not fetch weather: {we}")
+
+        print(f"DEBUG: rendering listing_detail.html for listing {id}")
+        return render_template('listing_detail.html', listing=listing,
+                               aircraft_sizes=aircraft_sizes, has_access=has_access,
+                               weather=weather)
+
     except Exception as e:
-        current_app.logger.warning(f"[WEATHER] Could not fetch weather: {e}")
-                
-    return render_template('listing_detail.html', listing=listing, 
-                           aircraft_sizes=aircraft_sizes, has_access=has_access,
-                           weather=weather)
+        err = _tb.format_exc()
+        print(f"ERROR in listing_detail(id={id}): {e}\n{err}")
+        # Return traceback as plain text so we can see the exact error
+        return f"<pre style='padding:2rem;font-size:13px'><b>500 DEBUG — listing_detail(id={id})</b>\n\n{err}</pre>", 500
 
 @bp.route('/post-listing', methods=['GET', 'POST'])
 @login_required
