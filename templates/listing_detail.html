@@ -935,7 +935,8 @@
                 const W = parseFloat(selected.getAttribute('data-wingspan'));
                 const H = parseFloat(selected.getAttribute('data-height'));
                 const area = L * W;
-                const hangarArea = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }};
+                const hangarArea = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }
+            };
 
 
 
@@ -1183,7 +1184,8 @@
                     const option = selector.options[selector.selectedIndex];
                     // Using a 10% safety buffer explicitly here on required footprint
                     const sqftReq = parseFloat(option.getAttribute('data-sqft')) * 1.1;
-                    const availableSqft = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }};
+                    const availableSqft = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }
+                };
 
 
                 alertDiv.classList.remove('hidden');
@@ -1323,27 +1325,7 @@
     <div id="map" style="height: 300px; width: 100%;" class="rounded-xl"></div>
 </div>
 
-<!-- Nearby FBOs & Fuel Widget -->
-<div class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
-    <h3 class="text-xl font-bold text-gray-900 dark:text-platinum-100 mb-4 flex items-center">
-        <i class="fas fa-gas-pump text-blue-600 mr-2"></i>Nearby Fuel & FBOs
-    </h3>
-    <div class="space-y-4">
-        <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <div class="flex justify-between items-center mb-1">
-                <span class="font-bold text-gray-800 dark:text-gray-200">Signature Flight Support</span>
-                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">Primary</span>
-            </div>
-            <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">122.95 MHz</div>
-            <div class="flex justify-between text-sm">
-                <span class="text-green-600 font-semibold">Jet A: $6.50/gal</span>
-                <span class="text-blue-600 font-semibold">100LL: $7.20/gal</span>
-            </div>
-        </div>
-    </div>
-    <a href="#" class="block text-center text-sm text-blue-600 hover:text-blue-800 mt-4 font-medium">View All FBOs
-        at {{ listing.airport_icao }}</a>
-</div>
+
 
 <!-- Featured Partner Ad -->
 {% set detail_ads = get_ads('listing_detail') %}
