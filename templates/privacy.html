@@ -1,24 +1,269 @@
 ﻿{% extends "base.html" %}
 
-{% block title %}Privacy Policy - HangarLinks{% endblock %}
-
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <h1 class="text-4xl font-bold text-white mb-8">Privacy Policy</h1>
+<div class="bg-gray-50 dark:bg-dark-900 min-h-screen pt-12 pb-24">
+    <div class="max-w-4xl mx-auto px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-12 text-center">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-4">Privacy Policy</h1>
+            <p class="text-lg text-gray-600 dark:text-platinum-300">Effective Date: March 4, 2026</p>
+        </div>
 
-    <div class="bg-gray-800 rounded-lg p-8 border border-gray-700">
-        <p class="text-gray-300 mb-6">
-            <em>Last Updated: February 2026</em>
-        </p>
+        <!-- Content Card -->
+        <div
+            class="bg-white dark:bg-dark-800 rounded-3xl shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+            <div class="p-8 md:p-12 space-y-12">
 
-        <h2 class="text-2xl font-semibold text-white mb-4">Privacy Policy - Coming Soon</h2>
-        <p class="text-gray-300 mb-6">
-            Our comprehensive privacy policy is currently being finalized. Please check back soon.
-        </p>
+                <!-- Section 1: Introduction -->
+                <section id="introduction">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                        <span
+                            class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mr-3 text-blue-600 dark:text-blue-400 text-sm">1</span>
+                        Introduction
+                    </h2>
+                    <div
+                        class="prose prose-blue dark:prose-invert max-w-none text-gray-600 dark:text-platinum-300 leading-relaxed">
+                        <p>
+                            Welcome to HangarLinks.com (referred to as "HangarLinks," "we," "us," or "our"). We are
+                            committed to protecting your privacy and ensuring your personal information is handled in a
+                            safe and responsible manner. This Privacy Policy describes how we collect, use, share, and
+                            protect information when you use our website, mobile application, and related services
+                            (collectively, the "Services").
+                        </p>
+                        <p>
+                            By access or using our Services, you agree to the practices described in this Privacy
+                            Policy. If you do not agree, please do not use our Services.
+                        </p>
+                    </div>
+                </section>
 
-        <p class="text-gray-400 text-sm">
-            For privacy-related questions, contact: privacy@HangarLinks.com
-        </p>
+                <hr class="border-gray-200 dark:border-gray-700">
+
+                <!-- Section 2: Information Collected -->
+                <section id="collection">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                        <span
+                            class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mr-3 text-blue-600 dark:text-blue-400 text-sm">2</span>
+                        Information We Collect
+                    </h2>
+                    <div class="space-y-6 text-gray-600 dark:text-platinum-300 leading-relaxed">
+                        <div>
+                            <h3 class="font-bold text-gray-900 dark:text-white mb-2">Personal Information You Provide:
+                            </h3>
+                            <ul class="list-disc pl-6 space-y-2">
+                                <li><strong>Account Data:</strong> Name, email address, phone number, and password when
+                                    you register.</li>
+                                <li><strong>Profile and Listing Data:</strong> Aircraft tail numbers, hangar dimensions,
+                                    airport ICAO codes, photos, and descriptions you upload.</li>
+                                <li><strong>Payment Information:</strong> We use Stripe to process payments. We do not
+                                    store your full credit card details on our servers; Stripe provides us with tokens
+                                    and transaction status.</li>
+                                <li><strong>Communication:</strong> Messages sent between users via our internal
+                                    messaging system and inquiries sent to our AI Concierge.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-900 dark:text-white mb-2">Information Collected
+                                Automatically:</h3>
+                            <ul class="list-disc pl-6 space-y-2">
+                                <li><strong>Usage Data:</strong> IP address, browser type, device information, and pages
+                                    visited.</li>
+                                <li><strong>Location Data:</strong> Based on your IP address or GPS (with permission),
+                                    to provide relevant local hangar availability and fuel prices.</li>
+                                <li><strong>Cookies:</strong> We use cookies to maintain your session and remember your
+                                    preferences.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-900 dark:text-white mb-2">Third-Party Data:</h3>
+                            <ul class="list-disc pl-6 space-y-2">
+                                <li>We receive information from partners such as AviationStack (for airport and FBO
+                                    data) and Stripe (to confirm subscription status).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <hr class="border-gray-200 dark:border-gray-700">
+
+                <!-- Section 3: How We Use Information -->
+                <section id="usage">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                        <span
+                            class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mr-3 text-blue-600 dark:text-blue-400 text-sm">3</span>
+                        How We Use Your Information
+                    </h2>
+                    <div
+                        class="prose prose-blue dark:prose-invert max-w-none text-gray-600 dark:text-platinum-300 leading-relaxed">
+                        <p>We use the information we collect for several purposes, including:</p>
+                        <ul class="list-disc pl-6 space-y-2">
+                            <li><strong>To Provide Services:</strong> Facilitating the search, listing, and booking of
+                                aircraft parking spaces.</li>
+                            <li><strong>To Improve the App:</strong> Analyzing usage patterns to enhance UI/UX and
+                                training our AI Concierge to provide more accurate aviation-specific assistance.</li>
+                            <li><strong>To Personalize Experience:</strong> Recommending hangars or FBO services based
+                                on your aircraft type and frequent airports.</li>
+                            <li><strong>To Communicate:</strong> Sending booking confirmations, security alerts, market
+                                intelligence updates, and marketing communications (which you can opt-out of).</li>
+                            <li><strong>For Safety and Compliance:</strong> Verifying user identities and ensuring
+                                compliance with FAA, Transport Canada (CARs), and local airport regulations.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <hr class="border-gray-200 dark:border-gray-700">
+
+                <!-- Section 4: How We Share Information -->
+                <section id="sharing">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                        <span
+                            class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mr-3 text-blue-600 dark:text-blue-400 text-sm">4</span>
+                        How We Share Your Information
+                    </h2>
+                    <div
+                        class="prose prose-blue dark:prose-invert max-w-none text-gray-600 dark:text-platinum-300 leading-relaxed">
+                        <p>We do not sell your personal data. We share your information only in the following contexts:
+                        </p>
+                        <ul class="list-disc pl-6 space-y-2">
+                            <li><strong>Between Users:</strong> When a booking is initiated, relevant contact and
+                                aircraft information is shared between the owner and renter to facilitate the
+                                transaction.</li>
+                            <li><strong>Service Providers:</strong> We share data with Stripe (payments), SendGrid
+                                (email), and our AI service providers (LLM processing) to operate the platform.</li>
+                            <li><strong>Partners:</strong> If you opt-in to micro-insurance or FBO services, we may
+                                share basic details with those third-party providers to generate quotes.</li>
+                            <li><strong>Legal Requirements:</strong> We may disclose information if required by law,
+                                such as a subpoena or government request, particularly regarding FAA/CARs compliance
+                                audits.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <hr class="border-gray-200 dark:border-gray-700">
+
+                <!-- Section 5: User Rights -->
+                <section id="rights">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                        <span
+                            class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mr-3 text-blue-600 dark:text-blue-400 text-sm">5</span>
+                        Your Rights and Choices
+                    </h2>
+                    <div
+                        class="prose prose-blue dark:prose-invert max-w-none text-gray-600 dark:text-platinum-300 leading-relaxed">
+                        <p>Depending on your location, you may have rights under the GDPR, CCPA, or PIPEDA, including:
+                        </p>
+                        <ul class="list-disc pl-6 space-y-4">
+                            <li><strong>Access and Portability:</strong> You can request a copy of the personal data we
+                                hold about you.</li>
+                            <li><strong>Correction:</strong> You can update your profile information at any time via
+                                your user dashboard.</li>
+                            <li><strong>Deletion:</strong> You can request that we delete your account and personal
+                                data, subject to certain legal obligations (like tax and transaction records).</li>
+                            <li><strong>Opt-Out:</strong> You can unsubscribe from marketing emails via the
+                                "unsubscribe" link or by contacting support.</li>
+                        </ul>
+                        <p class="mt-4 font-semibold text-blue-600 dark:text-blue-400">
+                            To exercise these rights, please contact us at <a href="mailto:support@hangarlinks.com"
+                                class="underline">support@hangarlinks.com</a>.
+                        </p>
+                    </div>
+                </section>
+
+                <hr class="border-gray-200 dark:border-gray-700">
+
+                <!-- Section 6: Security -->
+                <section id="security">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                        <span
+                            class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mr-3 text-blue-600 dark:text-blue-400 text-sm">6</span>
+                        Data Security
+                    </h2>
+                    <div
+                        class="prose prose-blue dark:prose-invert max-w-none text-gray-600 dark:text-platinum-300 leading-relaxed">
+                        <p>
+                            We implement industry-standard security measures, including SSL/TLS encryption for all data
+                            in transit and AES encryption for data at rest. While we strive to use commercially
+                            acceptable means to protect your personal information, no method of transmission over the
+                            internet or electronic storage is 100% secure, and we cannot guarantee absolute security.
+                        </p>
+                    </div>
+                </section>
+
+                <hr class="border-gray-200 dark:border-gray-700">
+
+                <!-- Section 7: Children's Privacy -->
+                <section id="children">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                        <span
+                            class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mr-3 text-blue-600 dark:text-blue-400 text-sm">7</span>
+                        Children's Privacy
+                    </h2>
+                    <div
+                        class="prose prose-blue dark:prose-invert max-w-none text-gray-600 dark:text-platinum-300 leading-relaxed">
+                        <p>
+                            HangarLinks is not intended for children under the age of 13, and we do not knowingly
+                            collect personal information from children under 13. If we become aware that we have
+                            collected information from a child under 13, we will take steps to delete it.
+                        </p>
+                    </div>
+                </section>
+
+                <hr class="border-gray-200 dark:border-gray-700">
+
+                <!-- Section 8: Changes to Policy -->
+                <section id="changes">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                        <span
+                            class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mr-3 text-blue-600 dark:text-blue-400 text-sm">8</span>
+                        Changes to This Policy
+                    </h2>
+                    <div
+                        class="prose prose-blue dark:prose-invert max-w-none text-gray-600 dark:text-platinum-300 leading-relaxed">
+                        <p>
+                            We may update our Privacy Policy from time to time. We will notify you of any changes by
+                            posting the new Privacy Policy on this page and updating the "Effective Date" at the top.
+                            You are advised to review this Privacy Policy periodically for any changes.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- Section 9: Contact -->
+                <section id="contact"
+                    class="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-6 sm:p-10 border border-blue-100 dark:border-blue-900/30">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Contact Us</h2>
+                    <p class="text-gray-600 dark:text-platinum-300 mb-6 font-medium">
+                        If you have any questions about this Privacy Policy or our data practices, please reach out to
+                        us:
+                    </p>
+                    <div class="grid sm:grid-cols-2 gap-8">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shrink-0">
+                                <i class="fas fa-envelope text-white"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-900 dark:text-white text-sm">Email</h4>
+                                <p class="text-blue-600 dark:text-blue-400 text-sm">support@hangarlinks.com</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shrink-0">
+                                <i class="fas fa-map-marker-alt text-white"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-900 dark:text-white text-sm">Address</h4>
+                                <p class="text-gray-600 dark:text-platinum-300 text-sm">Toronto, ON, Canada</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+
+        <!-- Sticky Footer for quick navigation (Desktop) -->
+        <div class="mt-8 text-center text-sm text-gray-500 dark:text-gray-600">
+            <p>&copy; 2026 HangarLinks. All rights reserved.</p>
+        </div>
     </div>
 </div>
 {% endblock %}
