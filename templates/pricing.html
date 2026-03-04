@@ -49,9 +49,31 @@
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════════
+     BILLING CYCLE TOGGLE
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="relative z-20 pt-4 pb-2">
+    <div class="max-w-xs mx-auto px-6">
+        <div class="flex items-center justify-center gap-0 bg-white/5 border border-white/10 rounded-2xl p-1.5">
+            <button id="toggle-monthly" onclick="setBilling('monthly')"
+                class="flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-300 bg-white/15 text-white shadow">
+                Monthly
+            </button>
+            <button id="toggle-yearly" onclick="setBilling('yearly')"
+                class="flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-300 text-slate-400 relative">
+                Yearly
+                <span
+                    class="absolute -top-2.5 -right-1 bg-gradient-to-r from-green-400 to-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow">
+                    Save 17%
+                </span>
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
      PRICING CARDS
      ═══════════════════════════════════════════════════════════════ -->
-<section class="relative -mt-10 pb-20 z-20">
+<section class="relative -mt-4 pb-20 z-20">
     <div class="max-w-6xl mx-auto px-6">
         <div class="grid md:grid-cols-3 gap-8">
 
@@ -127,11 +149,22 @@
 
                 <div class="mb-6 mt-2">
                     <h3 class="text-lg font-semibold text-amber-300 mb-2">✈️ Owner Premium</h3>
-                    <div class="flex items-baseline mb-4">
+                    <!-- Monthly price (shown by default) -->
+                    <div id="owner-price-monthly" class="flex items-baseline mb-1">
                         <span class="text-4xl font-extrabold text-white">${{ owner_plan.price_display }}</span>
                         <span class="text-slate-400 ml-2">/month</span>
                     </div>
-                    <p class="text-slate-300 text-sm">For hangar owners who mean business</p>
+                    <!-- Yearly price (hidden by default) -->
+                    <div id="owner-price-yearly" class="hidden">
+                        <div class="flex items-baseline mb-1">
+                            <span class="text-4xl font-extrabold text-white">${{ owner_plan_yearly.price_display
+                                }}</span>
+                            <span class="text-slate-400 ml-2">/year</span>
+                        </div>
+                        <p class="text-green-400 text-xs font-semibold">≈ ${{ owner_plan_yearly.monthly_equiv }}/mo
+                            &nbsp;·&nbsp; {{ owner_plan_yearly.savings }}</p>
+                    </div>
+                    <p class="text-slate-300 text-sm mt-1">For hangar owners who mean business</p>
                 </div>
 
                 <ul class="space-y-3 mb-8 flex-1">
@@ -154,11 +187,13 @@
                         ✓ Active — Manage
                     </a>
                     {% else %}
-                    <form action="{{ url_for('main.create_checkout_session') }}" method="POST">
-                        <input type="hidden" name="item_type" value="premium_owner">
+                    <form id="owner-checkout-form" action="{{ url_for('main.create_checkout_session') }}" method="POST">
+                        <input type="hidden" id="owner-item-type" name="item_type" value="premium_owner">
                         <button type="submit"
                             class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-lg transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/25 hover:scale-[1.02] active:scale-[0.98]">
-                            Subscribe — ${{ owner_plan.price_display }}/mo
+                            <span id="owner-btn-monthly">Subscribe — ${{ owner_plan.price_display }}/mo</span>
+                            <span id="owner-btn-yearly" class="hidden">Subscribe — ${{ owner_plan_yearly.price_display
+                                }}/yr</span>
                         </button>
                     </form>
                     {% endif %}
@@ -175,11 +210,22 @@
             <div class="bg-white/5 backdrop-blur-xl border border-purple-400/20 rounded-2xl p-8 flex flex-col">
                 <div class="mb-6">
                     <h3 class="text-lg font-semibold text-purple-300 mb-2">🔍 Renter Premium</h3>
-                    <div class="flex items-baseline mb-4">
+                    <!-- Monthly price (shown by default) -->
+                    <div id="renter-price-monthly" class="flex items-baseline mb-1">
                         <span class="text-4xl font-extrabold text-white">${{ renter_plan.price_display }}</span>
                         <span class="text-slate-400 ml-2">/month</span>
                     </div>
-                    <p class="text-slate-300 text-sm">Find the perfect hangar, faster</p>
+                    <!-- Yearly price (hidden by default) -->
+                    <div id="renter-price-yearly" class="hidden">
+                        <div class="flex items-baseline mb-1">
+                            <span class="text-4xl font-extrabold text-white">${{ renter_plan_yearly.price_display
+                                }}</span>
+                            <span class="text-slate-400 ml-2">/year</span>
+                        </div>
+                        <p class="text-green-400 text-xs font-semibold">≈ ${{ renter_plan_yearly.monthly_equiv }}/mo
+                            &nbsp;·&nbsp; {{ renter_plan_yearly.savings }}</p>
+                    </div>
+                    <p class="text-slate-300 text-sm mt-1">Find the perfect hangar, faster</p>
                 </div>
 
                 <ul class="space-y-3 mb-8 flex-1">
@@ -202,11 +248,14 @@
                         ✓ Active — Manage
                     </a>
                     {% else %}
-                    <form action="{{ url_for('main.create_checkout_session') }}" method="POST">
-                        <input type="hidden" name="item_type" value="premium_renter">
+                    <form id="renter-checkout-form" action="{{ url_for('main.create_checkout_session') }}"
+                        method="POST">
+                        <input type="hidden" id="renter-item-type" name="item_type" value="premium_renter">
                         <button type="submit"
                             class="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-400 hover:to-violet-400 text-white font-bold text-lg transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/25 hover:scale-[1.02] active:scale-[0.98]">
-                            Subscribe — ${{ renter_plan.price_display }}/mo
+                            <span id="renter-btn-monthly">Subscribe — ${{ renter_plan.price_display }}/mo</span>
+                            <span id="renter-btn-yearly" class="hidden">Subscribe — ${{ renter_plan_yearly.price_display
+                                }}/yr</span>
                         </button>
                     </form>
                     {% endif %}
@@ -221,6 +270,34 @@
         </div>
     </div>
 </section>
+
+<script>
+    function setBilling(cycle) {
+        const isYearly = cycle === 'yearly';
+
+        // Toggle button styles
+        document.getElementById('toggle-monthly').className = 'flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ' +
+            (isYearly ? 'text-slate-400' : 'bg-white/15 text-white shadow');
+        document.getElementById('toggle-yearly').className = 'flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-300 relative ' +
+            (isYearly ? 'bg-white/15 text-white shadow' : 'text-slate-400');
+
+        // Toggle price displays
+        ['owner', 'renter'].forEach(role => {
+            document.getElementById(role + '-price-monthly').classList.toggle('hidden', isYearly);
+            document.getElementById(role + '-price-yearly').classList.toggle('hidden', !isYearly);
+            const btnMonthly = document.getElementById(role + '-btn-monthly');
+            const btnYearly = document.getElementById(role + '-btn-yearly');
+            if (btnMonthly) btnMonthly.classList.toggle('hidden', isYearly);
+            if (btnYearly) btnYearly.classList.toggle('hidden', !isYearly);
+
+            // Update the hidden item_type input
+            const itemInput = document.getElementById(role + '-item-type');
+            if (itemInput) {
+                itemInput.value = isYearly ? 'premium_' + role + '_yearly' : 'premium_' + role;
+            }
+        });
+    }
+</script>
 
 <!-- ═══════════════════════════════════════════════════════════════
      TRANSACTION FEE EXPLAINER

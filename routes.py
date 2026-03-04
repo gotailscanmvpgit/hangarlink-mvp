@@ -1610,16 +1610,48 @@ RENTER_PLAN = {
     'features': ['Unlimited searches', 'Saved alerts', 'Priority support', 'Premium badge', 'Early access', 'Advanced filters']
 }
 
+# Yearly plans — Save ~17%
+OWNER_PLAN_YEARLY = {
+    'name': 'Owner Premium (Yearly)',
+    'price': 9900,          # $99.00/year
+    'price_display': '99',
+    'interval': 'year',
+    'monthly_equiv': '8.25',
+    'savings': 'Save 17%',
+    'features': OWNER_PLAN['features']
+}
+
+RENTER_PLAN_YEARLY = {
+    'name': 'Renter Premium (Yearly)',
+    'price': 6900,          # $69.00/year
+    'price_display': '69',
+    'interval': 'year',
+    'monthly_equiv': '5.75',
+    'savings': 'Save 17%',
+    'features': RENTER_PLAN['features']
+}
+
 @bp.route('/pricing')
 def pricing():
-    return render_template('pricing.html', owner_plan=OWNER_PLAN, renter_plan=RENTER_PLAN, fee_percent=TRANSACTION_FEE_PERCENT)
+    return render_template(
+        'pricing.html',
+        owner_plan=OWNER_PLAN,
+        renter_plan=RENTER_PLAN,
+        owner_plan_yearly=OWNER_PLAN_YEARLY,
+        renter_plan_yearly=RENTER_PLAN_YEARLY,
+        fee_percent=TRANSACTION_FEE_PERCENT
+    )
 
 @bp.route('/subscription/success')
 @login_required
 def subscription_success():
     session_id = request.args.get('session_id')
     plan_type = request.args.get('plan', 'owner')
+    billing_cycle = request.args.get('billing', 'monthly')  # 'monthly' or 'yearly'
     stripe = get_stripe()
+    
+    # Determine subscription duration based on billing cycle
+    days_active = 365 if billing_cycle == 'yearly' else 30
     
     if stripe and session_id:
         try:
@@ -1628,22 +1660,27 @@ def subscription_success():
             current_user.stripe_subscription_id = checkout.subscription
             current_user.subscription_tier = 'premium'
             current_user.is_premium = True
-            current_user.subscription_expires = datetime.utcnow() + timedelta(days=30)
+            current_user.subscription_expires = datetime.utcnow() + timedelta(days=days_active)
             db.session.commit()
         except Exception as e:
             print(f"Stripe session retrieve error: {e}")
     else:
         current_user.subscription_tier = 'premium'
         current_user.is_premium = True
-        current_user.subscription_expires = datetime.utcnow() + timedelta(days=30)
+        current_user.subscription_expires = datetime.utcnow() + timedelta(days=days_active)
         db.session.commit()
 
     # Admin email notification (MVP placeholder)
     _notify_admin_subscription(current_user, plan_type)
 
     flash('🎉 Welcome to Premium! Your subscription is active.', 'success')
-    return render_template('subscription_success.html', plan_type=plan_type,
-                           plan=OWNER_PLAN if plan_type == 'owner' else RENTER_PLAN)
+    
+    # Select the right plan object to display
+    if plan_type == 'owner':
+        plan = OWNER_PLAN_YEARLY if billing_cycle == 'yearly' else OWNER_PLAN
+    else:
+        plan = RENTER_PLAN_YEARLY if billing_cycle == 'yearly' else RENTER_PLAN
+    return render_template('subscription_success.html', plan_type=plan_type, plan=plan, billing_cycle=billing_cycle)
 
 @bp.route('/subscription/cancel')
 def subscription_cancel():
@@ -2581,15 +2618,20 @@ def create_checkout_session():
     
     # Pricing configuration (Test Mode Defaults)
     prices = {
-        'premium_owner': {'amount': 999, 'name': 'Owner Premium Subscription', 'recurring': True},
-        'premium_renter': {'amount': 699, 'name': 'Renter Premium Subscription', 'recurring': True},
-        'featured_silver': {'amount': 4900, 'name': 'Silver Featured Listing (30 Days)', 'recurring': False},
-        'featured_gold': {'amount': 9900, 'name': 'Gold Featured Listing (30 Days)', 'recurring': False},
-        'featured_platinum': {'amount': 19900, 'name': 'Platinum Featured Listing (30 Days)', 'recurring': False},
-        'insurance_base': {'amount': 4500, 'name': 'HangarLink Liability Coverage (Base)', 'recurring': False},
-        'analytics_report': {'amount': 1999, 'name': 'AI Market Intel Report', 'recurring': False},
-        'analytics_report_national': {'amount': 14900, 'name': 'National Hangar Market Report (Q1 2026)', 'recurring': False},
-        'white_label': {'amount': 9900, 'name': 'FBO White-Label Portal (Monthly)', 'recurring': True},
+        # Monthly plans
+        'premium_owner':          {'amount': 999,   'name': 'Owner Premium — Monthly',         'recurring': True,  'interval': 'month'},
+        'premium_renter':         {'amount': 699,   'name': 'Renter Premium — Monthly',        'recurring': True,  'interval': 'month'},
+        # Yearly plans (Save ~17%)
+        'premium_owner_yearly':   {'amount': 9900,  'name': 'Owner Premium — Yearly ($99/yr)', 'recurring': True,  'interval': 'year'},
+        'premium_renter_yearly':  {'amount': 6900,  'name': 'Renter Premium — Yearly ($69/yr)','recurring': True,  'interval': 'year'},
+        # One-time purchases
+        'featured_silver':        {'amount': 4900,  'name': 'Silver Featured Listing (30 Days)',  'recurring': False, 'interval': None},
+        'featured_gold':          {'amount': 9900,  'name': 'Gold Featured Listing (30 Days)',    'recurring': False, 'interval': None},
+        'featured_platinum':      {'amount': 19900, 'name': 'Platinum Featured Listing (30 Days)','recurring': False, 'interval': None},
+        'insurance_base':         {'amount': 4500,  'name': 'HangarLink Liability Coverage (Base)','recurring': False,'interval': None},
+        'analytics_report':       {'amount': 1999,  'name': 'AI Market Intel Report',             'recurring': False, 'interval': None},
+        'analytics_report_national': {'amount': 14900, 'name': 'National Hangar Market Report', 'recurring': False,'interval': None},
+        'white_label':            {'amount': 9900,  'name': 'FBO White-Label Portal (Monthly)',  'recurring': True,  'interval': 'month'},
     }
     
     config = prices.get(item_type)
@@ -2623,8 +2665,8 @@ def create_checkout_session():
             }
         }
         
-        if config['recurring']:
-            session_params['line_items'][0]['price_data']['recurring'] = {'interval': 'month'}
+        if config['recurring'] and config['interval']:
+            session_params['line_items'][0]['price_data']['recurring'] = {'interval': config['interval']}
             
         checkout_session = stripe_lib.checkout.Session.create(**session_params)
         
