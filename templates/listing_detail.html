@@ -935,7 +935,8 @@
                 const W = parseFloat(selected.getAttribute('data-wingspan'));
                 const H = parseFloat(selected.getAttribute('data-height'));
                 const area = L * W;
-                const hangarArea = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }};
+                const hangarArea = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }
+            };
 
 
 
@@ -1163,9 +1164,22 @@
                     class="block w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-xl text-center shadow-lg hover:shadow-xl transition-all hover-lift disabled:opacity-50 disabled:cursor-not-allowed">
                     <i class="fas fa-bolt mr-2 text-yellow-300"></i>Reserve Now
                 </button>
-                <p class="text-xs text-center text-gray-500 mt-2 flex items-center justify-center">
-                    <i class="fas fa-lock mr-1 text-green-500"></i>Secured by Stripe Escrow
-                </p>
+                <div class="mt-4 flex flex-col items-center">
+                    <div class="flex items-center gap-4 mb-2">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa"
+                            class="h-4 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
+                            alt="Mastercard"
+                            class="h-6 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg"
+                            alt="Stripe"
+                            class="h-5 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all">
+                    </div>
+                    <p
+                        class="text-[10px] text-gray-500 flex items-center justify-center font-medium uppercase tracking-wider">
+                        <i class="fas fa-lock mr-1.5 text-green-500"></i>Secure Stripe Checkout
+                    </p>
+                </div>
             </form>
 
             <script>
@@ -1183,7 +1197,8 @@
                     const option = selector.options[selector.selectedIndex];
                     // Using a 10% safety buffer explicitly here on required footprint
                     const sqftReq = parseFloat(option.getAttribute('data-sqft')) * 1.1;
-                    const availableSqft = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }};
+                    const availableSqft = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }
+                };
 
 
                 alertDiv.classList.remove('hidden');
@@ -1394,7 +1409,8 @@
                         alert("Thank you. Our safety team has been notified and will review this listing.");
                     } else {
                         alert("Error submitting report. Please try again.");
-                    });
+                    }
+                });
         }
     }
 </script>
