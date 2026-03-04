@@ -313,23 +313,57 @@
                             d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
-                <div>
-                    <h3 class="text-xl font-bold text-white mb-2">{{ fee_percent }}% Transaction Fee</h3>
-                    <p class="text-slate-300 mb-4">
-                        When a booking is completed, HangarLinks charges an <strong class="text-white">{{ fee_percent
-                            }}%
-                            platform fee</strong> on the total rental amount. This covers payment processing, platform
-                        maintenance, and dispute resolution.
+                <div class="flex-1">
+                    <h3 class="text-xl font-bold text-white mb-2">{{ fee_percent }}% Platform Fee — Simple & Transparent
+                    </h3>
+                    <p class="text-slate-300 mb-5">
+                        When a booking is completed, HangarLinks charges a flat <strong class="text-white">{{
+                            fee_percent }}% platform fee</strong> on the total rental amount — whether it's overnight or
+                        long-term. This covers payment processing, platform maintenance, and dispute resolution.
                     </p>
-                    <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                        <p class="text-sm text-slate-400 mb-1">Example: For a $1,500/mo hangar rental</p>
+
+                    <!-- Primary: Short-term / Daily example -->
+                    <div
+                        class="bg-gradient-to-r from-sky-500/10 to-blue-600/10 border border-sky-500/20 rounded-xl p-5 mb-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <i class="fas fa-moon text-sky-400 text-sm"></i>
+                            <span class="text-sky-300 text-xs font-bold uppercase tracking-wider">Short-Term / Nightly
+                                Rental</span>
+                        </div>
+                        <p class="text-sm text-slate-400 mb-2">Example: For a <strong
+                                class="text-white">$150/night</strong> short-term hangar rental</p>
                         <div class="flex items-center gap-3">
-                            <span class="text-2xl font-bold text-amber-400">${{ (1500 * fee_percent / 100)|int }}</span>
-                            <span class="text-slate-400">platform fee per month</span>
+                            <span class="text-3xl font-extrabold text-amber-400">${{ (150 * fee_percent / 100)|int
+                                }}</span>
+                            <div>
+                                <p class="text-white font-semibold text-sm">platform fee per night</p>
+                                <p class="text-slate-500 text-xs">{{ fee_percent }}% of $150</p>
+                            </div>
                         </div>
                     </div>
-                    <p class="text-xs text-slate-500 mt-3">
-                        Fee is charged to the renter upon booking completion. Owners receive the full listed amount.
+
+                    <!-- Secondary: Monthly example -->
+                    <div class="bg-white/5 border border-white/10 rounded-xl p-5">
+                        <div class="flex items-center gap-2 mb-3">
+                            <i class="fas fa-calendar-alt text-purple-400 text-sm"></i>
+                            <span class="text-purple-300 text-xs font-bold uppercase tracking-wider">Monthly / Long-Term
+                                Rental</span>
+                        </div>
+                        <p class="text-sm text-slate-400 mb-2">Example: For a <strong
+                                class="text-white">$1,500/month</strong> hangar rental</p>
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl font-extrabold text-amber-400">${{ (1500 * fee_percent / 100)|int
+                                }}</span>
+                            <div>
+                                <p class="text-white font-semibold text-sm">platform fee per month</p>
+                                <p class="text-slate-500 text-xs">{{ fee_percent }}% of $1,500</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-slate-500 mt-4">
+                        <i class="fas fa-info-circle mr-1"></i>Fee is charged to the renter upon booking completion.
+                        Owners receive the full listed amount. No fee on cancellations.
                     </p>
                 </div>
             </div>
