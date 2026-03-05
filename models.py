@@ -117,7 +117,8 @@ class Listing(db.Model):
     checklist_completed = db.Column(db.Boolean, default=False)
     availability_start = db.Column(db.Date, nullable=True)
     availability_end = db.Column(db.Date, nullable=True)
-    is_premium_listing = db.Column(db.Boolean, default=False)  # Premium listings get priority
+    is_premium_listing = db.Column(db.Boolean, default=False)
+    is_verified = db.Column(db.Boolean, default=False) # Fraud Protection Verified
     lat = db.Column(db.Float, nullable=True) # Automatic lat from airport_icao
     lon = db.Column(db.Float, nullable=True) # Automatic lon from airport_icao
     
