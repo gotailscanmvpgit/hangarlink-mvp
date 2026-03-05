@@ -110,7 +110,7 @@ def create_app(config_class=Config):
     # reCAPTCHA Keys (Should be in env)
     app.config.setdefault('RECAPTCHA_PUBLIC_KEY', os.environ.get('RECAPTCHA_PUBLIC_KEY', '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI')) # Dummy key
     app.config.setdefault('RECAPTCHA_PRIVATE_KEY', os.environ.get('RECAPTCHA_PRIVATE_KEY', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe')) # Dummy key
-    app.config.setdefault('RECAPTCHA_ENABLED', os.environ.get('RECAPTCHA_ENABLED', 'True') == 'True')
+    app.config.setdefault('RECAPTCHA_ENABLED', os.environ.get('RECAPTCHA_ENABLED', 'False') == 'True')
     app.config.setdefault('MAIL_USERNAME', os.environ.get('MAIL_USERNAME', ''))
     app.config.setdefault('MAIL_PASSWORD', os.environ.get('MAIL_PASSWORD', ''))
     app.config.setdefault('MAIL_DEFAULT_SENDER', os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@hangarlinks.com'))
@@ -170,6 +170,7 @@ def create_app(config_class=Config):
                 ('floor_loading_pcn', 'TEXT'),
                 ('gpu_power_available', 'BOOLEAN DEFAULT FALSE'),
                 ('shuttle_info', 'VARCHAR(255)'),
+                ('is_verified', 'BOOLEAN DEFAULT FALSE'),
             ]:
                 safe_add_column('listings', col_name, col_type)
 
