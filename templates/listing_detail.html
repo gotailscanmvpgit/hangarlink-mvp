@@ -936,6 +936,7 @@
                 const H = parseFloat(selected.getAttribute('data-height'));
                 const area = L * W;
                 const hangarArea = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }
+            } ;
             };
 
 
@@ -1198,6 +1199,7 @@
                     // Using a 10% safety buffer explicitly here on required footprint
                     const sqftReq = parseFloat(option.getAttribute('data-sqft')) * 1.1;
                     const availableSqft = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }
+                };
                 };
 
 
