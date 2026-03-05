@@ -1,6 +1,5 @@
-const CACHE_NAME = 'hangarlink-v2.1';
+const CACHE_NAME = 'hangarlink-v2.2'; // Forced refresh
 const ASSETS_TO_CACHE = [
-    '/',
     '/manifest.json',
     '/static/images/logo-192.png',
     '/static/images/logo-512.png',
@@ -40,30 +39,29 @@ self.addEventListener('activate', (event) => {
 
 // Fetch Event
 self.addEventListener('fetch', (event) => {
-    // Only handle GET requests
     if (event.request.method !== 'GET') return;
-
-    // Skip Chrome extensions and other non-http(s) schemes
     if (!event.request.url.startsWith('http')) return;
 
+    // FOR DYNAMIC CONTENT (Navigation, Root, API): Network First
+    const isDynamic = event.request.mode === 'navigate' ||
+        event.request.url.endsWith('/') ||
+        event.request.url.includes('/api/');
+
+    if (isDynamic) {
+        event.respondWith(
+            fetch(event.request)
+                .catch(() => {
+                    return caches.match(event.request);
+                })
+        );
+        return;
+    }
+
+    // FOR STATIC ASSETS: Cache First
     event.respondWith(
         caches.match(event.request).then((response) => {
-            // Cache hit - return response
-            if (response) {
-                return response;
-            }
-
-            // Not in cache - fetch from network
-            return fetch(event.request).then((fetchResponse) => {
-                // If the response is valid, clone it and save it in cache (Optional: decide what to auto-cache)
-                // For now, just return network result
-                return fetchResponse;
-            }).catch(() => {
-                // If network fails and it's a navigation request, return index page (offline mode)
-                if (event.request.mode === 'navigate') {
-                    return caches.match('/');
-                }
-            });
+            if (response) return response;
+            return fetch(event.request);
         })
     );
 });
