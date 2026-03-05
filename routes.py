@@ -2743,6 +2743,17 @@ def payment_cancel():
     flash("Payment cancelled.", "info")
     return redirect(url_for('main.profile'))
 
+@bp.route('/manifest.json')
+def serve_manifest():
+    return current_app.send_static_file('manifest.json')
+
+@bp.route('/sw.js')
+def serve_sw():
+    response = current_app.send_static_file('sw.js')
+    response.headers['Content-Type'] = 'application/javascript'
+    response.headers['Service-Worker-Allowed'] = '/'
+    return response
+
 # ─────────────────────────────────────────────
 #  WebSocket Real-Time Chat Handlers
 # ─────────────────────────────────────────────

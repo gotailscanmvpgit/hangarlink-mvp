@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}HangarLinks - Premium Aircraft Parking{% endblock %}</title>
     <!-- PWA Manifest & Meta -->
-    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#001F3F">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/logo-192.png') }}">
 
@@ -750,25 +750,32 @@
                 <button id="pwa-dismiss"
                     class="text-gray-400 hover:text-white text-xs font-semibold px-2 py-2">Later</button>
                 <button id="pwa-install-btn"
-                    class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg text-sm transition-all shadow-lg hover:shadow-blue-500/50">
-                    Install App
+                    class="bg-navy-700 hover:bg-navy-800 text-white font-bold py-2.5 px-5 rounded-xl text-sm transition-all shadow-lg hover:shadow-blue-500/30 flex items-center border border-blue-500/30">
+                    <i class="fas fa-plane-arrival mr-2 text-blue-400"></i>Install App
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- PWA Service Worker Registration -->
+    <!-- PWA Service Worker Registration & Install Logic -->
     <script>
         let deferredPrompt;
         const pwaBanner = document.getElementById('pwa-install-banner');
+
+        // Logic to track dismissal
+        const isPwaDismissed = localStorage.getItem('pwa_dismissed');
+        const isPwaInstalled = localStorage.getItem('pwa_installed');
 
         window.addEventListener('beforeinstallprompt', (e) => {
             // Prevent Chrome 67 and earlier from automatically showing the prompt
             e.preventDefault();
             // Stash the event so it can be triggered later.
             deferredPrompt = e;
-            // Update UI to notify the user they can add to home screen
-            pwaBanner.classList.remove('hidden');
+
+            // Only show if not dismissed or installed recently
+            if (!isPwaDismissed && !isPwaInstalled) {
+                pwaBanner.classList.remove('hidden');
+            }
         });
 
         document.getElementById('pwa-install-btn').addEventListener('click', async () => {
@@ -776,6 +783,11 @@
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
                 console.log(`User response to the install prompt: ${outcome}`);
+
+                if (outcome === 'accepted') {
+                    localStorage.setItem('pwa_installed', 'true');
+                }
+
                 deferredPrompt = null;
                 pwaBanner.classList.add('hidden');
             }
@@ -783,12 +795,14 @@
 
         document.getElementById('pwa-dismiss').addEventListener('click', () => {
             pwaBanner.classList.add('hidden');
+            // Store dismissal for 7 days
+            localStorage.setItem('pwa_dismissed', 'true');
         });
 
-        // Register Service Worker
+        // Register Service Worker at root level for full scope
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/static/sw.js')
+                navigator.serviceWorker.register('/sw.js', { scope: '/' })
                     .then(registration => {
                         console.log('ServiceWorker registration successful with scope: ', registration.scope);
                     })
@@ -797,6 +811,13 @@
                     });
             });
         }
+
+        // Listen for successful installation
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('HangarLinks PWA installed successfully');
+            localStorage.setItem('pwa_installed', 'true');
+            pwaBanner.classList.add('hidden');
+        });
     </script>
 
     <!-- ═══════════════════════════════════════════ -->
