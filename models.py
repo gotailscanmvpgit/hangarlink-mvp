@@ -12,6 +12,8 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
+    first_name = db.Column(db.String(50), nullable=True)
+    last_name = db.Column(db.String(50), nullable=True)
     role = db.Column(db.String(20), nullable=False)  # 'owner' or 'renter'
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
@@ -64,6 +66,9 @@ class User(UserMixin, db.Model):
     id_photo_url = db.Column(db.String(255), nullable=True)
     verification_status = db.Column(db.String(20), default='none') # 'none', 'pending', 'verified', 'rejected'
     is_banned = db.Column(db.Boolean, default=False)
+    
+    # Financials
+    total_revenue = db.Column(db.Float, default=0.0)
 
     
     def __repr__(self):

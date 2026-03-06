@@ -9,10 +9,21 @@ import os
 import secrets
 import datetime
 try:
+    if os.name == 'nt':
+        # Add common GTK+ installers to PATH for Windows users
+        gtk_bin_paths = [
+            r"C:\Program Files\GTK3-Runtime Win64\bin",
+            r"C:\Program Files (x86)\GTK3-Runtime Win64\bin"
+        ]
+        for p in gtk_bin_paths:
+            if os.path.exists(p):
+                os.add_dll_directory(p)
+                os.environ['PATH'] += os.pathsep + p
     from weasyprint import HTML
 except Exception as e:
     HTML = None
     print(f"Warning: WeasyPrint PDF Engine inactive (dependencies missing): {e}")
+    print("Please install GTK3 Runtime from: https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases")
 
 try:
     from flask_mail import Message as MailMessage
@@ -1010,7 +1021,10 @@ def owner_dashboard():
         
     listings = Listing.query.filter_by(owner_id=current_user.id).all()
     
-    total_earnings = 0
+    # Recent bookings for the owner's listings
+    recent_bookings = Booking.query.join(Listing).filter(Listing.owner_id == current_user.id).order_by(Booking.created_at.desc()).limit(10).all()
+    
+    total_earnings = current_user.total_revenue or 0.0
     occupancy_count = 0
     total_listings = len(listings)
     
@@ -1047,7 +1061,20 @@ def owner_dashboard():
                           listings=listings,
                           chart_data=monthly_data,
                           total_listings=total_listings,
+                          recent_bookings=recent_bookings,
                           event_suggestions=event_suggestions)
+
+@bp.route('/renter-dashboard')
+@login_required
+def renter_dashboard():
+    # Only for renters (or allow both but mainly for renter view)
+    recent_bookings = Booking.query.filter_by(renter_id=current_user.id).order_by(Booking.created_at.desc()).limit(20).all()
+    
+    total_spent = sum(b.total_price for b in recent_bookings if b.status == 'Confirmed')
+    
+    return render_template('dashboard_renter.html',
+                           recent_bookings=recent_bookings,
+                           total_spent=total_spent)
 
 # ========== HANGAR VALUE CALCULATOR (Single-Player Revenue Estimator) ==========
 
@@ -1234,7 +1261,18 @@ def booking_success():
         booking.sign_token_renter = secrets.token_urlsafe(32)
         booking.sign_token_owner = secrets.token_urlsafe(32)
         
-    booking.status = 'Pending E-Signature'
+    # Update Booking status to Confirmed directly for maximum transparency as requested
+    booking.status = 'Confirmed'
+    booking.listing.status = 'Rented'
+    
+    # Calculate revenue (total - 10% platform fee)
+    platform_fee_rate = 0.10
+    owner_share = 1.0 - platform_fee_rate
+    revenue = booking.total_price * owner_share
+    
+    owner = booking.listing.owner
+    if owner.total_revenue is None: owner.total_revenue = 0.0
+    owner.total_revenue += revenue
     
     # Update Payment status
     payment = Payment.query.filter_by(stripe_session_id=session_id).first()
@@ -1242,6 +1280,10 @@ def booking_success():
         payment.status = 'completed'
         
     db.session.commit()
+    
+    # Notify Renter & Owner (Mock)
+    print(f"[EMAIL MOCK] To: {booking.renter.email} -> Your booking at {booking.listing.airport_icao} is CONFIRMED!")
+    print(f"[EMAIL MOCK] To: {owner.email} -> New confirmed rental! Revenue added: ${revenue:.2f}")
     
     # WeasyPrint PDF Generation Engine
     if HTML:
