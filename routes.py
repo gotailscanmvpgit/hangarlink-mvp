@@ -1864,7 +1864,7 @@ def sponsored_success():
 def insights():
     has_access = current_user.has_analytics_access or current_user.subscription_tier == 'premium'
     # If analytics expired, reset access
-    if current_user.analytics_expires_at and current_user.analytics_expires_at < datetime.datetime.now(timezone.utc):
+    if current_user.analytics_expires_at and current_user.analytics_expires_at < datetime.datetime.utcnow():
         current_user.has_analytics_access = False
         db.session.commit()
         has_access = False # Re-evaluate access after resetting
@@ -1964,9 +1964,9 @@ def insights_success():
     
     current_user.has_analytics_access = True
     if type == 'subscription': # Assuming 'subscription' implies yearly based on INSIGHTS_PRICING
-        current_user.analytics_expires_at = datetime.datetime.now(timezone.utc) + timedelta(days=365)
+        current_user.analytics_expires_at = datetime.datetime.utcnow() + timedelta(days=365)
     else:
-        current_user.analytics_expires_at = datetime.datetime.now(timezone.utc) + timedelta(days=30) 
+        current_user.analytics_expires_at = datetime.datetime.utcnow() + timedelta(days=30) 
     db.session.commit()
     
     flash('Analytics Unlocked!', 'success')
