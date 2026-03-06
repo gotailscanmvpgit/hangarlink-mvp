@@ -935,7 +935,8 @@
                 const W = parseFloat(selected.getAttribute('data-wingspan'));
                 const H = parseFloat(selected.getAttribute('data-height'));
                 const area = L * W;
-                const hangarArea = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }}
+                const hangarArea = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }
+            }
             };
 
 
@@ -1177,11 +1178,14 @@
 
                 <div class="mt-4 flex flex-col items-center">
                     <div class="flex items-center gap-4 mb-2">
-                        <img src="https://cdn.simpleicons.org/visa/1434CB" alt="Visa" class="h-4 opacity-50 grayscale">
+                        <img src="https://cdn.simpleicons.org/visa/1434CB" alt="Visa"
+                            class="h-4 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
-                            alt="Mastercard" class="h-6 opacity-50 grayscale">
+                            alt="Mastercard"
+                            class="h-6 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg"
-                            alt="Stripe" class="h-5 opacity-50 grayscale">
+                            alt="Stripe"
+                            class="h-5 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all">
                     </div>
                     <p
                         class="text-[10px] text-gray-500 flex items-center justify-center font-medium uppercase tracking-wider">
@@ -1204,7 +1208,8 @@
 
                     const option = selector.options[selector.selectedIndex];
                     const sqftReq = parseFloat(option.getAttribute('data-sqft')) * 1.1;
-                    const availableSqft = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }}
+                    const availableSqft = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }
+                }
                 };
 
                 alertDiv.classList.remove('hidden');
@@ -1226,20 +1231,21 @@
                     const startInput = document.getElementById('booking_start');
                     const endInput = document.getElementById('booking_end');
                     const btnText = document.getElementById('btn-text');
-                    const isGuest = {{ 'true' if not current_user.is_authenticated else 'false' }}
+                    const isGuest = {{ 'true' if not current_user.is_authenticated else 'false' }
+                }
 
-                    if (startInput.value && endInput.value && btnText) {
-                        const start = new Date(startInput.value);
-                        const end = new Date(endInput.value);
-                        const nights = Math.round((end - start) / (1000 * 60 * 60 * 24));
-                        if (nights > 0) {
-                            if (isGuest) {
-                                btnText.textContent = `Sign up to reserve for ${nights} night${nights > 1 ? 's' : ''}`;
-                            } else {
-                                btnText.textContent = `Reserve for ${nights} night${nights > 1 ? 's' : ''}`;
-                            }
+                if (startInput.value && endInput.value && btnText) {
+                    const start = new Date(startInput.value);
+                    const end = new Date(endInput.value);
+                    const nights = Math.round((end - start) / (1000 * 60 * 60 * 24));
+                    if (nights > 0) {
+                        if (isGuest) {
+                            btnText.textContent = `Sign up to reserve for ${nights} night${nights > 1 ? 's' : ''}`;
+                        } else {
+                            btnText.textContent = `Reserve for ${nights} night${nights > 1 ? 's' : ''}`;
                         }
                     }
+                }
                 }
 
                 function calculateDates() {
