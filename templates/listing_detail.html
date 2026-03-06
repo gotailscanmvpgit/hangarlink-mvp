@@ -9,7 +9,7 @@
         'title': "{{ listing.airport_icao }} Hangar",
         'icao': "{{ listing.airport_icao }}",
         'price': "${{ listing.price_month|int }}",
-        'is_premium': {{ 'true' if listing.is_premium_listing else 'false' }}
+        'is_premium': {{ 'true' if listing.is_premium_listing else 'false' }}}
     }];
 </script>
 <style>
@@ -71,7 +71,7 @@
                             class="absolute z-30 flex -translate-x-1/2 bottom-5 left-1/2 space-x-3 rtl:space-x-reverse">
                             {% for photo in photos %}
                             <button type="button" class="w-3 h-3 rounded-full"
-                                aria-current="{{ 'true' if loop.first else 'false' }}"
+                                aria-current="{{ 'true' if loop.first else 'false' }}}"
                                 aria-label="Slide {{ loop.index }}" data-carousel-slide-to="{{ loop.index0 }}"></button>
                             {% endfor %}
                         </div>
@@ -1067,26 +1067,27 @@
                 </div>
             </div>
 
-            {% if current_user.is_authenticated %}
-            {% if current_user.id == listing.owner_id %}
+            {% if current_user.is_authenticated and current_user.id == listing.owner_id %}
             <a href="{{ url_for('main.edit_listing', id=listing.id) }}"
                 class="block w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-xl text-center shadow-lg hover:shadow-xl transition-all hover-lift mb-3">
                 <i class="fas fa-edit mr-2"></i>Edit Listing
             </a>
             {% else %}
+
+            {% if current_user.is_authenticated %}
             <a href="{{ url_for('main.message_user', user_id=listing.owner_id, listing_id=listing.id) }}"
                 class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl text-center shadow-lg hover:shadow-xl transition-all hover-lift mb-3">
                 <i class="fas fa-envelope mr-2"></i>Message Owner
             </a>
 
             <button onclick="reportListing({{ listing.id }})"
-                class="w-full text-center bg-white dark:bg-dark-800 text-gray-500 hover:text-red-500 font-medium py-3 px-6 rounded-xl border border-gray-200 dark:border-gray-700 transition-colors text-sm">
+                class="w-full text-center bg-white dark:bg-dark-800 text-gray-500 hover:text-red-500 font-medium py-3 px-6 rounded-xl border border-gray-200 dark:border-gray-700 transition-colors text-sm mb-3">
                 <i class="fas fa-flag mr-2"></i>Report Suspicious Listing
             </button>
+            {% endif %}
 
             {% if listing.status == 'Active' %}
             <form action="{{ url_for('main.book_listing', listing_id=listing.id) }}" method="POST" class="mt-3">
-
                 <!-- Airbnb Style Date Selection -->
                 <div class="grid grid-cols-2 gap-3 mb-4">
                     <div>
@@ -1102,7 +1103,7 @@
                             class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Checkout</label>
                         <input type="date" id="booking_end" name="end_date" required
                             class="w-full bg-gray-50 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm focus:ring-blue-500 dark:bg-dark-900 dark:text-white"
-                            disabled>
+                            disabled onchange="updateButtonText()">
                     </div>
                 </div>
 
@@ -1154,26 +1155,33 @@
                             </span>
                         </div>
                     </label>
-                    <div
-                        class="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-3 py-1.5 rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-10 pointer-events-none">
-                        Provided by Avemco Partner
-                    </div>
                 </div>
 
+                {% if current_user.is_authenticated %}
                 <button type="submit" id="btn-reserve-now"
                     class="block w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-xl text-center shadow-lg hover:shadow-xl transition-all hover-lift disabled:opacity-50 disabled:cursor-not-allowed">
-                    <i class="fas fa-bolt mr-2 text-yellow-300"></i>Reserve Now
+                    <i class="fas fa-bolt mr-2 text-yellow-300"></i><span id="btn-text">Reserve Now</span>
                 </button>
+                {% else %}
+                <a href="{{ url_for('main.register') }}?next={{ url_for('main.listing_detail', id=listing.id) }}"
+                    id="btn-reserve-now-guest"
+                    class="block w-full bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-xl text-center shadow-lg transition-all opacity-80 hover:opacity-100 flex items-center justify-center gap-2">
+                    <i class="fas fa-user-plus text-gray-200"></i>
+                    <span id="btn-text">Sign up to reserve</span>
+                </a>
+                <p class="text-[10px] text-gray-400 text-center mt-2">
+                    <i class="fas fa-info-circle mr-1"></i> Registering allows secure Stripe checkout and insurance
+                    activation.
+                </p>
+                {% endif %}
+
                 <div class="mt-4 flex flex-col items-center">
                     <div class="flex items-center gap-4 mb-2">
-                        <img src="https://cdn.simpleicons.org/visa/1434CB" alt="Visa"
-                            class="h-4 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all">
+                        <img src="https://cdn.simpleicons.org/visa/1434CB" alt="Visa" class="h-4 opacity-50 grayscale">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
-                            alt="Mastercard"
-                            class="h-6 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all">
+                            alt="Mastercard" class="h-6 opacity-50 grayscale">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg"
-                            alt="Stripe"
-                            class="h-5 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all">
+                            alt="Stripe" class="h-5 opacity-50 grayscale">
                     </div>
                     <p
                         class="text-[10px] text-gray-500 flex items-center justify-center font-medium uppercase tracking-wider">
@@ -1185,36 +1193,55 @@
             <script>
                 function validateBookingFit() {
                     const selector = document.getElementById('booking_aircraft');
-                    const btn = document.getElementById('btn-reserve-now');
+                    const btn = document.getElementById('btn-reserve-now') || document.getElementById('btn-reserve-now-guest');
                     const alertDiv = document.getElementById('booking_fit_alert');
 
                     if (!selector.value) {
                         alertDiv.classList.add('hidden');
-                        btn.disabled = false; // standard HTML5 handles required attr 
+                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
                         return;
                     }
 
                     const option = selector.options[selector.selectedIndex];
-                    // Using a 10% safety buffer explicitly here on required footprint
                     const sqftReq = parseFloat(option.getAttribute('data-sqft')) * 1.1;
                     const availableSqft = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }}
                 };
-
 
                 alertDiv.classList.remove('hidden');
 
                 if (sqftReq > availableSqft) {
                     alertDiv.className = 'mt-3 p-3 text-xs rounded-lg font-bold bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 text-center animate-shake block';
-                    alertDiv.innerHTML = '<i class="fas fa-times-circle mr-1 text-lg align-middle"></i> Fit Check: No (Aircraft is too large for ' + availableSqft + ' sqft space)';
-                    btn.disabled = true; // Hard lock the payment button
+                    alertDiv.innerHTML = '<i class="fas fa-times-circle mr-1 text-lg align-middle"></i> Fit Check: No (Too Large)';
+                    if (btn.tagName === 'BUTTON') btn.disabled = true;
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
                 } else {
                     alertDiv.className = 'mt-3 p-3 text-xs rounded-lg font-bold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 block';
-                    alertDiv.innerHTML = '<i class="fas fa-check-circle mr-1 text-lg align-middle"></i> Fit Check: Yes (Comfortable Fit)';
-                    btn.disabled = false;
+                    alertDiv.innerHTML = '<i class="fas fa-check-circle mr-1 text-lg align-middle"></i> Fit Check: Yes (Perfect Fit)';
+                    if (btn.tagName === 'BUTTON') btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
                 }
-            </script>
+                }
 
-            <script>
+                function updateButtonText() {
+                    const startInput = document.getElementById('booking_start');
+                    const endInput = document.getElementById('booking_end');
+                    const btnText = document.getElementById('btn-text');
+                    const isGuest = {{ 'true' if not current_user.is_authenticated else 'false' }}
+
+                    if (startInput.value && endInput.value && btnText) {
+                        const start = new Date(startInput.value);
+                        const end = new Date(endInput.value);
+                        const nights = Math.round((end - start) / (1000 * 60 * 60 * 24));
+                        if (nights > 0) {
+                            if (isGuest) {
+                                btnText.textContent = `Sign up to reserve for ${nights} night${nights > 1 ? 's' : ''}`;
+                            } else {
+                                btnText.textContent = `Reserve for ${nights} night${nights > 1 ? 's' : ''}`;
+                            }
+                        }
+                    }
+                }
+
                 function calculateDates() {
                     const startInput = document.getElementById('booking_start');
                     const endInput = document.getElementById('booking_end');
@@ -1222,19 +1249,16 @@
 
                     if (startInput.value) {
                         const startDate = new Date(startInput.value);
-                        // Add minimum nights
                         startDate.setDate(startDate.getDate() + minNights);
-
-                        // Format back to YYYY-MM-DD
                         const minEndDateStr = startDate.toISOString().split('T')[0];
 
                         endInput.disabled = false;
                         endInput.min = minEndDateStr;
 
-                        // If current end date is before min possible date, update it
                         if (!endInput.value || endInput.value < minEndDateStr) {
                             endInput.value = minEndDateStr;
                         }
+                        updateButtonText();
                     }
                 }
             </script>
@@ -1244,66 +1268,39 @@
                 <div class="font-bold text-green-800 dark:text-green-300 flex items-center justify-center mb-1">
                     <i class="fas fa-shield-alt mr-2 text-xl"></i> HangarLinks Guaranteed
                 </div>
-                <p class="text-xs text-green-700 dark:text-green-400">Protected booking. Liability coverage active.
-                </p>
+                <p class="text-xs text-green-700 dark:text-green-400">Protected booking. Liability coverage active.</p>
             </div>
             {% endif %}
-            {% endif %}
-            {% else %}
-            <!-- Guest Message Form (Premium UI) -->
-            <div
-                class="bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-dark-800 dark:via-dark-900 dark:to-indigo-950 rounded-2xl border border-blue-200 dark:border-indigo-800 shadow-xl overflow-hidden">
-                <!-- Header -->
-                <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
-                    <h4 class="text-white font-bold text-lg flex items-center">
-                        <i class="fas fa-paper-plane mr-2 text-blue-200"></i>Quick Message
-                    </h4>
-                    <p class="text-blue-200 text-xs mt-0.5">No account needed — the owner will reply to your email</p>
-                </div>
-                <form action="{{ url_for('main.contact_guest', listing_id=listing.id) }}" method="POST"
-                    class="p-6 space-y-4" id="guest-message-form">
-                    <div>
-                        <label for="guest_email"
-                            class="block text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider mb-1.5">
-                            <i class="fas fa-envelope text-blue-500 mr-1"></i>Your Email
-                        </label>
-                        <input type="email" id="guest_email" name="guest_email" required placeholder="pilot@example.com"
-                            class="w-full bg-white dark:bg-dark-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:text-platinum-100 transition-all placeholder-gray-400">
+
+            {% if not current_user.is_authenticated %}
+            <!-- Guest Message Form (Premium UI) - Secondary Action -->
+            <div class="mt-8 pt-8 border-t border-gray-100 dark:border-gray-800">
+                <div
+                    class="bg-gray-50 dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div class="bg-gray-200 dark:bg-gray-700 px-6 py-3">
+                        <h4 class="text-gray-700 dark:text-gray-200 font-bold text-sm flex items-center">
+                            <i class="fas fa-question-circle mr-2"></i>Have a question?
+                        </h4>
                     </div>
-                    <div>
-                        <label for="guest_message"
-                            class="block text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider mb-1.5">
-                            <i class="fas fa-comment-dots text-blue-500 mr-1"></i>Message
-                        </label>
-                        <textarea id="guest_message" name="message" required rows="3" maxlength="500"
-                            placeholder="Hi, is this hangar space still available? I have a Cessna 182 that needs parking..."
-                            class="w-full bg-white dark:bg-dark-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:text-platinum-100 transition-all placeholder-gray-400 resize-none"
-                            oninput="document.getElementById('char-count').textContent = this.value.length"></textarea>
-                        <div class="flex justify-between mt-1">
-                            <span class="text-[10px] text-gray-400"><i
-                                    class="fas fa-shield-alt mr-1 text-green-500"></i>Anti-spam protected</span>
-                            <span class="text-[10px] text-gray-400"><span id="char-count">0</span>/500</span>
+                    <form action="{{ url_for('main.contact_guest', listing_id=listing.id) }}" method="POST"
+                        class="p-6 space-y-4">
+                        <div>
+                            <input type="email" name="guest_email" required placeholder="Your Email"
+                                class="w-full bg-white dark:bg-dark-900 border border-gray-300 dark:border-gray-600 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 dark:text-white transition-all">
                         </div>
-                    </div>
-                    <button type="submit"
-                        class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl text-center shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2">
-                        <i class="fas fa-paper-plane"></i>Send Message as Guest
-                    </button>
-                    <p class="text-[10px] text-gray-400 text-center">
-                        <i class="fas fa-lock text-green-500 mr-1"></i>Your email is only shared with the listing owner
-                    </p>
-                </form>
+                        <div>
+                            <textarea name="message" required rows="2" maxlength="500"
+                                placeholder="Ask the owner a question..."
+                                class="w-full bg-white dark:bg-dark-900 border border-gray-300 dark:border-gray-600 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 dark:text-white transition-all resize-none"></textarea>
+                        </div>
+                        <button type="submit"
+                            class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-6 rounded-xl text-sm transition-all flex items-center justify-center gap-2">
+                            <i class="fas fa-paper-plane text-xs"></i>Send Quick Question
+                        </button>
+                    </form>
+                </div>
             </div>
-            <div
-                class="text-center mt-4 bg-white dark:bg-dark-800 rounded-xl py-3 px-4 border border-gray-200 dark:border-gray-700">
-                <span class="text-gray-500 text-sm">Want full messaging features?</span>
-                <a href="{{ url_for('main.login', next=url_for('main.listing_detail', id=listing.id)) }}"
-                    class="text-blue-600 font-bold hover:underline text-sm ml-1"><i
-                        class="fas fa-sign-in-alt mr-1"></i>Login</a>
-                <span class="text-gray-400 text-sm mx-1">or</span>
-                <a href="{{ url_for('main.register') }}" class="text-indigo-600 font-bold hover:underline text-sm"><i
-                        class="fas fa-user-plus mr-1"></i>Sign Up Free</a>
-            </div>
+            {% endif %}
             {% endif %}
 
             <!-- Badges -->
