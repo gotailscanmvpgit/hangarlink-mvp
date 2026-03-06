@@ -203,6 +203,14 @@ def create_app(config_class=Config):
             ]:
                 safe_add_column('messages', col_name, col_type)
 
+            # --- Users ---
+            for col_name, col_type in [
+                ('total_revenue', 'FLOAT DEFAULT 0.0'),
+                ('first_name', 'VARCHAR(50)'),
+                ('last_name', 'VARCHAR(50)'),
+            ]:
+                safe_add_column('users', col_name, col_type)
+
             print("🚀 [DB] Schema migration complete.")
         except Exception as migrate_err:
             print(f"⚠️ Schema migration note: {migrate_err}")
