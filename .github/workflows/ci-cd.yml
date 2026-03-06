@@ -41,13 +41,29 @@ jobs:
           pip install Flask-Limiter
           pip install flask-recaptcha
           pip install -r requirements.txt
+          pip install pytest-flask pytest-mock # Ensure common test plugins present
 
-      - name: Run tests (pytest)
+      - name: Run Database Migrations (Validate Schema)
         env:
+          FLASK_APP: app.py
+          DATABASE_URL: "sqlite:///:memory:"
+          SECRET_KEY: ci-testing-key
+        run: flask db upgrade
+
+      - name: Validate Jinja2 Templates (Syntax Check)
+        env:
+          FLASK_APP: app.py
+        run: python tests/template_validator.py
+
+      - name: Run Pytest (Unit / Integration)
+        env:
+          FLASK_APP: app.py
           FLASK_ENV: testing
           DATABASE_URL: "sqlite:///:memory:"
           SECRET_KEY: ci-testing-key
-        run: pytest tests/ -v
+          STRIPE_SECRET_KEY: sk_test_mock
+          STRIPE_PUBLISHABLE_KEY: pk_test_mock
+        run: pytest tests/tests.py tests/test_listing_detail_crash.py -n auto -v
 
       - name: Log in to Docker Hub
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -72,7 +88,7 @@ jobs:
   deploy:
     name: Deploy to Railway
     runs-on: ubuntu-latest
-    # needs: ci  # Temporarily removed - CI tests failing, blocking critical hotfix deploy
+    needs: ci  # CD only starts if CI passes (Critical Quality Gate)
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
