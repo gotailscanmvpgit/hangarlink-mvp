@@ -935,7 +935,8 @@
                 const W = parseFloat(selected.getAttribute('data-wingspan'));
                 const H = parseFloat(selected.getAttribute('data-height'));
                 const area = L * W;
-                const hangarArea = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }};
+                const hangarArea = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }
+            };
 
 
 
@@ -973,7 +974,7 @@
                 status.innerHTML = '<i class="fas fa-exclamation-triangle mr-2 text-xl align-middle"></i> TIGHT TOLERANCE: Fits with minimal margin. Exercise caution.';
             } else {
                 status.className = 'mt-8 p-4 rounded-2xl text-center text-sm font-bold bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/10 dark:text-emerald-400 dark:border-emerald-900/50';
-                status.innerHTML = '<i class="fas fa-check-circle mr-2 text-xl align-middle"></i> GUARANTEED FIT: footprint fits comfortahis space.';
+                status.innerHTML = '<i class="fas fa-check-circle mr-2 text-xl align-middle"></i> GUARANTEED FIT: footprint fits comfortably in this space.';
             }
                 });
         </script>
@@ -1196,7 +1197,8 @@
                     const option = selector.options[selector.selectedIndex];
                     // Using a 10% safety buffer explicitly here on required footprint
                     const sqftReq = parseFloat(option.getAttribute('data-sqft')) * 1.1;
-                    const availableSqft = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }};
+                    const availableSqft = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }
+                };
 
 
                 alertDiv.classList.remove('hidden');
