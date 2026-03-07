@@ -58,6 +58,15 @@ def create_app(config_class=Config):
     print(f"[DB-INIT] Target: {safe_uri}")
     logger.warning(f"[DB-INIT] Type: {db_type} Target: {safe_uri}")
 
+    # Flask-Mail config (reads from environment, falls back to console-print mode)
+    app.config.setdefault('MAIL_SERVER', os.environ.get('MAIL_SERVER', 'smtp.gmail.com'))
+    app.config.setdefault('MAIL_PORT', int(os.environ.get('MAIL_PORT', 587)))
+    app.config.setdefault('MAIL_USE_TLS', os.environ.get('MAIL_USE_TLS', 'True') == 'True')
+    app.config.setdefault('MAIL_USERNAME', os.environ.get('MAIL_USERNAME', ''))
+    app.config.setdefault('MAIL_PASSWORD', os.environ.get('MAIL_PASSWORD', ''))
+    app.config.setdefault('MAIL_DEFAULT_SENDER', os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@hangarlinks.com'))
+
+
     # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
@@ -102,18 +111,10 @@ def create_app(config_class=Config):
     recaptcha = ReCaptcha(app=app)
     app.recaptcha = recaptcha
 
-    # Flask-Mail config (reads from environment, falls back to console-print mode)
-    app.config.setdefault('MAIL_SERVER', os.environ.get('MAIL_SERVER', 'smtp.gmail.com'))
-    app.config.setdefault('MAIL_PORT', int(os.environ.get('MAIL_PORT', 587)))
-    app.config.setdefault('MAIL_USE_TLS', os.environ.get('MAIL_USE_TLS', 'True') == 'True')
-
     # reCAPTCHA Keys (Should be in env)
     app.config.setdefault('RECAPTCHA_PUBLIC_KEY', os.environ.get('RECAPTCHA_PUBLIC_KEY', '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI')) # Dummy key
     app.config.setdefault('RECAPTCHA_PRIVATE_KEY', os.environ.get('RECAPTCHA_PRIVATE_KEY', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe')) # Dummy key
     app.config.setdefault('RECAPTCHA_ENABLED', os.environ.get('RECAPTCHA_ENABLED', 'False') == 'True')
-    app.config.setdefault('MAIL_USERNAME', os.environ.get('MAIL_USERNAME', ''))
-    app.config.setdefault('MAIL_PASSWORD', os.environ.get('MAIL_PASSWORD', ''))
-    app.config.setdefault('MAIL_DEFAULT_SENDER', os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@hangarlinks.com'))
 
     # All tables are created/updated via migrations or db.create_all() if needed
     with app.app_context():

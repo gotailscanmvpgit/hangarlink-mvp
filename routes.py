@@ -918,7 +918,13 @@ If you did not request this, you can safely ignore this email.
     mail_configured = bool(current_app.config.get('MAIL_USERNAME'))
     if mail_configured:
         try:
+            # Gmail requires sender to match authenticated user unless alias is verified
+            sender = current_app.config.get('MAIL_DEFAULT_SENDER')
+            if 'gmail.com' in current_app.config.get('MAIL_SERVER', '').lower():
+                sender = current_app.config.get('MAIL_USERNAME')
+                
             msg = MailMessage(subject=subject,
+                              sender=sender,
                               recipients=[user.email],
                               body=body,
                               html=html_body)
