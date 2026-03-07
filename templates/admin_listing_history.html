@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Admin — Rental History | HangarLinks{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+    <!-- Header -->
+    <div class="mb-8 flex items-center justify-between">
+        <div>
+            <div class="flex items-center gap-3 mb-2">
+                <a href="{{ url_for('main.admin_listings') }}"
+                    class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 class="text-3xl font-extrabold text-white">Rental History</h1>
+            </div>
+            <p class="text-slate-400 text-sm ml-13">Listing #{{ listing.id }} • {{ listing.airport_icao }} • {{
+                listing.size_sqft }} sqft</p>
+        </div>
+        <a href="{{ url_for('main.listing_detail', id=listing.id) }}" target="_blank"
+            class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg transition">View Listing <i
+                class="fas fa-external-link-alt ml-1"></i></a>
+    </div>
+
+    <!-- History Table -->
+    <div class="rounded-2xl overflow-hidden border border-white/10" style="background: rgba(255,255,255,0.03);">
+        <table class="w-full text-sm">
+            <thead style="background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <tr>
+                    <th class="px-6 py-4 text-left font-bold text-slate-400 uppercase tracking-widest text-xs">Booking
+                        ID</th>
+                    <th class="px-6 py-4 text-left font-bold text-slate-400 uppercase tracking-widest text-xs">Renter
+                    </th>
+                    <th class="px-6 py-4 text-left font-bold text-slate-400 uppercase tracking-widest text-xs">Dates
+                    </th>
+                    <th class="px-6 py-4 text-left font-bold text-slate-400 uppercase tracking-widest text-xs">Total
+                        Price</th>
+                    <th class="px-6 py-4 text-left font-bold text-slate-400 uppercase tracking-widest text-xs">Status
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in listing.bookings %}
+                <tr class="border-b border-white/5 hover:bg-white/5 transition">
+                    <td class="px-6 py-4 font-mono text-slate-500">#{{ booking.id }}</td>
+                    <td class="px-6 py-4 text-slate-300 font-medium">
+                        {{ booking.renter.username if booking.renter else 'Guest/Unknown' }}
+                        <span class="block text-xs text-slate-500 font-normal">{{ booking.renter.email if booking.renter
+                            else '' }}</span>
+                    </td>
+                    <td class="px-6 py-4 text-slate-300">
+                        {{ booking.start_date.strftime('%b %d, %Y') if booking.start_date else 'N/A' }}
+                        <i class="fas fa-arrow-right text-slate-500 text-[10px] mx-1"></i>
+                        {{ booking.end_date.strftime('%b %d, %Y') if booking.end_date else 'N/A' }}
+                    </td>
+                    <td class="px-6 py-4 text-green-400 font-mono font-bold">${{ "%.2f"|format(booking.total_price) }}
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if booking.status == 'Confirmed' %}
+                        <span
+                            class="px-2 py-1 rounded-md text-[10px] uppercase tracking-wider font-bold bg-green-500/15 text-green-400 border border-green-500/20">Confirmed</span>
+                        {% elif booking.status == 'Pending' %}
+                        <span
+                            class="px-2 py-1 rounded-md text-[10px] uppercase tracking-wider font-bold bg-amber-500/15 text-amber-500 border border-amber-500/20">Pending</span>
+                        {% else %}
+                        <span
+                            class="px-2 py-1 rounded-md text-[10px] uppercase tracking-wider font-bold bg-slate-500/15 text-slate-400 border border-slate-500/20">{{
+                            booking.status }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="px-6 py-16 text-center text-slate-500 bg-white/5">
+                        <i class="fas fa-calendar-times text-4xl mb-3 opacity-30 block"></i>
+                        <p class="text-sm font-medium">No bookings found for this listing yet.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

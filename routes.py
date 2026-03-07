@@ -2307,6 +2307,75 @@ def toggle_featured(listing_id):
     flash(f'✅ Listing {listing.airport_icao} #{listing.id} → {state}', 'success')
     return redirect(request.referrer or url_for('main.admin_listings'))
 
+@bp.route('/admin/listing/<int:listing_id>/pause', methods=['POST'])
+@login_required
+@admin_required
+def admin_pause_listing(listing_id):
+    listing = Listing.query.get_or_404(listing_id)
+    listing.status = 'Paused'
+    db.session.commit()
+    flash(f'Listing {listing.airport_icao} #{listing.id} is now Paused.', 'success')
+    return redirect(request.referrer or url_for('main.admin_listings'))
+
+@bp.route('/admin/listing/<int:listing_id>/approve', methods=['POST'])
+@login_required
+@admin_required
+def admin_approve_listing(listing_id):
+    listing = Listing.query.get_or_404(listing_id)
+    listing.status = 'Active'
+    db.session.commit()
+    flash(f'Listing {listing.airport_icao} #{listing.id} has been Approved/Activated.', 'success')
+    return redirect(request.referrer or url_for('main.admin_listings'))
+
+@bp.route('/admin/listing/<int:listing_id>/health-score', methods=['POST'])
+@login_required
+@admin_required
+def admin_health_score(listing_id):
+    score = request.form.get('score', type=int)
+    if score is not None and 0 <= score <= 100:
+        listing = Listing.query.get_or_404(listing_id)
+        listing.health_score = score
+        db.session.commit()
+        flash(f'Health Score updated for Listing #{listing.id}.', 'success')
+    else:
+        flash('Invalid health score score.', 'error')
+    return redirect(request.referrer or url_for('main.admin_listings'))
+
+@bp.route('/admin/listings/bulk', methods=['POST'])
+@login_required
+@admin_required
+def admin_bulk_action():
+    listing_ids = request.form.getlist('listing_ids')
+    action = request.form.get('action')
+    
+    if not listing_ids or not action:
+        flash('No listings or action selected.', 'warning')
+        return redirect(url_for('main.admin_listings'))
+    
+    count = 0
+    for l_id in listing_ids:
+        listing = Listing.query.get(l_id)
+        if not listing:
+            continue
+        if action == 'pause':
+            listing.status = 'Paused'
+        elif action == 'approve':
+            listing.status = 'Active'
+        elif action == 'delete':
+            db.session.delete(listing)
+        count += 1
+        
+    db.session.commit()
+    flash(f'Successfully performed "{action}" on {count} listings.', 'success')
+    return redirect(url_for('main.admin_listings'))
+
+@bp.route('/admin/listing/<int:listing_id>/history')
+@login_required
+@admin_required
+def admin_listing_history(listing_id):
+    listing = Listing.query.get_or_404(listing_id)
+    return render_template('admin_listing_history.html', listing=listing)
+
 
 # ─────────────────────────────────────────────
 #  AI CONCIERGE  – /api/concierge
