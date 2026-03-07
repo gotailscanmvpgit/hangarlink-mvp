@@ -935,9 +935,7 @@
                 const W = parseFloat(selected.getAttribute('data-wingspan'));
                 const H = parseFloat(selected.getAttribute('data-height'));
                 const area = L * W;
-                const hangarArea = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }
-            }
-            };
+                const hangarArea = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }};
 
 
 
@@ -1208,8 +1206,7 @@
 
                     const option = selector.options[selector.selectedIndex];
                     const sqftReq = parseFloat(option.getAttribute('data-sqft')) * 1.1;
-                    const availableSqft = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }
-                }
+                    const availableSqft = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }};
                 };
 
                 alertDiv.classList.remove('hidden');
@@ -1231,8 +1228,8 @@
                     const startInput = document.getElementById('booking_start');
                     const endInput = document.getElementById('booking_end');
                     const btnText = document.getElementById('btn-text');
-                    const isGuest = {{ 'true' if not current_user.is_authenticated else 'false' }
-                }
+                    const isGuest = {{ "true" if not current_user.is_authenticated else "false" }}
+                };;
 
                 if (startInput.value && endInput.value && btnText) {
                     const start = new Date(startInput.value);

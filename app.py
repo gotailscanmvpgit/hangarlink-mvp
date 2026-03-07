@@ -11,10 +11,10 @@ from dotenv import load_dotenv
 
 # Load .env file if it exists
 if os.path.exists('.env'):
-    print("📁 [CONFIG] Found .env file, loading...")
+    print("[CONFIG] Found .env file, loading...")
     load_dotenv()
 else:
-    print("☁️ [CONFIG] No .env file found, using system environment variables.")
+    print("[CONFIG] No .env file found, using system environment variables.")
 
 # Compatibility for flask-recaptcha which may expect flask.Markup
 import flask
@@ -54,8 +54,8 @@ def create_app(config_class=Config):
     if '@' in db_uri:
         safe_uri = db_uri.split('@')[1] if ':' not in db_uri.split('@')[0] else f"***@{db_uri.split('@')[1]}"
 
-    print(f"🚀 [DB-INIT] Type: {db_type}")
-    print(f"📍 [DB-INIT] Target: {safe_uri}")
+    print(f"[DB-INIT] Type: {db_type}")
+    print(f"[DB-INIT] Target: {safe_uri}")
     logger.warning(f"[DB-INIT] Type: {db_type} Target: {safe_uri}")
 
     # Initialize extensions
@@ -85,18 +85,18 @@ def create_app(config_class=Config):
     if s_key and 'here' not in s_key:
         # Masked print for debugging live site
         masked_s = s_key[:7] + "..." + s_key[-4:] if len(s_key) > 15 else "***"
-        print(f"✅ [STRIPE] Secret Key detected: {masked_s}")
+        print(f"[STRIPE] Secret Key detected: {masked_s}")
         logger.info(f"Stripe Secret Key loaded: {masked_s}")
         stripe.api_key = s_key
     else:
-        print("❌ [STRIPE] Secret Key is MISSING or using PLACEHOLDER.")
+        print("[STRIPE] Secret Key is MISSING or using PLACEHOLDER.")
         logger.error("Stripe Secret Key is missing or invalid.")
 
     if p_key and 'here' not in p_key:
         masked_p = p_key[:7] + "..." + p_key[-4:] if len(p_key) > 15 else "***"
-        print(f"✅ [STRIPE] Publishable Key detected: {masked_p}")
+        print(f"[STRIPE] Publishable Key detected: {masked_p}")
     else:
-        print("❌ [STRIPE] Publishable Key is MISSING or using PLACEHOLDER.")
+        print("[STRIPE] Publishable Key is MISSING or using PLACEHOLDER.")
 
     # reCAPTCHA
     recaptcha = ReCaptcha(app=app)

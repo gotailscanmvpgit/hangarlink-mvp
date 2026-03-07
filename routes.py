@@ -288,6 +288,7 @@ def listings():
 def listing_detail(id):
     """Individual listing detail page"""
     import traceback as _tb
+    from werkzeug.exceptions import NotFound
     from models import Booking
     print(f"DEBUG: listing_detail entered for id={id}")
     try:
@@ -353,6 +354,8 @@ def listing_detail(id):
                                aircraft_sizes=aircraft_sizes, has_access=has_access,
                                weather=weather, fbo_data=fbo_data)
 
+    except NotFound:
+        raise
     except Exception as e:
         err = _tb.format_exc()
         print(f"ERROR in listing_detail(id={id}): {e}\n{err}")

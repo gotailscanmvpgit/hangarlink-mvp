@@ -24,7 +24,7 @@ def validate_templates():
     })
 
     success_count = 0
-    error_count = 0
+    failed_templates = []
     
     print("\n🔍 Validating Jinja2 Template Syntax...")
     print("=" * 50)
@@ -32,26 +32,24 @@ def validate_templates():
     for root, dirs, files in os.walk(template_dir):
         for file in files:
             if file.endswith('.html'):
-                relative_path = os.path.relpath(os.path.join(root, file), template_dir)
+                relative_path = os.path.relpath(os.path.join(root, file), template_dir).replace('\\', '/')
                 try:
                     env.get_template(relative_path)
-                    # print(f"✅ {relative_path}")
                     success_count += 1
                 except TemplateSyntaxError as e:
-                    print(f"❌ SYNTAX ERROR: {relative_path} (Line {e.lineno})")
-                    print(f"   Message: {e.message}")
-                    print(f"   Source: {e.source}")
-                    error_count += 1
+                    print(f"❌ SYNTAX ERROR: {relative_path} (Line {e.lineno}): {e.message}")
+                    failed_templates.append(relative_path)
                 except Exception as e:
-                    # Some templates might depend on specific context for loading?
-                    # Generally loading shouldn't fail if syntax is OK.
-                    print(f"⚠️  WARNING: Could not load {relative_path}: {type(e).__name__}: {str(e)}")
-                    # success_count += 1 # Not necessarily a syntax error
+                    print(f"❌ LOAD ERROR: {relative_path}: {type(e).__name__}: {str(e)}")
+                    failed_templates.append(relative_path)
 
     print("=" * 50)
-    print(f"📊 SUMMARY: {success_count} passed, {error_count} failed.")
+    print(f"📊 SUMMARY: {success_count} passed, {len(failed_templates)} failed.")
 
-    if error_count > 0:
+    if failed_templates:
+        print("\n❌ Failed Templates:")
+        for t in failed_templates:
+            print(f"  - {t}")
         print("\n❌ Template validation FAILED!")
         sys.exit(1)
     else:
