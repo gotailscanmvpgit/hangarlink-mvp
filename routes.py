@@ -930,10 +930,14 @@ If you did not request this, you can safely ignore this email.
                               html=html_body)
             mail.send(msg)
             current_app.logger.info(f"[RESET] Email sent to {user.email}")
+            return True
         except Exception as e:
-            current_app.logger.error(f"[RESET] Mail send failed: {e}")
+            error_msg = str(e)
+            current_app.logger.error(f"[RESET] Mail send failed: {error_msg}")
             # Fall through to console output
             print(f"\n[RESET LINK for {user.email}]: {reset_url}\n")
+            print(f"SMTP ERROR WAS: {error_msg}")
+            return False
     else:
         # MVP fallback — print to console / Railway logs
         print(f"\n{'='*60}")
@@ -941,6 +945,7 @@ If you did not request this, you can safely ignore this email.
         print(f"User: {user.email}")
         print(f"URL:  {reset_url}")
         print(f"{'='*60}\n")
+        return False
 
 
 @bp.route('/forgot-password', methods=['GET', 'POST'])
@@ -950,9 +955,18 @@ def forgot_password():
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
         user = User.query.filter_by(email=email).first()
-        # Always show success to prevent email enumeration
+        
+        # Always show success initially to prevent email enumeration,
+        # but if we try to send and it fails due to SMTP, notify the admin.
         if user:
-            _send_reset_email(user)
+            send_success = _send_reset_email(user)
+            if not send_success:
+                if not current_app.config.get('MAIL_USERNAME'):
+                    flash('App SMTP is not configured. The reset link was printed to the server logs.', 'warning')
+                else:
+                    flash('Failed to dispatch email due to an SMTP authentication/configuration error. Please check server logs.', 'danger')
+                return redirect(url_for('main.forgot_password'))
+                
         flash('If that email is registered, a reset link has been sent. Check your inbox (and spam folder).', 'info')
         return redirect(url_for('main.forgot_password'))
     return render_template('forgot_password.html')
