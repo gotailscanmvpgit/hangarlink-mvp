@@ -58,14 +58,22 @@ def create_app(config_class=Config):
     print(f"[DB-INIT] Target: {safe_uri}")
     logger.warning(f"[DB-INIT] Type: {db_type} Target: {safe_uri}")
 
-    # Flask-Mail config (reads from environment, falls back to console-print mode)
-    app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
-    app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
-    app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True') == 'True'
-    app.config['MAIL_USE_SSL'] = os.environ.get('MAIL_USE_SSL', 'False') == 'True'
-    app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', '')
-    app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', '')
-    app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@hangarlinks.com')
+    # ── SendPulse SMTP Config ──────────────────────────────────────────────
+    # Uses SENDPULSE_USERNAME / SENDPULSE_PASSWORD env vars.
+    # Falls back to console-print mode when credentials are absent.
+    app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.sendpulse.com')
+    app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 465))
+    app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'False') == 'True'
+    app.config['MAIL_USE_SSL'] = os.environ.get('MAIL_USE_SSL', 'True') == 'True'
+    app.config['MAIL_USERNAME'] = os.environ.get('SENDPULSE_USERNAME', '')
+    app.config['MAIL_PASSWORD'] = os.environ.get('SENDPULSE_PASSWORD', '')
+    app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', 'no-reply@tryhangarlinks.com')
+
+    # Log mail config (mask password)
+    _mu = app.config['MAIL_USERNAME']
+    print(f"[MAIL] Server: {app.config['MAIL_SERVER']}:{app.config['MAIL_PORT']} | SSL={app.config['MAIL_USE_SSL']} TLS={app.config['MAIL_USE_TLS']}")
+    print(f"[MAIL] Username: {_mu if _mu else '(not set — console fallback mode)'}") 
+    print(f"[MAIL] Sender:   {app.config['MAIL_DEFAULT_SENDER']}")
 
 
     # Initialize extensions

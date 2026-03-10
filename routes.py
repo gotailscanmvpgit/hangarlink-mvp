@@ -918,32 +918,27 @@ If you did not request this, you can safely ignore this email.
     mail_configured = bool(current_app.config.get('MAIL_USERNAME'))
     if mail_configured:
         try:
-            # Gmail requires sender to match authenticated user unless alias is verified
-            sender = current_app.config.get('MAIL_DEFAULT_SENDER')
-            if 'gmail.com' in current_app.config.get('MAIL_SERVER', '').lower():
-                sender = current_app.config.get('MAIL_USERNAME')
-                
+            sender = current_app.config.get('MAIL_DEFAULT_SENDER', 'no-reply@tryhangarlinks.com')
             msg = MailMessage(subject=subject,
                               sender=sender,
                               recipients=[user.email],
                               body=body,
                               html=html_body)
             mail.send(msg)
-            current_app.logger.info(f"[RESET] Email sent to {user.email}")
+            current_app.logger.info(f"[RESET] Email sent to {user.email} via {current_app.config.get('MAIL_SERVER')}")
             return True
         except Exception as e:
             error_msg = str(e)
-            current_app.logger.error(f"[RESET] Mail send failed: {error_msg}")
-            # Fall through to console output
-            print(f"\n[RESET LINK for {user.email}]: {reset_url}\n")
-            print(f"SMTP ERROR WAS: {error_msg}")
+            current_app.logger.error(f"[RESET] Mail send FAILED: {error_msg}")
+            print(f"\n[RESET LINK for {user.email}]: {reset_url}")
+            print(f"SMTP ERROR: {error_msg}\n")
             return False
     else:
-        # MVP fallback — print to console / Railway logs
+        # Dev fallback — print to console / Railway logs
         print(f"\n{'='*60}")
-        print(f"PASSWORD RESET LINK (no mail configured)")
-        print(f"User: {user.email}")
-        print(f"URL:  {reset_url}")
+        print(f"PASSWORD RESET LINK (SMTP not configured)")
+        print(f"User:  {user.email}")
+        print(f"URL:   {reset_url}")
         print(f"{'='*60}\n")
         return False
 
@@ -1006,6 +1001,85 @@ def reset_password(token):
         return redirect(url_for('main.login'))
 
     return render_template('reset_password.html', token=token)
+
+
+# ─────────────────────────────────────────────
+#  REUSABLE EMAIL HELPER
+# ─────────────────────────────────────────────
+
+def _send_email(to, subject, body_text, body_html):
+    """
+    Send an email via Flask-Mail / SendPulse SMTP.
+    Returns True on success, False on failure (with console fallback).
+    """
+    mail_configured = bool(current_app.config.get('MAIL_USERNAME'))
+    sender = current_app.config.get('MAIL_DEFAULT_SENDER', 'no-reply@tryhangarlinks.com')
+
+    if mail_configured and MailMessage is not None:
+        try:
+            msg = MailMessage(subject=subject,
+                              sender=sender,
+                              recipients=[to] if isinstance(to, str) else to,
+                              body=body_text,
+                              html=body_html)
+            mail.send(msg)
+            current_app.logger.info(f"[EMAIL] Sent '{subject}' to {to}")
+            return True
+        except Exception as e:
+            current_app.logger.error(f"[EMAIL] SMTP error sending to {to}: {e}")
+            print(f"\n[EMAIL FAILED] To: {to} | Subject: {subject}")
+            print(f"SMTP ERROR: {e}\n")
+            return False
+    else:
+        print(f"\n{'='*60}")
+        print(f"[EMAIL] SMTP not configured — console fallback")
+        print(f"  To:      {to}")
+        print(f"  Subject: {subject}")
+        print(f"  Body:    {body_text[:200]}...")
+        print(f"{'='*60}\n")
+        return False
+
+
+# ─────────────────────────────────────────────
+#  TEST EMAIL ROUTE (admin only)
+# ─────────────────────────────────────────────
+
+@bp.route('/test-email')
+@login_required
+@admin_required
+def test_email():
+    """Send a test email to the current admin user to verify SMTP config."""
+    recipient = current_user.email
+    subject = 'HangarLinks — SMTP Test Email'
+    body_text = f"Hi {current_user.username}, this is a test email from HangarLinks.\n\nIf you received this, SendPulse SMTP is working correctly.\n\n— HangarLinks System"
+    body_html = f"""
+    <div style="font-family:'Segoe UI',system-ui,sans-serif;max-width:520px;margin:0 auto;">
+      <div style="background:linear-gradient(135deg,#001F3F,#002952);padding:32px;border-radius:16px 16px 0 0;text-align:center;">
+        <h1 style="color:white;font-size:24px;margin:0;">&#9993; SMTP Test Email</h1>
+      </div>
+      <div style="background:#0d1117;padding:32px;border-radius:0 0 16px 16px;border:1px solid rgba(255,255,255,0.08);">
+        <p style="color:#94a3b8;">Hi <strong style="color:white;">{current_user.username}</strong>,</p>
+        <p style="color:#94a3b8;">This is an automated test from <strong style="color:#60a5fa;">HangarLinks</strong>.</p>
+        <p style="color:#94a3b8;">If you're reading this, your SendPulse SMTP integration is <strong style="color:#34d399;">working perfectly</strong>.</p>
+        <div style="margin-top:24px;padding:16px;background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.2);border-radius:10px;">
+          <p style="color:#34d399;font-size:13px;margin:0;">
+            <strong>Server:</strong> {current_app.config.get('MAIL_SERVER')} |
+            <strong>Port:</strong> {current_app.config.get('MAIL_PORT')} |
+            <strong>Sender:</strong> {current_app.config.get('MAIL_DEFAULT_SENDER')}
+          </p>
+        </div>
+      </div>
+    </div>
+    """
+    success = _send_email(recipient, subject, body_text, body_html)
+    if success:
+        flash(f'Test email sent to {recipient}. Check your inbox!', 'success')
+    else:
+        if not current_app.config.get('MAIL_USERNAME'):
+            flash('SMTP not configured. Set SENDPULSE_USERNAME and SENDPULSE_PASSWORD environment variables.', 'warning')
+        else:
+            flash('SMTP send failed. Check server logs for details.', 'danger')
+    return redirect(request.referrer or url_for('main.admin_dashboard'))
 
 @bp.route('/terms')
 def terms():
