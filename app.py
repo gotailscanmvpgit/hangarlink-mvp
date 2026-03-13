@@ -63,8 +63,8 @@ def create_app(config_class=Config):
     # Falls back to console-print mode when credentials are absent.
     app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp-pulse.com')
     app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 465))
-    app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'False') == 'True'
-    app.config['MAIL_USE_SSL'] = os.environ.get('MAIL_USE_SSL', 'True') == 'True'
+    app.config['MAIL_USE_TLS'] = str(os.environ.get('MAIL_USE_TLS', 'False')).lower() in ('true', '1', 't')
+    app.config['MAIL_USE_SSL'] = str(os.environ.get('MAIL_USE_SSL', 'True')).lower() in ('true', '1', 't')
     app.config['MAIL_USERNAME'] = os.environ.get('SENDPULSE_USERNAME', '')
     app.config['MAIL_PASSWORD'] = os.environ.get('SENDPULSE_PASSWORD', '')
     app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', 'no-reply@tryhangarlinks.com')
