@@ -1090,7 +1090,7 @@ def test_email():
             flash('SMTP not configured. Set SENDPULSE_USERNAME and SENDPULSE_PASSWORD environment variables.', 'warning')
         else:
             flash('SMTP send failed. Check server logs for details.', 'danger')
-    return redirect(request.referrer or url_for('main.admin_dashboard'))
+    return redirect(request.referrer or url_for('main.index'))
 
 @bp.route('/terms')
 def terms():
