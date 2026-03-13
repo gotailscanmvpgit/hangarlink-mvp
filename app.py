@@ -58,21 +58,14 @@ def create_app(config_class=Config):
     print(f"[DB-INIT] Target: {safe_uri}")
     logger.warning(f"[DB-INIT] Type: {db_type} Target: {safe_uri}")
 
-    # ── SendPulse SMTP Config ──────────────────────────────────────────────
-    # Uses SENDPULSE_USERNAME / SENDPULSE_PASSWORD env vars.
-    # Falls back to console-print mode when credentials are absent.
-    app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp-pulse.com')
-    app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 465))
-    app.config['MAIL_USE_TLS'] = str(os.environ.get('MAIL_USE_TLS', 'False')).lower() in ('true', '1', 't')
-    app.config['MAIL_USE_SSL'] = str(os.environ.get('MAIL_USE_SSL', 'True')).lower() in ('true', '1', 't')
-    app.config['MAIL_USERNAME'] = os.environ.get('SENDPULSE_USERNAME', '')
-    app.config['MAIL_PASSWORD'] = os.environ.get('SENDPULSE_PASSWORD', '')
+    # ── SendPulse REST API Config ──────────────────────────────────────────
+    # Uses SENDPULSE_API_ID / SENDPULSE_API_SECRET env vars over HTTPS to bypass SMTP port blocks on Railway
+    app.config['SENDPULSE_API_ID'] = os.environ.get('SENDPULSE_API_ID', '')
+    app.config['SENDPULSE_API_SECRET'] = os.environ.get('SENDPULSE_API_SECRET', '')
     app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', 'no-reply@tryhangarlinks.com')
 
-    # Log mail config (mask password)
-    _mu = app.config['MAIL_USERNAME']
-    print(f"[MAIL] Server: {app.config['MAIL_SERVER']}:{app.config['MAIL_PORT']} | SSL={app.config['MAIL_USE_SSL']} TLS={app.config['MAIL_USE_TLS']}")
-    print(f"[MAIL] Username: {_mu if _mu else '(not set — console fallback mode)'}") 
+    _api_id = app.config['SENDPULSE_API_ID']
+    print(f"[MAIL] SendPulse API Mode. API_ID: {_api_id if _api_id else '(not set — console fallback mode)'}") 
     print(f"[MAIL] Sender:   {app.config['MAIL_DEFAULT_SENDER']}")
 
 

@@ -926,28 +926,19 @@ If you did not request this, you can safely ignore this email.
     </div>
     """
 
-    mail_configured = bool(current_app.config.get('MAIL_USERNAME'))
-    if mail_configured:
-        try:
-            sender = current_app.config.get('MAIL_DEFAULT_SENDER', 'no-reply@tryhangarlinks.com')
-            msg = MailMessage(subject=subject,
-                              sender=sender,
-                              recipients=[user.email],
-                              body=body,
-                              html=html_body)
-            mail.send(msg)
-            current_app.logger.info(f"[RESET] Email sent to {user.email} via {current_app.config.get('MAIL_SERVER')}")
-            return True
-        except Exception as e:
-            error_msg = str(e)
-            current_app.logger.error(f"[RESET] Mail send FAILED: {error_msg}")
-            print(f"\n[RESET LINK for {user.email}]: {reset_url}")
-            print(f"SMTP ERROR: {error_msg}\n")
-            return False
+    api_id = current_app.config.get('SENDPULSE_API_ID')
+    if api_id:
+        success = _send_email(user.email, subject, body, html_body)
+        if success:
+            current_app.logger.info(f"[RESET] Email sent to {user.email} via SendPulse REST API")
+        else:
+            current_app.logger.error(f"[RESET] Mail send FAILED via SendPulse API")
+            print(f"\n[RESET LINK for {user.email}]: {reset_url}\n")
+        return success
     else:
         # Dev fallback — print to console / Railway logs
         print(f"\n{'='*60}")
-        print(f"PASSWORD RESET LINK (SMTP not configured)")
+        print(f"PASSWORD RESET LINK (API not configured)")
         print(f"User:  {user.email}")
         print(f"URL:   {reset_url}")
         print(f"{'='*60}\n")
@@ -967,10 +958,10 @@ def forgot_password():
         if user:
             send_success = _send_reset_email(user)
             if not send_success:
-                if not current_app.config.get('MAIL_USERNAME'):
-                    flash('App SMTP is not configured. The reset link was printed to the server logs.', 'warning')
+                if not current_app.config.get('SENDPULSE_API_ID'):
+                    flash('App Email API is not configured. The reset link was printed to the server logs.', 'warning')
                 else:
-                    flash('Failed to dispatch email due to an SMTP authentication/configuration error. Please check server logs.', 'danger')
+                    flash('Failed to dispatch email due to an API error. Please check server logs.', 'danger')
                 return redirect(url_for('main.forgot_password'))
                 
         flash('If that email is registered, a reset link has been sent. Check your inbox (and spam folder).', 'info')
@@ -1020,30 +1011,57 @@ def reset_password(token):
 
 def _send_email(to, subject, body_text, body_html):
     """
-    Send an email via Flask-Mail / SendPulse SMTP.
-    Returns True on success, False on failure (with console fallback).
+    Send an email via SendPulse REST API over HTTPS (Port 443).
+    Bypasses cloud provider SMTP restrictions.
+    Returns True on success, False on failure.
     """
-    mail_configured = bool(current_app.config.get('MAIL_USERNAME'))
-    sender = current_app.config.get('MAIL_DEFAULT_SENDER', 'no-reply@tryhangarlinks.com')
+    import requests
+    import json
+    import base64
+    
+    api_id = current_app.config.get('SENDPULSE_API_ID')
+    api_secret = current_app.config.get('SENDPULSE_API_SECRET')
+    sender_email = current_app.config.get('MAIL_DEFAULT_SENDER', 'no-reply@tryhangarlinks.com')
 
-    if mail_configured and MailMessage is not None:
+    if api_id and api_secret:
         try:
-            msg = MailMessage(subject=subject,
-                              sender=sender,
-                              recipients=[to] if isinstance(to, str) else to,
-                              body=body_text,
-                              html=body_html)
-            mail.send(msg)
-            current_app.logger.info(f"[EMAIL] Sent '{subject}' to {to}")
+            # 1. Get OAuth Token
+            auth_resp = requests.post(
+                "https://api.sendpulse.com/oauth/access_token",
+                json={"grant_type": "client_credentials", "client_id": api_id, "client_secret": api_secret},
+                timeout=10
+            )
+            auth_resp.raise_for_status()
+            access_token = auth_resp.json().get('access_token')
+
+            # 2. Fire the email request
+            headers = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}
+            payload = {
+                "email": {
+                    "html": base64.b64encode(body_html.encode('utf-8')).decode('utf-8') if body_html else "",
+                    "text": body_text,
+                    "subject": subject,
+                    "from": {"name": "HangarLinks", "email": sender_email},
+                    "to": [{"email": to}]
+                }
+            }
+            
+            # SendPulse API expects the body_html to be base64 encoded by default
+            send_resp = requests.post("https://api.sendpulse.com/smtp/emails", headers=headers, json=payload, timeout=10)
+            send_resp.raise_for_status()
+            
+            current_app.logger.info(f"[EMAIL API] Sent '{subject}' to {to}")
             return True
         except Exception as e:
-            current_app.logger.error(f"[EMAIL] SMTP error sending to {to}: {e}")
+            current_app.logger.error(f"[EMAIL API] Error sending to {to}: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                current_app.logger.error(f"[EMAIL API] Response: {e.response.text}")
             print(f"\n[EMAIL FAILED] To: {to} | Subject: {subject}")
-            print(f"SMTP ERROR: {e}\n")
+            print(f"API ERROR: {e}\n")
             return False
     else:
         print(f"\n{'='*60}")
-        print(f"[EMAIL] SMTP not configured — console fallback")
+        print(f"[EMAIL] API credentials not configured — console fallback")
         print(f"  To:      {to}")
         print(f"  Subject: {subject}")
         print(f"  Body:    {body_text[:200]}...")
@@ -1086,10 +1104,10 @@ def test_email():
     if success:
         flash(f'Test email sent to {recipient}. Check your inbox!', 'success')
     else:
-        if not current_app.config.get('MAIL_USERNAME'):
-            flash('SMTP not configured. Set SENDPULSE_USERNAME and SENDPULSE_PASSWORD environment variables.', 'warning')
+        if not current_app.config.get('SENDPULSE_API_ID'):
+            flash('Email API not configured. Set SENDPULSE_API_ID and SENDPULSE_API_SECRET variables.', 'warning')
         else:
-            flash('SMTP send failed. Check server logs for details.', 'danger')
+            flash('Email API send failed. Check server logs for details.', 'danger')
     return redirect(request.referrer or url_for('main.index'))
 
 @bp.route('/terms')
