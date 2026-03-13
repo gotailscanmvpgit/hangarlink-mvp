@@ -42,6 +42,17 @@ import datetime
 from datetime import date, timedelta, timezone
 from sqlalchemy import text, func
 
+
+def admin_required(f):
+    """Decorator: only allow is_admin users."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not current_user.is_authenticated or not getattr(current_user, 'is_admin', False):
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated
+
+
 try:
     import stripe
 except ImportError:
@@ -2343,15 +2354,6 @@ def _notify_admin_subscription(user, plan_type: str):
 # ─────────────────────────────────────────────
 #  ADMIN — /admin/listings  (Featured Management)
 # ─────────────────────────────────────────────
-
-def admin_required(f):
-    """Decorator: only allow is_admin users."""
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if not current_user.is_authenticated or not getattr(current_user, 'is_admin', False):
-            abort(403)
-        return f(*args, **kwargs)
-    return decorated
 
 
 @bp.route('/admin/listings')
