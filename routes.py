@@ -926,19 +926,28 @@ If you did not request this, you can safely ignore this email.
     </div>
     """
 
-    api_id = current_app.config.get('SENDPULSE_API_ID')
-    if api_id:
-        success = _send_email(user.email, subject, body, html_body)
-        if success:
-            current_app.logger.info(f"[RESET] Email sent to {user.email} via SendPulse REST API")
-        else:
-            current_app.logger.error(f"[RESET] Mail send FAILED via SendPulse API")
-            print(f"\n[RESET LINK for {user.email}]: {reset_url}\n")
-        return success
+    mail_configured = bool(current_app.config.get('MAIL_USERNAME'))
+    if mail_configured:
+        try:
+            sender = current_app.config.get('MAIL_DEFAULT_SENDER', 'no-reply@tryhangarlinks.com')
+            msg = MailMessage(subject=subject,
+                              sender=sender,
+                              recipients=[user.email],
+                              body=body,
+                              html=html_body)
+            mail.send(msg)
+            current_app.logger.info(f"[RESET] Email sent to {user.email} via {current_app.config.get('MAIL_SERVER')}")
+            return True
+        except Exception as e:
+            error_msg = str(e)
+            current_app.logger.error(f"[RESET] Mail send FAILED: {error_msg}")
+            print(f"\n[RESET LINK for {user.email}]: {reset_url}")
+            print(f"SMTP ERROR: {error_msg}\n")
+            return False
     else:
         # Dev fallback — print to console / Railway logs
         print(f"\n{'='*60}")
-        print(f"PASSWORD RESET LINK (API not configured)")
+        print(f"PASSWORD RESET LINK (SMTP not configured)")
         print(f"User:  {user.email}")
         print(f"URL:   {reset_url}")
         print(f"{'='*60}\n")
@@ -958,10 +967,10 @@ def forgot_password():
         if user:
             send_success = _send_reset_email(user)
             if not send_success:
-                if not current_app.config.get('SENDPULSE_API_ID'):
-                    flash('App Email API is not configured. The reset link was printed to the server logs.', 'warning')
+                if not current_app.config.get('MAIL_USERNAME'):
+                    flash('App SMTP is not configured. The reset link was printed to the server logs.', 'warning')
                 else:
-                    flash('Failed to dispatch email due to an API error. Please check server logs.', 'danger')
+                    flash('Failed to dispatch email due to an SMTP authentication/configuration error. Please check server logs.', 'danger')
                 return redirect(url_for('main.forgot_password'))
                 
         flash('If that email is registered, a reset link has been sent. Check your inbox (and spam folder).', 'info')
@@ -1011,57 +1020,30 @@ def reset_password(token):
 
 def _send_email(to, subject, body_text, body_html):
     """
-    Send an email via SendPulse REST API over HTTPS (Port 443).
-    Bypasses cloud provider SMTP restrictions.
-    Returns True on success, False on failure.
+    Send an email via Flask-Mail (e.g. Gmail SMTP).
+    Returns True on success, False on failure (with console fallback).
     """
-    import requests
-    import json
-    import base64
-    
-    api_id = current_app.config.get('SENDPULSE_API_ID')
-    api_secret = current_app.config.get('SENDPULSE_API_SECRET')
-    sender_email = current_app.config.get('MAIL_DEFAULT_SENDER', 'no-reply@tryhangarlinks.com')
+    mail_configured = bool(current_app.config.get('MAIL_USERNAME'))
+    sender = current_app.config.get('MAIL_DEFAULT_SENDER', 'no-reply@tryhangarlinks.com')
 
-    if api_id and api_secret:
+    if mail_configured and MailMessage is not None:
         try:
-            # 1. Get OAuth Token
-            auth_resp = requests.post(
-                "https://api.sendpulse.com/oauth/access_token",
-                json={"grant_type": "client_credentials", "client_id": api_id, "client_secret": api_secret},
-                timeout=10
-            )
-            auth_resp.raise_for_status()
-            access_token = auth_resp.json().get('access_token')
-
-            # 2. Fire the email request
-            headers = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}
-            payload = {
-                "email": {
-                    "html": base64.b64encode(body_html.encode('utf-8')).decode('utf-8') if body_html else "",
-                    "text": body_text,
-                    "subject": subject,
-                    "from": {"name": "HangarLinks", "email": sender_email},
-                    "to": [{"email": to}]
-                }
-            }
-            
-            # SendPulse API expects the body_html to be base64 encoded by default
-            send_resp = requests.post("https://api.sendpulse.com/smtp/emails", headers=headers, json=payload, timeout=10)
-            send_resp.raise_for_status()
-            
-            current_app.logger.info(f"[EMAIL API] Sent '{subject}' to {to}")
+            msg = MailMessage(subject=subject,
+                              sender=sender,
+                              recipients=[to] if isinstance(to, str) else to,
+                              body=body_text,
+                              html=body_html)
+            mail.send(msg)
+            current_app.logger.info(f"[EMAIL] Sent '{subject}' to {to}")
             return True
         except Exception as e:
-            current_app.logger.error(f"[EMAIL API] Error sending to {to}: {e}")
-            if hasattr(e, 'response') and e.response is not None:
-                current_app.logger.error(f"[EMAIL API] Response: {e.response.text}")
+            current_app.logger.error(f"[EMAIL] SMTP error sending to {to}: {e}")
             print(f"\n[EMAIL FAILED] To: {to} | Subject: {subject}")
-            print(f"API ERROR: {e}\n")
+            print(f"SMTP ERROR: {e}\n")
             return False
     else:
         print(f"\n{'='*60}")
-        print(f"[EMAIL] API credentials not configured — console fallback")
+        print(f"[EMAIL] SMTP credentials not configured — console fallback")
         print(f"  To:      {to}")
         print(f"  Subject: {subject}")
         print(f"  Body:    {body_text[:200]}...")
@@ -1080,7 +1062,7 @@ def test_email():
     """Send a test email to the current admin user to verify SMTP config."""
     recipient = current_user.email
     subject = 'HangarLinks — SMTP Test Email'
-    body_text = f"Hi {current_user.username}, this is a test email from HangarLinks.\n\nIf you received this, SendPulse SMTP is working correctly.\n\n— HangarLinks System"
+    body_text = f"Hi {current_user.username}, this is a test email from HangarLinks.\n\nIf you received this, Gmail SMTP is working correctly.\n\n— HangarLinks System"
     body_html = f"""
     <div style="font-family:'Segoe UI',system-ui,sans-serif;max-width:520px;margin:0 auto;">
       <div style="background:linear-gradient(135deg,#001F3F,#002952);padding:32px;border-radius:16px 16px 0 0;text-align:center;">
@@ -1089,7 +1071,7 @@ def test_email():
       <div style="background:#0d1117;padding:32px;border-radius:0 0 16px 16px;border:1px solid rgba(255,255,255,0.08);">
         <p style="color:#94a3b8;">Hi <strong style="color:white;">{current_user.username}</strong>,</p>
         <p style="color:#94a3b8;">This is an automated test from <strong style="color:#60a5fa;">HangarLinks</strong>.</p>
-        <p style="color:#94a3b8;">If you're reading this, your SendPulse SMTP integration is <strong style="color:#34d399;">working perfectly</strong>.</p>
+        <p style="color:#94a3b8;">If you're reading this, your Gmail SMTP integration is <strong style="color:#34d399;">working perfectly</strong>.</p>
         <div style="margin-top:24px;padding:16px;background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.2);border-radius:10px;">
           <p style="color:#34d399;font-size:13px;margin:0;">
             <strong>Server:</strong> {current_app.config.get('MAIL_SERVER')} |
@@ -1104,10 +1086,10 @@ def test_email():
     if success:
         flash(f'Test email sent to {recipient}. Check your inbox!', 'success')
     else:
-        if not current_app.config.get('SENDPULSE_API_ID'):
-            flash('Email API not configured. Set SENDPULSE_API_ID and SENDPULSE_API_SECRET variables.', 'warning')
+        if not current_app.config.get('MAIL_USERNAME'):
+            flash('SMTP not configured. Set GMAIL_USERNAME and GMAIL_APP_PASSWORD variables.', 'warning')
         else:
-            flash('Email API send failed. Check server logs for details.', 'danger')
+            flash('SMTP send failed. Check server logs for details.', 'danger')
     return redirect(request.referrer or url_for('main.index'))
 
 @bp.route('/terms')
@@ -1919,32 +1901,45 @@ def cancel_subscription():
     return redirect(url_for('main.pricing'))
 
 def check_search_limit():
-    """Rate-limit free renters. Returns True = allowed, False = blocked."""
+    """
+    Rate-limit free users and guests to 5 searches per day.
+    Uses Flask session (cookie) for tracking — no DB columns required.
+    Returns True = allowed, False = limit reached.
+    """
     try:
-        if not current_user.is_authenticated:
-            return True
-        if getattr(current_user, 'subscription_tier', None) == 'premium':
-            return True
-        if getattr(current_user, 'role', 'renter') != 'renter':
-            return True
+        # Admins and premium users always bypass limits
+        if current_user.is_authenticated:
+            if getattr(current_user, 'is_admin', False):
+                return True
+            if getattr(current_user, 'subscription_tier', None) == 'premium':
+                return True
+            # Owners can search freely too
+            if getattr(current_user, 'role', 'renter') != 'renter':
+                return True
 
-        today = date.today()
-        reset_date = getattr(current_user, 'search_reset_date', None)
-        if reset_date != today:
-            current_user.search_count_today = 0
-            current_user.search_reset_date = today
-            db.session.commit()
+        # Use session cookie to track count — works for both guests and free users
+        today_str = date.today().isoformat()
+        session_date = session.get('search_date')
+        session_count = session.get('search_count', 0)
 
-        if getattr(current_user, 'search_count_today', 0) >= 5:
-            return False
+        # Reset counter if it's a new day
+        if session_date != today_str:
+            session['search_date'] = today_str
+            session['search_count'] = 0
+            session_count = 0
 
-        current_user.search_count_today = getattr(current_user, 'search_count_today', 0) + 1
-        db.session.commit()
+        FREE_SEARCH_LIMIT = 5
+
+        if session_count >= FREE_SEARCH_LIMIT:
+            return False  # Limit reached
+
+        # Increment and save counter to session cookie
+        session['search_count'] = session_count + 1
         return True
+
     except Exception as e:
         print(f"WARN: check_search_limit error (allowing): {e}")
-        db.session.rollback()
-        return True  # Fail open — don't block users on DB errors
+        return True  # Fail open — never block users on errors
 
 SPONSORED_TIERS = {
     'silver': {'price': 4900, 'name': 'Silver Featured', 'days': 30, 'boost': '2x'},
