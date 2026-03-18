@@ -211,6 +211,19 @@ def listings():
     nfpa_409_compliant = request.args.get('nfpa_409_compliant')
     gpu_power_available = request.args.get('gpu_power_available')
 
+    # If search limit is reached, return immediately with empty results — no DB query needed
+    if search_limited:
+        return render_template('listings.html',
+                               listings=[],
+                               pagination=None,
+                               airport=airport,
+                               radius=radius,
+                               covered=covered,
+                               min_price=min_price,
+                               max_price=max_price,
+                               search_limited=True,
+                               markers=[])
+
     def _run_query():
         q = Listing.query.filter_by(status='Active')
         if airport:
