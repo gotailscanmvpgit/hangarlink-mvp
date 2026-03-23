@@ -61,8 +61,9 @@
                         <div class="relative h-full overflow-hidden">
                             {% for photo in photos %}
                             <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                                <img src="{{ url_for('static', filename='uploads/listings/' + photo) }}"
+                                <img src="{{ optimized_img(photo) }}"
                                     class="absolute block w-full h-full object-cover"
+                                    loading="lazy"
                                     alt="Listing Photo {{ loop.index }}">
                             </div>
                             {% endfor %}
@@ -106,8 +107,8 @@
                     </div>
                     {% else %}
                     <!-- Single Image -->
-                    <img src="{{ url_for('static', filename='uploads/listings/' + photos[0]) }}"
-                        class="w-full h-full object-cover" alt="Listing Photo">
+                    <img src="{{ optimized_img(photos[0]) }}"
+                        class="w-full h-full object-cover" loading="lazy" alt="Listing Photo">
                     {% endif %}
 
                     {% else %}

@@ -18,8 +18,8 @@
             <!-- Listing Photo -->
             {% if listing.photos %}
             {% set first_photo = listing.photos.split(',')[0] %}
-            <div class="h-48 bg-cover bg-center relative"
-                style="background-image: url('{{ url_for('static', filename='uploads/listings/' + first_photo) }}');">
+            <div class="h-48 bg-cover bg-center"
+                style="background-image: url('{{ optimized_img(first_photo) }}');">
                 <div class="absolute top-4 right-4">
                     <span
                         class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold

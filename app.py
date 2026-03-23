@@ -8,7 +8,9 @@ from flask_recaptcha import ReCaptcha
 import os
 import stripe
 from dotenv import load_dotenv
-
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 # Load .env file if it exists
 if os.path.exists('.env'):
     print("[CONFIG] Found .env file, loading...")
@@ -115,6 +117,23 @@ def create_app(config_class=Config):
     else:
         print("[STRIPE] Publishable Key is MISSING or using PLACEHOLDER.")
 
+    # Cloudinary Configuration
+    c_cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME')
+    c_api_key = os.environ.get('CLOUDINARY_API_KEY')
+    c_api_secret = os.environ.get('CLOUDINARY_API_SECRET')
+    
+    if c_cloud_name and c_api_key and c_api_secret:
+        cloudinary.config(
+            cloud_name=c_cloud_name,
+            api_key=c_api_key,
+            api_secret=c_api_secret,
+            secure=True
+        )
+        print("[CLOUDINARY] Configured successfully.")
+        logger.info("Cloudinary configured.")
+    else:
+        print("⚠️ [CLOUDINARY] Missing API Keys! Uploads may fail if routing to Cloudinary.")
+
     # reCAPTCHA
     recaptcha = ReCaptcha(app=app)
     app.recaptcha = recaptcha
@@ -136,8 +155,19 @@ def create_app(config_class=Config):
             import traceback
             traceback.print_exc()
 
-        # ── Step 2: Dynamic column patching (add any missing columns) ──
         from sqlalchemy import text, inspect as sa_inspect
+        
+    @app.context_processor
+    def utility_processor():
+        def optimized_img(photo_filename, w=800, h=600):
+            if not photo_filename:
+                return ""
+            if photo_filename.startswith('http'):
+                return photo_filename.replace('/upload/', f'/upload/w_{w},h_{h},c_fill,f_webp/')
+            else:
+                from flask import url_for
+                return url_for('static', filename='uploads/listings/' + photo_filename)
+        return dict(optimized_img=optimized_img)
         try:
             inspector = sa_inspect(db.engine)
             is_postgres = 'postgresql' in str(db.engine.url).lower()

@@ -249,7 +249,7 @@
                     {% if listing.photos %}
                     {% set photos = listing.photos.split(',') %}
                     <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                        style="background-image: url('{{ url_for('static', filename='uploads/listings/' + photos[0]) }}');">
+                        style="background-image: url('{{ optimized_img(photos[0]) }}');">
                     </div>
 
                     <!-- Thumbnails Overlay on Hover -->
@@ -258,7 +258,7 @@
                         class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 overflow-hidden">
                         {% for thumb in photos[1:4] %}
                         <div class="w-12 h-12 rounded-lg bg-cover bg-center border border-white/50 shadow-sm shrink-0"
-                            style="background-image: url('{{ url_for('static', filename='uploads/listings/' + thumb) }}');">
+                            style="background-image: url('{{ optimized_img(thumb, 200, 150) }}');">
                         </div>
                         {% endfor %}
                         {% if photos|length > 4 %}

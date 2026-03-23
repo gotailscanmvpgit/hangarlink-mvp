@@ -100,7 +100,7 @@ class Listing(db.Model):
     price_night = db.Column(db.Float, nullable=True) # Airbnb-style daily rate
     min_stay_nights = db.Column(db.Integer, default=1) # Airbnb-style min stay
     description = db.Column(db.Text, nullable=True)
-    photos = db.Column(db.Text, nullable=True)  # Comma-separated filenames
+    photos = db.Column(db.Text, nullable=True)  # Comma-separated Cloudinary URLs or local filenames (fallback)
     owner_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     status = db.Column(db.String(20), default='Active')  # 'Active', 'Inactive', 'Rented'
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

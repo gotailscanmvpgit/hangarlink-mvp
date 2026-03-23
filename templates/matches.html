@@ -69,8 +69,8 @@
 
             <div class="h-64 bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
                 {% if listing.photos %}
-                <img src="{{ url_for('static', filename='uploads/listings/' + listing.photos.split(',')[0]) }}"
-                    alt="Hangar" loading="lazy"
+                <img src="{{ optimized_img(listing.photos.split(',')[0]) }}"
+                    alt="{{ listing.airport_icao }} Hangar" loading="lazy"
                     class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
                 {% else %}
                 <div class="flex items-center justify-center h-full text-gray-400">

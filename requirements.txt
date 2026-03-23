@@ -27,3 +27,4 @@ flask-socketio>=5.3.0
 eventlet>=0.35.0
 locust>=2.15.0
 selenium>=4.10.0
+cloudinary>=1.38.0

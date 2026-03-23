@@ -424,21 +424,27 @@ def post_listing():
             # I'll process up to 10 to allow comprehensive gallery.
             all_files = all_files[:10] 
             
+            import cloudinary.uploader
             for file in all_files:
                 if file and allowed_file(file.filename):
-                    filename = secure_filename(file.filename)
-                    # Add timestamp AND uuid to avoid conflicts
-                    timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-                    unique_id = uuid.uuid4().hex[:8]
-                    filename = f"{timestamp}_{unique_id}_{filename}"
-                    
-                    # Use current_app.config for upload folder
-                    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], 'listings', filename)
-                    
-                    # Create directory if it doesn't exist
-                    os.makedirs(os.path.dirname(filepath), exist_ok=True)
-                    file.save(filepath)
-                    photo_filenames.append(filename)
+                    try:
+                        # Upload to Cloudinary Optimization Network
+                        upload_result = cloudinary.uploader.upload(
+                            file,
+                            folder="hangarlinks/listings"
+                        )
+                        photo_filenames.append(upload_result['secure_url'])
+                    except Exception as e:
+                        print(f"⚠️ [CLOUDINARY ERROR] {e}")
+                        # Fallback to local if no API keys (for dev resilience)
+                        filename = secure_filename(file.filename)
+                        timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+                        unique_id = uuid.uuid4().hex[:8]
+                        filename = f"{timestamp}_{unique_id}_{filename}"
+                        filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], 'listings', filename)
+                        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+                        file.save(filepath)
+                        photo_filenames.append(filename)
             
             # Health Score Calculation
             score = 0

@@ -50,8 +50,8 @@
                 {% if listing.photos %}
                 {% set photos = listing.photos.split(',') %}
                 <div class="rounded-xl overflow-hidden h-64 bg-gray-100 dark:bg-gray-800 relative">
-                    <img src="{{ url_for('static', filename='uploads/listings/' + photos[0]) }}"
-                        class="w-full h-full object-cover">
+                    <img src="{{ optimized_img(photos[0]) }}"
+                        alt="{{ listing.airport_icao }} hangar" loading="lazy" class="w-full h-full object-cover">
                     {% if photos|length > 1 %}
                     <div
                         class="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
