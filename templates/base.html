@@ -179,7 +179,7 @@
                                     <h3 style="font-weight: bold; margin: 0; color: #111827; font-size: 16px;">${markerData.title}</h3>
                                     <span style="background: #EBF5FF; color: #1E429F; font-size: 10px; font-weight: bold; padding: 2px 6px; rounded: 4px;">${markerData.icao}</span>
                                 </div>
-                                <div style="font-size: 18px; font-weight: 800; color: #2563EB; margin-bottom: 8px;">${markerData.price}<span style="font-size: 12px; color: #6B7280; font-weight: 400;">/mo</span></div>
+                                <div style="font-size: 18px; font-weight: 800; color: #2563EB; margin-bottom: 8px;">${markerData.price}<span style="font-size: 12px; color: #6B7280; font-weight: 400;">${markerData.price_unit || '/mo'}</span></div>
                                 <a href="/listing/${markerData.id}" style="display: block; width: 100%; text-align: center; background: #2563EB; color: white; border-radius: 8px; padding: 8px; font-size: 12px; font-weight: bold; text-decoration: none; transition: background 0.2s;">View Details</a>
                             </div>
                         `);

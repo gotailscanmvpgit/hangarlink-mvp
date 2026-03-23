@@ -152,13 +152,16 @@ def index():
         markers = []
         for l in map_listings:
             if l.lat is not None and l.lon is not None:
+                price_val = int(l.price_night) if l.price_night else (int(l.price_month) if l.price_month else 0)
+                price_unit = "/night" if l.price_night else "/mo"
                 markers.append({
                     'id': l.id,
                     'lat': l.lat,
                     'lon': l.lon,
                     'title': f"{l.airport_icao} Hangar",
                     'icao': l.airport_icao,
-                    'price': f"${int(l.price_month)}",
+                    'price': f"${price_val}",
+                    'price_unit': price_unit,
                     'is_premium': l.is_premium_listing or (l.owner and l.owner.is_premium)
                 })
             
@@ -284,13 +287,16 @@ def listings():
     for l in listings_items:
         if l.lat is not None and l.lon is not None:
             try:
+                price_val = int(l.price_night) if l.price_night else (int(l.price_month) if l.price_month else 0)
+                price_unit = "/night" if l.price_night else "/mo"
                 markers.append({
                     'id': l.id,
                     'lat': l.lat,
                     'lon': l.lon,
                     'title': f"{l.airport_icao} Hangar",
                     'icao': l.airport_icao,
-                    'price': f"${int(l.price_month)}",
+                    'price': f"${price_val}",
+                    'price_unit': price_unit,
                     'is_premium': l.is_premium_listing or (l.owner and l.owner.is_premium)
                 })
             except Exception:
