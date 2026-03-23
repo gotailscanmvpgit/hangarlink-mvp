@@ -58,15 +58,21 @@ def create_app(config_class=Config):
     print(f"[DB-INIT] Target: {safe_uri}")
     logger.warning(f"[DB-INIT] Type: {db_type} Target: {safe_uri}")
 
-    # ── SendPulse REST API Config ──────────────────────────────────────────
-    # Uses SENDPULSE_API_ID / SENDPULSE_API_SECRET env vars over HTTPS to bypass SMTP port blocks on Railway
-    app.config['SENDPULSE_API_ID'] = os.environ.get('SENDPULSE_API_ID', '')
-    app.config['SENDPULSE_API_SECRET'] = os.environ.get('SENDPULSE_API_SECRET', '')
+    # ── Gmail SMTP Config ──────────────────────────────────────────────
+    # Uses GMAIL_USERNAME / GMAIL_APP_PASSWORD env vars.
+    # Falls back to console-print mode when credentials are absent.
+    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+    app.config['MAIL_PORT'] = 587
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USE_SSL'] = False
+    app.config['MAIL_USERNAME'] = os.environ.get('GMAIL_USERNAME', '')
+    app.config['MAIL_PASSWORD'] = os.environ.get('GMAIL_APP_PASSWORD', '')
     app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', 'no-reply@tryhangarlinks.com')
 
-    _api_id = app.config['SENDPULSE_API_ID']
-    print(f"[MAIL] SendPulse API Mode. API_ID: {_api_id if _api_id else '(not set — console fallback mode)'}") 
-    print(f"[MAIL] Sender:   {app.config['MAIL_DEFAULT_SENDER']}")
+    # Log mail config (mask password)
+    _gu = app.config['MAIL_USERNAME']
+    print(f"[MAIL] Server: {app.config['MAIL_SERVER']}:{app.config['MAIL_PORT']} | TLS={app.config['MAIL_USE_TLS']}")
+    print(f"[MAIL] Username: {_gu if _gu else '(not set — console fallback mode)'}") 
 
 
     # Initialize extensions

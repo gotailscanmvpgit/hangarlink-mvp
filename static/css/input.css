@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #0a0f1a;
+    color: #e2e8f0;
+    min-height: 100vh;
+    overflow-x: hidden;
+    width: 100%;
+}
+
+.hover-lift {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+    transform: scale(1.02);
+}
+
+/* Premium Google Maps Styling */
+#map {
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}

@@ -16,37 +16,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
 
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        navy: {
-                            900: '#001F3F',
-                            800: '#002952',
-                            700: '#003366',
-                        },
-                        platinum: {
-                            100: '#FAFAFA',
-                            200: '#E0E0E0',
-                            300: '#B0B0B0',
-                        },
-                        dark: {
-                            900: '#0A0F1A',
-                            800: '#131824',
-                        }
-                    },
-                    fontFamily: {
-                        'inter': ['Inter', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-
+    <!-- Compiled Tailwind CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
     <!-- Flowbite CSS & JS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
@@ -54,34 +25,10 @@
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-    <style>
-        html,
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0a0f1a;
-            color: #e2e8f0;
-            min-height: 100vh;
-            overflow-x: hidden;
-            width: 100%;
-        }
 
-        .hover-lift {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .hover-lift:hover {
-            transform: scale(1.02);
-        }
-
-        /* Premium Google Maps Styling */
-        #map {
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-        }
-    </style>
 
     <!-- Google Maps JavaScript API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDL9tIA9KW41-K9-n8Arw-u9-THZVlifCU&callback=initMap"
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDL9tIA9KW41-K9-n8Arw-u9-THZVlifCU&callback=initMap&loading=async"
         async defer></script>
     <script>
         // Google Maps Initialization
