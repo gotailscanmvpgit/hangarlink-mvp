@@ -1070,60 +1070,68 @@
 
                     if (!selector.value) {
                         alertDiv.classList.add('hidden');
-                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        if (btn) btn.classList.remove('opacity-50', 'cursor-not-allowed');
                         return;
                     }
 
                     const option = selector.options[selector.selectedIndex];
                     const sqftReq = parseFloat(option.getAttribute('data-sqft')) * 1.1;
                     const availableSqft = {{ listing.available_sqft if listing.available_sqft is not none else listing.size_sqft }};
-                };
 
-                alertDiv.classList.remove('hidden');
+                    alertDiv.classList.remove('hidden');
 
-                if (sqftReq > availableSqft) {
-                    alertDiv.className = 'mt-3 p-3 text-xs rounded-lg font-bold bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 text-center animate-shake block';
-                    alertDiv.innerHTML = '<i class="fas fa-times-circle mr-1 text-lg align-middle"></i> Fit Check: No (Too Large)';
-                    if (btn.tagName === 'BUTTON') btn.disabled = true;
-                    btn.classList.add('opacity-50', 'cursor-not-allowed');
-                } else {
-                    alertDiv.className = 'mt-3 p-3 text-xs rounded-lg font-bold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 block';
-                    alertDiv.innerHTML = '<i class="fas fa-check-circle mr-1 text-lg align-middle"></i> Fit Check: Yes (Perfect Fit)';
-                    if (btn.tagName === 'BUTTON') btn.disabled = false;
-                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                }
+                    if (sqftReq > availableSqft) {
+                        alertDiv.className = 'mt-3 p-3 text-xs rounded-lg font-bold bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 text-center animate-shake block';
+                        alertDiv.innerHTML = '<i class="fas fa-times-circle mr-1 text-lg align-middle"></i> Fit Check: No (Too Large)';
+                        if (btn && btn.tagName === 'BUTTON') btn.disabled = true;
+                        if (btn) btn.classList.add('opacity-50', 'cursor-not-allowed');
+                    } else {
+                        alertDiv.className = 'mt-3 p-3 text-xs rounded-lg font-bold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 block';
+                        alertDiv.innerHTML = '<i class="fas fa-check-circle mr-1 text-lg align-middle"></i> Fit Check: Yes (Perfect Fit)';
+                        if (btn && btn.tagName === 'BUTTON') btn.disabled = false;
+                        if (btn) btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
                 }
 
                 function updateButtonText() {
                     const startInput = document.getElementById('booking_start');
                     const endInput = document.getElementById('booking_end');
                     const btnText = document.getElementById('btn-text');
-                    const isGuest = {{ "true" if not current_user.is_authenticated else "false" }}
-                };;
+                    const isGuest = {{ "true" if not current_user.is_authenticated else "false" }};
 
-                if (startInput.value && endInput.value && btnText) {
-                    const start = new Date(startInput.value);
-                    const end = new Date(endInput.value);
-                    const nights = Math.round((end - start) / (1000 * 60 * 60 * 24));
-                    if (nights > 0) {
-                        if (isGuest) {
-                            btnText.textContent = `Sign up to reserve for ${nights} night${nights > 1 ? 's' : ''}`;
-                        } else {
-                            btnText.textContent = `Reserve for ${nights} night${nights > 1 ? 's' : ''}`;
+                    if (startInput && endInput && btnText && startInput.value && endInput.value) {
+                        const startParts = startInput.value.split('-');
+                        const endParts = endInput.value.split('-');
+                        
+                        const start = new Date(parseInt(startParts[0], 10), parseInt(startParts[1], 10) - 1, parseInt(startParts[2], 10));
+                        const end = new Date(parseInt(endParts[0], 10), parseInt(endParts[1], 10) - 1, parseInt(endParts[2], 10));
+                        
+                        const nights = Math.round((end - start) / (1000 * 60 * 60 * 24));
+                        if (nights > 0) {
+                            if (isGuest) {
+                                btnText.textContent = `Sign up to reserve for ${nights} night${nights > 1 ? 's' : ''}`;
+                            } else {
+                                btnText.textContent = `Reserve for ${nights} night${nights > 1 ? 's' : ''}`;
+                            }
                         }
                     }
-                }
                 }
 
                 function calculateDates() {
                     const startInput = document.getElementById('booking_start');
                     const endInput = document.getElementById('booking_end');
-                    const minNights = parseInt('{{ listing.min_stay_nights|default(1) }}', 10);
+                    const minNights = parseInt('{{ listing.min_stay_nights|default(1) }}', 10) || 1;
 
-                    if (startInput.value) {
-                        const startDate = new Date(startInput.value);
+                    if (startInput && startInput.value && endInput) {
+                        const dateParts = startInput.value.split('-');
+                        const startDate = new Date(parseInt(dateParts[0], 10), parseInt(dateParts[1], 10) - 1, parseInt(dateParts[2], 10));
+                        
                         startDate.setDate(startDate.getDate() + minNights);
-                        const minEndDateStr = startDate.toISOString().split('T')[0];
+                        
+                        const y = startDate.getFullYear();
+                        const m = String(startDate.getMonth() + 1).padStart(2, '0');
+                        const d = String(startDate.getDate()).padStart(2, '0');
+                        const minEndDateStr = `${y}-${m}-${d}`;
 
                         endInput.disabled = false;
                         endInput.min = minEndDateStr;
@@ -1132,6 +1140,9 @@
                             endInput.value = minEndDateStr;
                         }
                         updateButtonText();
+                    } else if (endInput) {
+                        endInput.disabled = true;
+                        endInput.value = '';
                     }
                 }
             </script>
