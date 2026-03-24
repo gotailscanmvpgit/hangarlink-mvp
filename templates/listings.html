@@ -71,22 +71,14 @@
                 <!-- Duration -->
                 <div>
                     <label class="block text-xs font-bold text-white/80 mb-2 uppercase tracking-wider">
-                        <i class="fas fa-calendar-alt mr-2 text-blue-400"></i>Duration
+                        <i class="fas fa-calendar-alt mr-2 text-blue-400"></i>Rental Duration
                     </label>
                     <select name="duration"
                         class="block w-full rounded-xl p-3 text-base font-semibold shadow-inner focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
                         style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #FAFAFA;">
-                        <option value="7" {% if request.args.get('duration')=='7' or request.args.get('duration') is
-                            none %}selected{% endif %} style="background:#001F3F; color:#FAFAFA;">Short-term (1-7
-                            nights)</option>
-                        <option value="1" {% if request.args.get('duration')=='1' %}selected{% endif %}
-                            style="background:#001F3F; color:#FAFAFA;">Overnight (1 Night)</option>
-                        <option value="3" {% if request.args.get('duration')=='3' %}selected{% endif %}
-                            style="background:#001F3F; color:#FAFAFA;">2-3 Nights</option>
-                        <option value="30" {% if request.args.get('duration')=='30' %}selected{% endif %}
-                            style="background:#001F3F; color:#FAFAFA;">Monthly (30+ Days)</option>
-                        <option value="" {% if request.args.get('duration')=='' %}selected{% endif %}
-                            style="background:#001F3F; color:#FAFAFA;">Flexible / Any</option>
+                        <option value="7" {% if request.args.get('duration') == '7' or not request.args.get('duration') %}selected{% endif %} style="background:#001F3F; color:#FAFAFA;">Short-Term (1–7 nights)</option>
+                        <option value="30" {% if request.args.get('duration') == '30' %}selected{% endif %} style="background:#001F3F; color:#FAFAFA;">Monthly</option>
+                        <option value="" {% if request.args.get('duration') == '' %}selected{% endif %} style="background:#001F3F; color:#FAFAFA;">Flexible</option>
                     </select>
                 </div>
 
@@ -115,48 +107,39 @@
                 </div>
             </div>
     </div>
-
-    <!-- Practical Amenities Filters -->
-    <div class="flex flex-wrap items-center gap-4 mt-6 mb-4 px-1">
-        <label
-            class="flex items-center space-x-2 text-white/80 font-bold text-sm cursor-pointer group hover:text-white transition-all">
-            <input type="checkbox" name="is_heated" value="1" {% if request.args.get('is_heated')=='1' %}checked{% endif
-                %}
-                class="w-4 h-4 text-blue-500 rounded border-gray-500 bg-gray-800/50 focus:ring-blue-500 transition-all shadow-inner">
-            <span><i class="fas fa-thermometer-half text-red-500 mr-1.5"></i>Heated Only</span>
+    
+    <!-- Safety & Features Section -->
+    <div class="mt-8 mb-6">
+        <label class="block text-sm font-bold text-white/90 mb-4 uppercase tracking-wider border-b border-white/10 pb-2">
+            <i class="fas fa-shield-alt mr-2 text-blue-400"></i>Safety & Features
         </label>
+        
+        <div class="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            <label class="flex items-center space-x-3 text-white/80 font-bold text-sm cursor-pointer group hover:text-white transition-all bg-white/5 hover:bg-white/10 p-3 rounded-xl border border-white/10">
+                <input type="checkbox" name="is_heated" value="1" {% if request.args.get('is_heated')=='1' %}checked{% endif %} class="w-5 h-5 text-blue-500 rounded border-gray-500 bg-gray-800/50 focus:ring-blue-500 transition-all shadow-inner">
+                <span class="flex items-center"><i class="fas fa-thermometer-half text-red-500 mr-2"></i>Heated Only</span>
+            </label>
 
-        <label
-            class="flex items-center space-x-2 text-white/80 font-bold text-sm cursor-pointer group hover:text-white transition-all">
-            <input type="checkbox" name="access_24_7" value="1" {% if request.args.get('access_24_7')=='1' %}checked{%
-                endif %}
-                class="w-4 h-4 text-blue-500 rounded border-gray-500 bg-gray-800/50 focus:ring-blue-500 transition-all shadow-inner">
-            <span><i class="fas fa-key text-blue-400 mr-1.5"></i>24/7 Access</span>
-        </label>
+            <label class="flex items-center space-x-3 text-white/80 font-bold text-sm cursor-pointer group hover:text-white transition-all bg-white/5 hover:bg-white/10 p-3 rounded-xl border border-white/10">
+                <input type="checkbox" name="access_24_7" value="1" {% if request.args.get('access_24_7')=='1' %}checked{% endif %} class="w-5 h-5 text-blue-500 rounded border-gray-500 bg-gray-800/50 focus:ring-blue-500 transition-all shadow-inner">
+                <span class="flex items-center"><i class="fas fa-key text-blue-400 mr-2"></i>24/7 Access</span>
+            </label>
 
-        <label
-            class="flex items-center space-x-2 text-white/80 font-bold text-sm cursor-pointer group hover:text-white transition-all">
-            <input type="checkbox" name="electric_doors_only" value="1" {% if
-                request.args.get('electric_doors_only')=='1' %}checked{% endif %}
-                class="w-4 h-4 text-amber-500 rounded border-gray-500 bg-gray-800/50 focus:ring-amber-500 transition-all shadow-inner">
-            <span><i class="fas fa-bolt text-amber-400 mr-1.5"></i>Electric/Hydraulic Doors</span>
-        </label>
+            <label class="flex items-center space-x-3 text-white/80 font-bold text-sm cursor-pointer group hover:text-white transition-all bg-white/5 hover:bg-white/10 p-3 rounded-xl border border-white/10">
+                <input type="checkbox" name="electric_doors_only" value="1" {% if request.args.get('electric_doors_only')=='1' %}checked{% endif %} class="w-5 h-5 text-amber-500 rounded border-gray-500 bg-gray-800/50 focus:ring-amber-500 transition-all shadow-inner">
+                <span class="flex items-center"><i class="fas fa-bolt text-amber-400 mr-2"></i>Electric/Hydraulic Doors</span>
+            </label>
 
-        <label
-            class="flex items-center space-x-2 text-white/80 font-bold text-sm cursor-pointer group hover:text-white transition-all">
-            <input type="checkbox" name="nfpa_409_compliant" value="1" {% if request.args.get('nfpa_409_compliant')=='1'
-                %}checked{% endif %}
-                class="w-4 h-4 text-amber-500 rounded border-gray-500 bg-gray-800/50 focus:ring-amber-500 transition-all shadow-inner">
-            <span><i class="fas fa-fire-extinguisher text-amber-500 mr-1.5"></i>NFPA 409 Compliant</span>
-        </label>
+            <label class="flex items-center space-x-3 text-white/80 font-bold text-sm cursor-pointer group hover:text-white transition-all bg-white/5 hover:bg-white/10 p-3 rounded-xl border border-white/10 border-l-2 border-l-amber-500">
+                <input type="checkbox" name="nfpa_409_compliant" value="1" {% if request.args.get('nfpa_409_compliant')=='1' %}checked{% endif %} class="w-5 h-5 text-amber-500 rounded border-amber-500/50 bg-gray-800/50 focus:ring-amber-500 transition-all shadow-inner">
+                <span class="flex items-center"><i class="fas fa-fire-extinguisher text-amber-500 mr-2"></i>NFPA 409 Compliant <span class="ml-2 text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded-sm">GOLD</span></span>
+            </label>
 
-        <label
-            class="flex items-center space-x-2 text-white/80 font-bold text-sm cursor-pointer group hover:text-white transition-all">
-            <input type="checkbox" name="gpu_power_available" value="1" {% if
-                request.args.get('gpu_power_available')=='1' %}checked{% endif %}
-                class="w-4 h-4 text-blue-500 rounded border-gray-500 bg-gray-800/50 focus:ring-blue-500 transition-all shadow-inner">
-            <span><i class="fas fa-plug text-blue-400 mr-1.5"></i>GPU Available</span>
-        </label>
+            <label class="flex items-center space-x-3 text-white/80 font-bold text-sm cursor-pointer group hover:text-white transition-all bg-white/5 hover:bg-white/10 p-3 rounded-xl border border-white/10">
+                <input type="checkbox" name="gpu_power_available" value="1" {% if request.args.get('gpu_power_available')=='1' %}checked{% endif %} class="w-5 h-5 text-blue-500 rounded border-gray-500 bg-gray-800/50 focus:ring-blue-500 transition-all shadow-inner">
+                <span class="flex items-center"><i class="fas fa-plug text-blue-400 mr-2"></i>GPU Available</span>
+            </label>
+        </div>
     </div>
 
     <button type="submit"
