@@ -892,21 +892,7 @@
             <div class="text-sm text-gray-500 italic mb-4">Contact owner for availability.</div>
             {% endif %}
 
-            {% if current_user.is_authenticated and current_user.id != listing.owner_id %}
-            <!-- Book Viewing Button -->
-            <form action="{{ url_for('main.book_viewing', listing_id=listing.id) }}" method="POST" class="mt-4">
-                <div class="flex space-x-2 mb-2">
-                    <input type="date" name="viewing_date" required
-                        class="w-2/3 bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm focus:ring-blue-500">
-                    <input type="time" name="viewing_time"
-                        class="w-1/3 bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm focus:ring-blue-500">
-                </div>
-                <button type="submit"
-                    class="w-full bg-white border-2 border-blue-600 text-blue-600 font-bold py-2 rounded-lg hover:bg-blue-50 transition-colors">
-                    <i class="fas fa-eye mr-2"></i>Request Viewing
-                </button>
-            </form>
-            {% endif %}
+
         </div>
 
         <!-- Contact Owner Card -->
