@@ -60,21 +60,28 @@ def create_app(config_class=Config):
     print(f"[DB-INIT] Target: {safe_uri}")
     logger.warning(f"[DB-INIT] Type: {db_type} Target: {safe_uri}")
 
-    # ── Gmail SMTP Config ──────────────────────────────────────────────
-    # Uses GMAIL_USERNAME / GMAIL_APP_PASSWORD env vars.
-    # Falls back to console-print mode when credentials are absent.
-    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-    app.config['MAIL_PORT'] = 587
-    app.config['MAIL_USE_TLS'] = True
-    app.config['MAIL_USE_SSL'] = False
-    app.config['MAIL_USERNAME'] = os.environ.get('GMAIL_USERNAME', '')
-    app.config['MAIL_PASSWORD'] = os.environ.get('GMAIL_APP_PASSWORD', '')
+    # ── Mail Server Config (SendPulse, Google, etc) ─────────────────────────
+    app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+    app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
+    app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True') == 'True'
+    app.config['MAIL_USE_SSL'] = os.environ.get('MAIL_USE_SSL', 'False') == 'True'
+    
+    # Priority: 1. MAIL_USERNAME, 2. GMAIL_USERNAME (legacy), 3. SENDPULSE_USERNAME (custom)
+    app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME') or \
+                                 os.environ.get('GMAIL_USERNAME') or \
+                                 os.environ.get('SENDPULSE_USERNAME', '')
+    
+    app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD') or \
+                                 os.environ.get('GMAIL_APP_PASSWORD') or \
+                                 os.environ.get('SENDPULSE_PASSWORD', '')
+                                 
     app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', 'no-reply@tryhangarlinks.com')
 
-    # Log mail config (mask password)
-    _gu = app.config['MAIL_USERNAME']
-    print(f"[MAIL] Server: {app.config['MAIL_SERVER']}:{app.config['MAIL_PORT']} | TLS={app.config['MAIL_USE_TLS']}")
-    print(f"[MAIL] Username: {_gu if _gu else '(not set — console fallback mode)'}") 
+    # Log mail configuration for troubleshooting (masked)
+    _mu = app.config.get('MAIL_USERNAME')
+    print(f"[MAIL-INIT] Server: {app.config['MAIL_SERVER']}:{app.config['MAIL_PORT']} (TLS={app.config['MAIL_USE_TLS']})")
+    print(f"[MAIL-INIT] User: {_mu if _mu else '(NOT CONFIGURED - FALLBACK TO CONSOLE)'}")
+ 
 
 
     # Initialize extensions

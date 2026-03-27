@@ -923,6 +923,7 @@ If you did not request this, you can safely ignore this email.
     mail_configured = bool(current_app.config.get('MAIL_USERNAME'))
     if mail_configured:
         try:
+            print(f"[RESET-FLOW] Attempting to send reset email to {user.email} via {current_app.config['MAIL_SERVER']}")
             sender = current_app.config.get('MAIL_DEFAULT_SENDER', 'no-reply@tryhangarlinks.com')
             msg = MailMessage(subject=subject,
                               sender=sender,
@@ -930,18 +931,19 @@ If you did not request this, you can safely ignore this email.
                               body=body,
                               html=html_body)
             mail.send(msg)
-            current_app.logger.info(f"[RESET] Email sent to {user.email} via {current_app.config.get('MAIL_SERVER')}")
+            current_app.logger.info(f"[RESET] Email sent to {user.email}")
+            print(f"✅ Success: Reset email sent to {user.email}")
             return True
         except Exception as e:
             error_msg = str(e)
             current_app.logger.error(f"[RESET] Mail send FAILED: {error_msg}")
-            print(f"\n[RESET LINK for {user.email}]: {reset_url}")
-            print(f"SMTP ERROR: {error_msg}\n")
+            print(f"❌ Error: Mail send FAILED for {user.email}: {error_msg}")
+            print(f"DEBUG LINK: {reset_url}")
             return False
     else:
         # Dev fallback — print to console / Railway logs
         print(f"\n{'='*60}")
-        print(f"PASSWORD RESET LINK (SMTP not configured)")
+        print(f"PASSWORD RESET LINK (SMTP NOT CONFIGURED)")
         print(f"User:  {user.email}")
         print(f"URL:   {reset_url}")
         print(f"{'='*60}\n")
@@ -1009,8 +1011,44 @@ def reset_password(token):
 
 
 # ─────────────────────────────────────────────
+#  DEVELOPMENT/TEST TOOLS
+# ─────────────────────────────────────────────
+
+@bp.route('/test-forgot-password')
+def test_forgot_password_sim():
+    """
+    Simulate a forgot password request for a test account.
+    """
+    email = request.args.get('email', 'admin@hangarlink.com')
+    user = User.query.filter_by(email=email).first()
+    
+    if not user:
+        return jsonify({
+            'status': 'error',
+            'message': f'User {email} not found in database. Create them first.'
+        }), 404
+        
+    print(f"[TEST-RESET] Simulating reset request for {user.email}...")
+    success = _send_reset_email(user)
+    
+    if success:
+        return jsonify({
+            'status': 'success',
+            'message': f'Reset email simulation completed for {user.email}. Check inbox or Railway logs.',
+            'mail_server': current_app.config.get('MAIL_SERVER'),
+            'smtp_user': current_app.config.get('MAIL_USERNAME', '(unset)')
+        })
+    else:
+        return jsonify({
+            'status': 'fallback',
+            'message': 'Mail failed or SMTP not configured. Check server logs/console for the reset link.',
+            'mail_server': current_app.config.get('MAIL_SERVER')
+        })
+
+# ─────────────────────────────────────────────
 #  REUSABLE EMAIL HELPER
 # ─────────────────────────────────────────────
+
 
 def _send_email(to, subject, body_text, body_html):
     """
