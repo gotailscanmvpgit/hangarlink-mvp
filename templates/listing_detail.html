@@ -894,62 +894,60 @@
 
                 <!-- ── Insurance Add-on ─────────────────────────────── -->
                 <div id="insurance-box"
-                    class="mb-4 rounded-xl border-2 transition-all duration-300 overflow-hidden"
-                    style="border-color: rgba(96,165,250,0.3); background: rgba(239,246,255,0.7);">
+                    class="mb-4 rounded-xl border-2 border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950 transition-all duration-300 overflow-hidden">
                     <!-- Header row -->
-                    <label class="flex items-start gap-3 p-3 cursor-pointer" id="insurance-label">
+                    <label class="flex items-start gap-3 p-3 cursor-pointer">
                         <input type="checkbox" name="add_insurance" id="add_insurance_cb"
-                            class="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300 shadow-sm cursor-pointer flex-shrink-0"
+                            class="mt-1 w-5 h-5 accent-blue-500 rounded border-gray-300 dark:border-gray-600 shadow-sm cursor-pointer flex-shrink-0"
                             onchange="updateInsuranceCost()">
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center justify-between flex-wrap gap-1">
                                 <span class="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
-                                    <i class="fas fa-shield-alt text-blue-500"></i>
+                                    <i class="fas fa-shield-alt text-blue-500 dark:text-blue-400"></i>
                                     Short-Term Insurance Protection
                                 </span>
-                                <!-- Tooltip trigger -->
                                 <button type="button" onclick="toggleInsuranceInfo(event)"
                                     class="text-[10px] text-blue-600 dark:text-blue-400 font-semibold flex items-center gap-1 hover:underline whitespace-nowrap">
                                     <i class="fas fa-info-circle"></i> What's covered?
                                 </button>
                             </div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            <p class="text-xs text-gray-600 dark:text-gray-300 mt-0.5">
                                 Covers theft, physical damage &amp; liability during your rental period
                             </p>
                             <div class="flex items-center gap-2 mt-1.5">
-                                <span class="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/40 px-2 py-0.5 rounded-full">
+                                <span class="text-xs font-bold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 px-2 py-0.5 rounded-full">
                                     $45 – $150
                                 </span>
-                                <span class="text-[10px] text-gray-400">calculated by stay length</span>
+                                <span class="text-[10px] text-gray-500 dark:text-gray-400">calculated by stay length</span>
                             </div>
                         </div>
                     </label>
 
                     <!-- Coverage info panel (hidden by default) -->
                     <div id="insurance-info-panel" class="hidden px-4 pb-4">
-                        <div class="rounded-lg p-3 text-xs space-y-1.5" style="background: rgba(219,234,254,0.6);">
-                            <div class="font-bold text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-1.5">
+                        <div class="rounded-lg p-3 text-xs space-y-1.5 bg-blue-100 dark:bg-blue-900 border border-blue-200 dark:border-blue-700">
+                            <div class="font-bold text-blue-800 dark:text-blue-200 mb-2 flex items-center gap-1.5">
                                 <i class="fas fa-umbrella"></i> What's Included
                             </div>
-                            <div class="flex items-start gap-2 text-gray-600 dark:text-gray-400">
+                            <div class="flex items-start gap-2 text-gray-700 dark:text-gray-200">
                                 <i class="fas fa-check text-green-500 mt-0.5 flex-shrink-0"></i>
                                 Aircraft physical damage (hull coverage)
                             </div>
-                            <div class="flex items-start gap-2 text-gray-600 dark:text-gray-400">
+                            <div class="flex items-start gap-2 text-gray-700 dark:text-gray-200">
                                 <i class="fas fa-check text-green-500 mt-0.5 flex-shrink-0"></i>
                                 Theft &amp; vandalism protection
                             </div>
-                            <div class="flex items-start gap-2 text-gray-600 dark:text-gray-400">
+                            <div class="flex items-start gap-2 text-gray-700 dark:text-gray-200">
                                 <i class="fas fa-check text-green-500 mt-0.5 flex-shrink-0"></i>
                                 Liability coverage ($1M limit)
                             </div>
-                            <div class="flex items-start gap-2 text-gray-600 dark:text-gray-400">
+                            <div class="flex items-start gap-2 text-gray-700 dark:text-gray-200">
                                 <i class="fas fa-check text-green-500 mt-0.5 flex-shrink-0"></i>
                                 Covers your exact rental dates
                             </div>
-                            <div class="mt-2 pt-2 border-t border-blue-200 dark:border-blue-800 text-gray-500 dark:text-gray-400">
-                                <i class="fas fa-handshake mr-1 text-blue-400"></i>
-                                Policy activated via <strong>Avemco / BWI Aviation Insurance</strong> after booking.
+                            <div class="mt-2 pt-2 border-t border-blue-200 dark:border-blue-700 text-gray-600 dark:text-gray-300">
+                                <i class="fas fa-handshake mr-1 text-blue-500 dark:text-blue-400"></i>
+                                Policy activated via <strong class="text-gray-800 dark:text-white">Avemco / BWI Aviation Insurance</strong> after booking.
                                 No pre-inspection required.
                             </div>
                         </div>
@@ -957,34 +955,35 @@
 
                     <!-- Live cost row (shown when checked) -->
                     <div id="insurance-cost-row" class="hidden px-4 pb-3">
-                        <div class="flex items-center justify-between text-xs border-t pt-2" style="border-color: rgba(96,165,250,0.2);">
-                            <span class="text-gray-500 dark:text-gray-400">Insurance added:</span>
-                            <span id="insurance-cost-display" class="font-bold text-blue-600 dark:text-blue-400">—</span>
+                        <div class="flex items-center justify-between text-xs border-t border-blue-200 dark:border-blue-700 pt-2">
+                            <span class="text-gray-600 dark:text-gray-300">Insurance added:</span>
+                            <span id="insurance-cost-display" class="font-bold text-blue-600 dark:text-blue-300">—</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- ── Booking Total Summary ─────────────────────────── -->
-                <div id="booking-total-row" class="hidden mb-4 rounded-xl p-3 text-sm"
-                    style="background: rgba(15,23,42,0.06); border: 1px solid rgba(15,23,42,0.1);">
-                    <div class="flex justify-between text-gray-600 dark:text-gray-400 mb-1">
+                <div id="booking-total-row"
+                    class="hidden mb-4 rounded-xl p-3 text-sm bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                    <div class="flex justify-between text-gray-600 dark:text-gray-300 mb-1">
                         <span>Rental subtotal</span>
-                        <span id="total-rental-display">—</span>
+                        <span id="total-rental-display" class="font-medium text-gray-800 dark:text-gray-100">—</span>
                     </div>
                     <div id="total-convenience-row" class="hidden flex justify-between text-purple-600 dark:text-purple-400 mb-1">
                         <span>Convenience fee</span>
-                        <span>$5.00</span>
+                        <span class="font-medium">$5.00</span>
                     </div>
                     <div id="total-insurance-summary" class="hidden flex justify-between text-blue-600 dark:text-blue-400 mb-1">
                         <span>Insurance protection</span>
-                        <span id="total-insurance-display">—</span>
+                        <span id="total-insurance-display" class="font-medium">—</span>
                     </div>
-                    <div class="flex justify-between font-bold text-gray-900 dark:text-white border-t pt-1.5 mt-1.5" style="border-color: rgba(15,23,42,0.1);">
+                    <div class="flex justify-between font-bold text-gray-900 dark:text-white border-t border-gray-200 dark:border-gray-600 pt-1.5 mt-1.5">
                         <span>Est. Total</span>
                         <span id="grand-total-display" class="text-blue-600 dark:text-blue-400">—</span>
                     </div>
-                    <p class="text-[10px] text-gray-400 mt-1">* Owner receives 91% of rental subtotal. Final total charged at checkout.</p>
+                    <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-1">* Owner receives 91% of rental subtotal. Final total charged at checkout.</p>
                 </div>
+
 
                 {% if current_user.is_authenticated %}
                 <button type="submit" id="btn-reserve-now"
