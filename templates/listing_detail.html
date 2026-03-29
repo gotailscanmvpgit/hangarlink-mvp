@@ -350,7 +350,7 @@
                     <div class="text-sm font-medium text-gray-600 dark:text-gray-400">per month</div>
                     <div
                         class="text-xs text-gray-500 mt-2 sm:mt-1 bg-white/50 sm:bg-transparent dark:bg-dark-900/50 sm:dark:bg-transparent p-2 sm:p-0 rounded-lg sm:rounded-none">
-                        + 8% platform fee
+                        + 9% platform fee (charged to owner)
                     </div>
                     {% endif %}
                 </div>
@@ -892,25 +892,98 @@
                     <div id="booking_fit_alert" class="hidden mt-3 p-3 text-xs rounded-lg font-bold"></div>
                 </div>
 
-                <!-- Insurance Add-on -->
-                <div
-                    class="mb-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-xl p-3 hover:border-blue-300 dark:hover:border-blue-600 transition-colors group relative">
-                    <label class="flex items-start cursor-pointer">
-                        <input type="checkbox" name="add_insurance" checked
-                            class="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300 dark:border-gray-600 shadow-sm cursor-pointer">
-                        <div class="ml-3">
-                            <span class="block text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                Add Short-Term Insurance
-                                <i class="fas fa-shield-alt text-blue-500"></i>
-                            </span>
-                            <span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                Cover theft/damage/liability.
-                            </span>
-                            <span class="block text-xs font-semibold text-blue-600 dark:text-blue-400 mt-1">
-                                $45 – $150
-                            </span>
+                <!-- ── Insurance Add-on ─────────────────────────────── -->
+                <div id="insurance-box"
+                    class="mb-4 rounded-xl border-2 transition-all duration-300 overflow-hidden"
+                    style="border-color: rgba(96,165,250,0.3); background: rgba(239,246,255,0.7);">
+                    <!-- Header row -->
+                    <label class="flex items-start gap-3 p-3 cursor-pointer" id="insurance-label">
+                        <input type="checkbox" name="add_insurance" id="add_insurance_cb"
+                            class="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300 shadow-sm cursor-pointer flex-shrink-0"
+                            onchange="updateInsuranceCost()">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between flex-wrap gap-1">
+                                <span class="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
+                                    <i class="fas fa-shield-alt text-blue-500"></i>
+                                    Short-Term Insurance Protection
+                                </span>
+                                <!-- Tooltip trigger -->
+                                <button type="button" onclick="toggleInsuranceInfo(event)"
+                                    class="text-[10px] text-blue-600 dark:text-blue-400 font-semibold flex items-center gap-1 hover:underline whitespace-nowrap">
+                                    <i class="fas fa-info-circle"></i> What's covered?
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                Covers theft, physical damage &amp; liability during your rental period
+                            </p>
+                            <div class="flex items-center gap-2 mt-1.5">
+                                <span class="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/40 px-2 py-0.5 rounded-full">
+                                    $45 – $150
+                                </span>
+                                <span class="text-[10px] text-gray-400">calculated by stay length</span>
+                            </div>
                         </div>
                     </label>
+
+                    <!-- Coverage info panel (hidden by default) -->
+                    <div id="insurance-info-panel" class="hidden px-4 pb-4">
+                        <div class="rounded-lg p-3 text-xs space-y-1.5" style="background: rgba(219,234,254,0.6);">
+                            <div class="font-bold text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-1.5">
+                                <i class="fas fa-umbrella"></i> What's Included
+                            </div>
+                            <div class="flex items-start gap-2 text-gray-600 dark:text-gray-400">
+                                <i class="fas fa-check text-green-500 mt-0.5 flex-shrink-0"></i>
+                                Aircraft physical damage (hull coverage)
+                            </div>
+                            <div class="flex items-start gap-2 text-gray-600 dark:text-gray-400">
+                                <i class="fas fa-check text-green-500 mt-0.5 flex-shrink-0"></i>
+                                Theft &amp; vandalism protection
+                            </div>
+                            <div class="flex items-start gap-2 text-gray-600 dark:text-gray-400">
+                                <i class="fas fa-check text-green-500 mt-0.5 flex-shrink-0"></i>
+                                Liability coverage ($1M limit)
+                            </div>
+                            <div class="flex items-start gap-2 text-gray-600 dark:text-gray-400">
+                                <i class="fas fa-check text-green-500 mt-0.5 flex-shrink-0"></i>
+                                Covers your exact rental dates
+                            </div>
+                            <div class="mt-2 pt-2 border-t border-blue-200 dark:border-blue-800 text-gray-500 dark:text-gray-400">
+                                <i class="fas fa-handshake mr-1 text-blue-400"></i>
+                                Policy activated via <strong>Avemco / BWI Aviation Insurance</strong> after booking.
+                                No pre-inspection required.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live cost row (shown when checked) -->
+                    <div id="insurance-cost-row" class="hidden px-4 pb-3">
+                        <div class="flex items-center justify-between text-xs border-t pt-2" style="border-color: rgba(96,165,250,0.2);">
+                            <span class="text-gray-500 dark:text-gray-400">Insurance added:</span>
+                            <span id="insurance-cost-display" class="font-bold text-blue-600 dark:text-blue-400">—</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Booking Total Summary ─────────────────────────── -->
+                <div id="booking-total-row" class="hidden mb-4 rounded-xl p-3 text-sm"
+                    style="background: rgba(15,23,42,0.06); border: 1px solid rgba(15,23,42,0.1);">
+                    <div class="flex justify-between text-gray-600 dark:text-gray-400 mb-1">
+                        <span>Rental subtotal</span>
+                        <span id="total-rental-display">—</span>
+                    </div>
+                    <div id="total-convenience-row" class="hidden flex justify-between text-purple-600 dark:text-purple-400 mb-1">
+                        <span>Convenience fee</span>
+                        <span>$5.00</span>
+                    </div>
+                    <div id="total-insurance-summary" class="hidden flex justify-between text-blue-600 dark:text-blue-400 mb-1">
+                        <span>Insurance protection</span>
+                        <span id="total-insurance-display">—</span>
+                    </div>
+                    <div class="flex justify-between font-bold text-gray-900 dark:text-white border-t pt-1.5 mt-1.5" style="border-color: rgba(15,23,42,0.1);">
+                        <span>Est. Total</span>
+                        <span id="grand-total-display" class="text-blue-600 dark:text-blue-400">—</span>
+                    </div>
+                    <p class="text-[10px] text-gray-400 mt-1">* Owner receives 91% of rental subtotal. Final total charged at checkout.</p>
                 </div>
 
                 {% if current_user.is_authenticated %}
@@ -926,28 +999,103 @@
                     <span id="btn-text">Sign up to reserve</span>
                 </a>
                 <p class="text-[10px] text-gray-400 text-center mt-2">
-                    <i class="fas fa-info-circle mr-1"></i> Registering allows secure Stripe checkout and insurance
-                    activation.
+                    <i class="fas fa-info-circle mr-1"></i> Register for secure Stripe checkout and insurance activation.
                 </p>
                 {% endif %}
 
                 <div class="mt-4 flex flex-col items-center">
                     <div class="flex items-center gap-4 mb-2">
-                        <img src="https://cdn.simpleicons.org/visa/1434CB" alt="Visa"
-                            class="h-4 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
-                            alt="Mastercard"
-                            class="h-6 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg"
-                            alt="Stripe"
-                            class="h-5 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all">
+                        <img src="https://cdn.simpleicons.org/visa/1434CB" alt="Visa" class="h-4 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" class="h-6 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" class="h-5 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all">
                     </div>
-                    <p
-                        class="text-[10px] text-gray-500 flex items-center justify-center font-medium uppercase tracking-wider">
+                    <p class="text-[10px] text-gray-500 flex items-center justify-center font-medium uppercase tracking-wider">
                         <i class="fas fa-lock mr-1.5 text-green-500"></i>Secure Stripe Checkout
                     </p>
                 </div>
             </form>
+
+            <script>
+                // Insurance cost calculation (mirrors backend logic)
+                function calcInsuranceCost(nights) {
+                    if (nights <= 0) return 0;
+                    const raw = (15 * nights) + 45;
+                    return Math.min(150, raw);
+                }
+
+                function getNights() {
+                    const s = document.getElementById('booking_start');
+                    const e = document.getElementById('booking_end');
+                    if (!s || !e || !s.value || !e.value) return 0;
+                    const sp = s.value.split('-'), ep = e.value.split('-');
+                    const start = new Date(+sp[0], +sp[1]-1, +sp[2]);
+                    const end   = new Date(+ep[0], +ep[1]-1, +ep[2]);
+                    return Math.max(0, Math.round((end - start) / 86400000));
+                }
+
+                function updateInsuranceCost() {
+                    const cb      = document.getElementById('add_insurance_cb');
+                    const costRow = document.getElementById('insurance-cost-row');
+                    const display = document.getElementById('insurance-cost-display');
+                    const nights  = getNights();
+                    const ins     = calcInsuranceCost(nights);
+
+                    if (cb && cb.checked) {
+                        costRow.classList.remove('hidden');
+                        if (display) display.textContent = nights > 0 ? `+$${ins.toFixed(0)}` : 'Select dates first';
+                        document.getElementById('insurance-box').style.borderColor = 'rgba(37,99,235,0.6)';
+                    } else {
+                        costRow.classList.add('hidden');
+                        document.getElementById('insurance-box').style.borderColor = 'rgba(96,165,250,0.3)';
+                    }
+                    updateTotal();
+                }
+
+                function updateTotal() {
+                    const nights  = getNights();
+                    const cb      = document.getElementById('add_insurance_cb');
+                    const totalRow = document.getElementById('booking-total-row');
+
+                    if (nights <= 0) { totalRow.classList.add('hidden'); return; }
+
+                    const nightlyRate = {{ listing.price_night if listing.price_night else 0 }};
+                    const monthlyRate = {{ listing.price_month if listing.price_month else 0 }};
+                    const isShortTerm = nights < 30;
+                    const base  = isShortTerm ? (nightlyRate * nights) : monthlyRate;
+                    const convFee = isShortTerm ? 5 : 0;
+                    const ins   = (cb && cb.checked) ? calcInsuranceCost(nights) : 0;
+                    const grand = base + convFee + ins;
+
+                    totalRow.classList.remove('hidden');
+                    document.getElementById('total-rental-display').textContent = `$${base.toFixed(2)}`;
+
+                    const convRow = document.getElementById('total-convenience-row');
+                    isShortTerm ? convRow.classList.remove('hidden') : convRow.classList.add('hidden');
+
+                    const insSummary = document.getElementById('total-insurance-summary');
+                    const insDisplay = document.getElementById('total-insurance-display');
+                    if (ins > 0) {
+                        insSummary.classList.remove('hidden');
+                        insDisplay.textContent = `$${ins.toFixed(0)}`;
+                    } else {
+                        insSummary.classList.add('hidden');
+                    }
+                    document.getElementById('grand-total-display').textContent = `$${grand.toFixed(2)}`;
+                }
+
+                function toggleInsuranceInfo(e) {
+                    e.preventDefault();
+                    document.getElementById('insurance-info-panel').classList.toggle('hidden');
+                }
+
+                // Hook into existing date change handlers
+                const _origUpdateButtonText = typeof updateButtonText === 'function' ? updateButtonText : null;
+                function updateButtonText() {
+                    if (_origUpdateButtonText) _origUpdateButtonText();
+                    updateInsuranceCost();
+                }
+            </script>
+
 
             <script>
                 function validateBookingFit() {
