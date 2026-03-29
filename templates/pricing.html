@@ -1,429 +1,382 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
-{% block title %}HangarLinks Premium - Upgrade Your Experience{% endblock %}
+{% block title %}HangarLinks Pricing — 2026 Hybrid Fee Model{% endblock %}
 
 {% block content %}
-<!-- ═══════════════════════════════════════════════════════════════
-     PRICING HERO
-     ═══════════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════ HERO ═══════════════════════════════ -->
 <section class="relative pt-32 pb-20 overflow-hidden">
-    <!-- Background -->
-    <div class="absolute inset-0 bg-gradient-to-b from-navy-900 via-navy-800 to-navy-900"></div>
-    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.1),transparent_60%)]"></div>
+    <div class="absolute inset-0" style="background: radial-gradient(ellipse at 20% 50%, rgba(26,86,219,0.15), transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(139,92,246,0.12), transparent 60%), linear-gradient(180deg, #060d1a 0%, #0b1628 100%);"></div>
+    <div class="absolute top-24 left-1/3 w-80 h-80 rounded-full blur-3xl animate-pulse" style="background: rgba(245,158,11,0.08);"></div>
+    <div class="absolute bottom-10 right-1/4 w-96 h-96 rounded-full blur-3xl animate-pulse" style="background: rgba(139,92,246,0.08); animation-delay:1.2s;"></div>
 
-    <!-- Floating orbs -->
-    <div class="absolute top-20 left-1/4 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
-    <div class="absolute bottom-20 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl animate-pulse"
-        style="animation-delay: 1s"></div>
-
-    <div class="relative z-10 max-w-6xl mx-auto px-6 text-center">
-        <!-- Badge -->
-        <div
-            class="inline-flex items-center bg-gradient-to-r from-amber-500/20 to-purple-500/20 backdrop-blur-md border border-amber-400/30 rounded-full px-5 py-2 mb-6">
-            <svg class="w-4 h-4 mr-2 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
-            <span class="text-amber-200 text-sm font-medium tracking-wide">Premium Plans</span>
+    <div class="relative z-10 max-w-5xl mx-auto px-6 text-center">
+        <div class="inline-flex items-center gap-2 rounded-full px-5 py-2 mb-6 border text-sm font-medium" style="background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.3); color: #fbbf24;">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            2026 Pricing Model
         </div>
-
-        <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6">
-            Elevate Your <span
-                class="bg-gradient-to-r from-amber-400 via-orange-400 to-pink-500 bg-clip-text text-transparent">HangarLinks</span>
+        <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-5 leading-tight">
+            Simple. Transparent.<br>
+            <span class="bg-clip-text text-transparent" style="background-image: linear-gradient(135deg, #f59e0b, #f97316, #ec4899);">Built for Pilots.</span>
         </h1>
-        <p class="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto mb-4">
-            Unlock unlimited listings, priority search, analytics, and more with HangarLinks Premium.
+        <p class="text-lg text-slate-400 max-w-2xl mx-auto">
+            No hidden fees. Owners keep 91% of every booking. Renters pay a flat $5 on short-term stays. That's it.
         </p>
-
-        {% if current_user.is_authenticated and current_user.subscription_tier == 'premium' %}
-        <div class="inline-flex items-center bg-green-500/20 border border-green-400/40 rounded-full px-6 py-3 mt-4">
-            <svg class="w-5 h-5 mr-2 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <span class="text-green-300 font-semibold">You're on Premium!</span>
-            <a href="{{ url_for('main.manage_subscription') }}" class="ml-4 text-green-400 underline text-sm">Manage
-                →</a>
-        </div>
-        {% endif %}
     </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     BILLING CYCLE TOGGLE
-     ═══════════════════════════════════════════════════════════════ -->
-<section class="relative z-30 pt-4 pb-2">
-    <div class="max-w-xs mx-auto px-6">
-        <div class="flex items-center justify-center gap-0 bg-white/5 border border-white/10 rounded-2xl p-1.5">
+<!-- ═══════════════════════════ FEE BREAKDOWN HERO ═══════════════════════════ -->
+<section class="relative z-10 pb-8">
+    <div class="max-w-5xl mx-auto px-6">
+        <!-- The Transaction Model -->
+        <div class="rounded-2xl p-1" style="background: linear-gradient(135deg, rgba(26,86,219,0.6), rgba(139,92,246,0.4));">
+            <div class="rounded-xl p-8 md:p-10" style="background: rgba(8,14,28,0.96); backdrop-filter: blur(20px);">
+                <div class="text-center mb-10">
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-2">How Fees Work</h2>
+                    <p class="text-slate-400">Every booking has two separate, clear fees. No surprises.</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6 mb-10">
+                    <!-- Owner Fee -->
+                    <div class="rounded-xl p-6" style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25);">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #f59e0b, #f97316);">
+                                <i class="fas fa-plane-departure text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="text-amber-300 font-bold text-lg">Owners Pay</div>
+                                <div class="text-slate-500 text-xs">Deducted from payout</div>
+                            </div>
+                        </div>
+                        <div class="text-5xl font-extrabold text-white mb-1">9<span class="text-2xl text-amber-400">%</span></div>
+                        <p class="text-slate-400 text-sm">Platform fee charged on every confirmed booking. You receive <strong class="text-white">91% of the listed price</strong>, paid out automatically.</p>
+                    </div>
+
+                    <!-- Renter Fee -->
+                    <div class="rounded-xl p-6" style="background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.25);">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #7c3aed, #6366f1);">
+                                <i class="fas fa-search text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="text-purple-300 font-bold text-lg">Renters Pay</div>
+                                <div class="text-slate-500 text-xs">Short-term bookings only</div>
+                            </div>
+                        </div>
+                        <div class="text-5xl font-extrabold text-white mb-1">$<span class="text-amber-400">5</span></div>
+                        <p class="text-slate-400 text-sm">Flat $5 convenience fee added to short-term (&lt;30 day) bookings. <strong class="text-white">Monthly/long-term stays: $0 fee.</strong></p>
+                    </div>
+                </div>
+
+                <!-- Live Example Calculator -->
+                <div class="rounded-xl p-6" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);">
+                    <div class="flex items-center gap-2 mb-5">
+                        <i class="fas fa-calculator text-blue-400"></i>
+                        <span class="text-white font-bold">Live Booking Example</span>
+                        <span class="text-xs text-slate-500 ml-1">Short-term, 3 nights @ $150/night</span>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Renter sees -->
+                        <div>
+                            <div class="text-xs font-bold uppercase tracking-wider text-purple-400 mb-3 flex items-center gap-2">
+                                <i class="fas fa-user"></i> Renter Checkout
+                            </div>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between text-slate-300">
+                                    <span>Hangar rental (3 nights)</span>
+                                    <span class="text-white font-medium">$450.00</span>
+                                </div>
+                                <div class="flex justify-between text-slate-300">
+                                    <span>Convenience fee</span>
+                                    <span class="text-purple-300 font-medium">$5.00</span>
+                                </div>
+                                <div class="border-t pt-2 mt-2 flex justify-between font-bold text-white" style="border-color: rgba(255,255,255,0.1);">
+                                    <span>Renter pays total</span>
+                                    <span class="text-xl text-white">$455.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Owner gets -->
+                        <div style="border-left: 1px solid rgba(255,255,255,0.08);" class="pl-0 md:pl-6">
+                            <div class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-3 flex items-center gap-2">
+                                <i class="fas fa-building"></i> Owner Payout
+                            </div>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between text-slate-300">
+                                    <span>Booking revenue</span>
+                                    <span class="text-white font-medium">$450.00</span>
+                                </div>
+                                <div class="flex justify-between text-slate-300">
+                                    <span>Platform fee (9%)</span>
+                                    <span class="text-red-400 font-medium">− $40.50</span>
+                                </div>
+                                <div class="border-t pt-2 mt-2 flex justify-between font-bold text-white" style="border-color: rgba(255,255,255,0.1);">
+                                    <span>Owner receives</span>
+                                    <span class="text-xl text-green-400">$409.50</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════ BILLING TOGGLE ═══════════════════════════ -->
+<section class="relative z-30 pt-12 pb-4">
+    <div class="max-w-xs mx-auto px-6 text-center">
+        <p class="text-slate-500 text-xs uppercase tracking-widest mb-4 font-medium">Pro Subscription Plans</p>
+        <div class="flex items-center gap-0 rounded-2xl p-1.5 border" style="background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1);">
             <button id="toggle-monthly" onclick="setBilling('monthly')"
-                class="flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-300 bg-white/15 text-white shadow">
+                class="flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-300"
+                style="background: rgba(255,255,255,0.12); color: white;">
                 Monthly
             </button>
             <button id="toggle-yearly" onclick="setBilling('yearly')"
-                class="flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-300 text-slate-400 relative">
+                class="flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-300 relative"
+                style="color: #64748b;">
                 Yearly
-                <span
-                    class="absolute -top-2.5 -right-1 bg-gradient-to-r from-green-400 to-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow">
-                    Save 17%
-                </span>
+                <span class="absolute -top-2.5 -right-1 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full" style="background: linear-gradient(135deg, #22c55e, #10b981);">Save 17%</span>
             </button>
         </div>
     </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     PRICING CARDS
-     ═══════════════════════════════════════════════════════════════ -->
-<section class="relative mt-12 pb-20 z-10">
-    <div class="max-w-6xl mx-auto px-6">
-        <div class="grid md:grid-cols-3 gap-8">
+<!-- ═══════════════════════════ PRICING CARDS ═══════════════════════════ -->
+<section class="relative mt-6 pb-20 z-10">
+    <div class="max-w-5xl mx-auto px-6">
+        <div class="grid md:grid-cols-3 gap-8 items-start">
 
             <!-- FREE TIER -->
-            <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 flex flex-col">
+            <div class="rounded-2xl p-8 flex flex-col" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);">
                 <div class="mb-6">
-                    <h3 class="text-lg font-semibold text-slate-300 mb-2">Free</h3>
-                    <div class="flex items-baseline mb-4">
+                    <div class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Free Forever</div>
+                    <div class="flex items-baseline mb-1">
                         <span class="text-4xl font-extrabold text-white">$0</span>
-                        <span class="text-slate-400 ml-2">/month</span>
+                        <span class="text-slate-500 ml-2 text-sm">/month</span>
                     </div>
-                    <p class="text-slate-400 text-sm">Get started with the basics</p>
+                    <p class="text-slate-500 text-sm mt-2">Try HangarLinks with no commitment</p>
                 </div>
-
-                <ul class="space-y-3 mb-8 flex-1">
-                    <li class="flex items-start text-sm text-slate-300">
-                        <svg class="w-5 h-5 mr-3 text-green-400 shrink-0 mt-0.5" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                <ul class="space-y-3 mb-8 flex-1 text-sm">
+                    {% for item, check in [
+                        ('1 active listing (owners)', true),
+                        ('5 searches/day (renters)', true),
+                        ('Basic messaging', true),
+                        ('$5 convenience fee per booking', true),
+                        ('Priority placement', false),
+                        ('Analytics dashboard', false)
+                    ] %}
+                    <li class="flex items-start gap-3 {{ 'text-slate-300' if check else 'text-slate-600' }}">
+                        <svg class="w-4 h-4 mt-0.5 shrink-0 {{ 'text-green-400' if check else 'text-slate-700' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            {% if check %}
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            {% else %}
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            {% endif %}
                         </svg>
-                        1 active listing (owners)
+                        {{ item }}
                     </li>
-                    <li class="flex items-start text-sm text-slate-300">
-                        <svg class="w-5 h-5 mr-3 text-green-400 shrink-0 mt-0.5" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                        5 searches per day (renters)
-                    </li>
-                    <li class="flex items-start text-sm text-slate-300">
-                        <svg class="w-5 h-5 mr-3 text-green-400 shrink-0 mt-0.5" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                        Basic messaging
-                    </li>
-                    <li class="flex items-start text-sm text-slate-400">
-                        <svg class="w-5 h-5 mr-3 text-slate-600 shrink-0 mt-0.5" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                        No priority placement
-                    </li>
-                    <li class="flex items-start text-sm text-slate-400">
-                        <svg class="w-5 h-5 mr-3 text-slate-600 shrink-0 mt-0.5" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                        No analytics
-                    </li>
+                    {% endfor %}
                 </ul>
-
-                <div class="mt-auto">
-                    <span
-                        class="block w-full text-center py-3 rounded-xl bg-white/5 border border-white/10 text-slate-400 font-medium">
-                        Current Plan
-                    </span>
-                </div>
+                <span class="block w-full text-center py-3 rounded-xl text-slate-500 text-sm font-medium" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);">Current Plan</span>
             </div>
 
-            <!-- OWNER PREMIUM (Featured) -->
-            <div
-                class="relative bg-gradient-to-b from-amber-500/10 to-purple-500/10 backdrop-blur-xl border-2 border-amber-400/40 rounded-2xl p-8 flex flex-col transform md:scale-105 shadow-2xl shadow-amber-500/10">
-                <!-- Popular badge -->
+            <!-- OWNER PRO (Featured) -->
+            <div class="relative rounded-2xl p-8 flex flex-col" style="background: linear-gradient(145deg, rgba(245,158,11,0.08), rgba(249,115,22,0.06)); border: 2px solid rgba(245,158,11,0.4); box-shadow: 0 0 40px rgba(245,158,11,0.08);">
                 <div class="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <span
-                        class="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full shadow-lg">
-                        Most Popular
-                    </span>
+                    <span class="text-white text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full shadow-lg" style="background: linear-gradient(135deg, #f59e0b, #f97316);">Most Popular</span>
                 </div>
-
                 <div class="mb-6 mt-2">
-                    <h3 class="text-lg font-semibold text-amber-300 mb-2">✈️ Owner Premium</h3>
-                    <!-- Monthly price (shown by default) -->
+                    <div class="text-xs font-bold uppercase tracking-widest text-amber-500 mb-3">✈️ Owner Pro</div>
+                    <!-- Monthly -->
                     <div id="owner-price-monthly" class="flex items-baseline mb-1">
                         <span class="text-4xl font-extrabold text-white">${{ owner_plan.price_display }}</span>
-                        <span class="text-slate-400 ml-2">/month</span>
+                        <span class="text-slate-400 ml-2 text-sm">/month</span>
                     </div>
-                    <!-- Yearly price (hidden by default) -->
+                    <!-- Yearly -->
                     <div id="owner-price-yearly" class="hidden">
                         <div class="flex items-baseline mb-1">
-                            <span class="text-4xl font-extrabold text-white">${{ owner_plan_yearly.price_display
-                                }}</span>
-                            <span class="text-slate-400 ml-2">/year</span>
+                            <span class="text-4xl font-extrabold text-white">${{ owner_plan_yearly.price_display }}</span>
+                            <span class="text-slate-400 ml-2 text-sm">/year</span>
                         </div>
-                        <p class="text-green-400 text-xs font-semibold">≈ ${{ owner_plan_yearly.monthly_equiv }}/mo
-                            &nbsp;·&nbsp; {{ owner_plan_yearly.savings }}</p>
+                        <p class="text-green-400 text-xs font-semibold">≈ ${{ owner_plan_yearly.monthly_equiv }}/mo &nbsp;·&nbsp; {{ owner_plan_yearly.savings }}</p>
                     </div>
-                    <p class="text-slate-300 text-sm mt-1">For hangar owners who mean business</p>
+                    <p class="text-slate-400 text-sm mt-1">For hangar owners who mean business</p>
                 </div>
-
-                <ul class="space-y-3 mb-8 flex-1">
+                <ul class="space-y-3 mb-8 flex-1 text-sm">
                     {% for feature in owner_plan.features %}
-                    <li class="flex items-start text-sm text-white">
-                        <svg class="w-5 h-5 mr-3 text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    <li class="flex items-start gap-3 text-white">
+                        <svg class="w-4 h-4 mt-0.5 shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
                         {{ feature }}
                     </li>
                     {% endfor %}
                 </ul>
-
                 <div class="mt-auto">
                     {% if current_user.is_authenticated %}
-                    {% if current_user.subscription_tier == 'premium' %}
-                    <a href="{{ url_for('main.manage_subscription') }}"
-                        class="block w-full text-center py-3 rounded-xl bg-green-500/20 border border-green-400/40 text-green-300 font-semibold">
-                        ✓ Active — Manage
-                    </a>
+                      {% if current_user.subscription_tier == 'premium' %}
+                        <a href="{{ url_for('main.manage_subscription') }}" class="block w-full text-center py-3 rounded-xl font-semibold text-sm" style="background: rgba(52,211,153,0.15); border: 1px solid rgba(52,211,153,0.3); color: #34d399;">✓ Active — Manage</a>
+                      {% else %}
+                        <form id="owner-checkout-form" action="{{ url_for('main.create_checkout_session') }}" method="POST">
+                            <input type="hidden" id="owner-item-type" name="item_type" value="premium_owner">
+                            <button type="submit" class="w-full py-3.5 rounded-xl text-white font-bold text-base transition-all hover:scale-[1.02] active:scale-[0.98]" style="background: linear-gradient(135deg, #f59e0b, #f97316); box-shadow: 0 8px 24px rgba(245,158,11,0.25);">
+                                <span id="owner-btn-monthly">Subscribe — ${{ owner_plan.price_display }}/mo</span>
+                                <span id="owner-btn-yearly" class="hidden">Subscribe — ${{ owner_plan_yearly.price_display }}/yr</span>
+                            </button>
+                        </form>
+                      {% endif %}
                     {% else %}
-                    <form id="owner-checkout-form" action="{{ url_for('main.create_checkout_session') }}" method="POST">
-                        <input type="hidden" id="owner-item-type" name="item_type" value="premium_owner">
-                        <button type="submit"
-                            class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-lg transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/25 hover:scale-[1.02] active:scale-[0.98]">
-                            <span id="owner-btn-monthly">Subscribe — ${{ owner_plan.price_display }}/mo</span>
-                            <span id="owner-btn-yearly" class="hidden">Subscribe — ${{ owner_plan_yearly.price_display
-                                }}/yr</span>
-                        </button>
-                    </form>
-                    {% endif %}
-                    {% else %}
-                    <a href="{{ url_for('main.register') }}"
-                        class="block w-full text-center py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-lg transition-all duration-300">
-                        Sign Up to Subscribe
-                    </a>
+                      <a href="{{ url_for('main.register') }}" class="block w-full text-center py-3.5 rounded-xl text-white font-bold text-base transition-all hover:scale-[1.02]" style="background: linear-gradient(135deg, #f59e0b, #f97316); box-shadow: 0 8px 24px rgba(245,158,11,0.25);">Get Started Free</a>
                     {% endif %}
                 </div>
             </div>
 
-            <!-- RENTER PREMIUM -->
-            <div class="bg-white/5 backdrop-blur-xl border border-purple-400/20 rounded-2xl p-8 flex flex-col">
+            <!-- RENTER PRO -->
+            <div class="rounded-2xl p-8 flex flex-col" style="background: rgba(139,92,246,0.06); border: 1px solid rgba(139,92,246,0.25);">
                 <div class="mb-6">
-                    <h3 class="text-lg font-semibold text-purple-300 mb-2">🔍 Renter Premium</h3>
-                    <!-- Monthly price (shown by default) -->
+                    <div class="text-xs font-bold uppercase tracking-widest text-purple-400 mb-3">🔍 Renter Pro</div>
+                    <!-- Monthly -->
                     <div id="renter-price-monthly" class="flex items-baseline mb-1">
                         <span class="text-4xl font-extrabold text-white">${{ renter_plan.price_display }}</span>
-                        <span class="text-slate-400 ml-2">/month</span>
+                        <span class="text-slate-400 ml-2 text-sm">/month</span>
                     </div>
-                    <!-- Yearly price (hidden by default) -->
+                    <!-- Yearly -->
                     <div id="renter-price-yearly" class="hidden">
                         <div class="flex items-baseline mb-1">
-                            <span class="text-4xl font-extrabold text-white">${{ renter_plan_yearly.price_display
-                                }}</span>
-                            <span class="text-slate-400 ml-2">/year</span>
+                            <span class="text-4xl font-extrabold text-white">${{ renter_plan_yearly.price_display }}</span>
+                            <span class="text-slate-400 ml-2 text-sm">/year</span>
                         </div>
-                        <p class="text-green-400 text-xs font-semibold">≈ ${{ renter_plan_yearly.monthly_equiv }}/mo
-                            &nbsp;·&nbsp; {{ renter_plan_yearly.savings }}</p>
+                        <p class="text-green-400 text-xs font-semibold">≈ ${{ renter_plan_yearly.monthly_equiv }}/mo &nbsp;·&nbsp; {{ renter_plan_yearly.savings }}</p>
                     </div>
-                    <p class="text-slate-300 text-sm mt-1">Find the perfect hangar, faster</p>
+                    <p class="text-slate-400 text-sm mt-1">Find the perfect hangar, faster</p>
                 </div>
-
-                <ul class="space-y-3 mb-8 flex-1">
+                <ul class="space-y-3 mb-8 flex-1 text-sm">
                     {% for feature in renter_plan.features %}
-                    <li class="flex items-start text-sm text-white">
-                        <svg class="w-5 h-5 mr-3 text-purple-400 shrink-0 mt-0.5" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    <li class="flex items-start gap-3 text-white">
+                        <svg class="w-4 h-4 mt-0.5 shrink-0 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
                         {{ feature }}
                     </li>
                     {% endfor %}
                 </ul>
-
                 <div class="mt-auto">
                     {% if current_user.is_authenticated %}
-                    {% if current_user.subscription_tier == 'premium' %}
-                    <a href="{{ url_for('main.manage_subscription') }}"
-                        class="block w-full text-center py-3 rounded-xl bg-green-500/20 border border-green-400/40 text-green-300 font-semibold">
-                        ✓ Active — Manage
-                    </a>
+                      {% if current_user.subscription_tier == 'premium' %}
+                        <a href="{{ url_for('main.manage_subscription') }}" class="block w-full text-center py-3 rounded-xl font-semibold text-sm" style="background: rgba(52,211,153,0.15); border: 1px solid rgba(52,211,153,0.3); color: #34d399;">✓ Active — Manage</a>
+                      {% else %}
+                        <form id="renter-checkout-form" action="{{ url_for('main.create_checkout_session') }}" method="POST">
+                            <input type="hidden" id="renter-item-type" name="item_type" value="premium_renter">
+                            <button type="submit" class="w-full py-3.5 rounded-xl text-white font-bold text-base transition-all hover:scale-[1.02] active:scale-[0.98]" style="background: linear-gradient(135deg, #7c3aed, #6366f1); box-shadow: 0 8px 24px rgba(124,58,237,0.25);">
+                                <span id="renter-btn-monthly">Subscribe — ${{ renter_plan.price_display }}/mo</span>
+                                <span id="renter-btn-yearly" class="hidden">Subscribe — ${{ renter_plan_yearly.price_display }}/yr</span>
+                            </button>
+                        </form>
+                      {% endif %}
                     {% else %}
-                    <form id="renter-checkout-form" action="{{ url_for('main.create_checkout_session') }}"
-                        method="POST">
-                        <input type="hidden" id="renter-item-type" name="item_type" value="premium_renter">
-                        <button type="submit"
-                            class="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-400 hover:to-violet-400 text-white font-bold text-lg transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/25 hover:scale-[1.02] active:scale-[0.98]">
-                            <span id="renter-btn-monthly">Subscribe — ${{ renter_plan.price_display }}/mo</span>
-                            <span id="renter-btn-yearly" class="hidden">Subscribe — ${{ renter_plan_yearly.price_display
-                                }}/yr</span>
-                        </button>
-                    </form>
-                    {% endif %}
-                    {% else %}
-                    <a href="{{ url_for('main.register') }}"
-                        class="block w-full text-center py-3.5 rounded-xl bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-400 hover:to-violet-400 text-white font-bold text-lg transition-all duration-300">
-                        Sign Up to Subscribe
-                    </a>
+                      <a href="{{ url_for('main.register') }}" class="block w-full text-center py-3.5 rounded-xl text-white font-bold text-base transition-all hover:scale-[1.02]" style="background: linear-gradient(135deg, #7c3aed, #6366f1); box-shadow: 0 8px 24px rgba(124,58,237,0.25);">Get Started Free</a>
                     {% endif %}
                 </div>
             </div>
         </div>
-        <!-- Payment trust logos -->
-        <div class="mt-12 flex flex-col items-center animate-fade-in-up" style="animation-delay: 0.4s;">
-            <div class="flex items-center gap-6 mb-4">
-                <img src="https://cdn.simpleicons.org/visa/1434CB" alt="Visa"
-                    class="h-5 opacity-60 hover:opacity-100 transition-opacity">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard"
-                    class="h-6 opacity-60 hover:opacity-100 transition-opacity">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg"
-                    alt="Stripe" class="h-6 opacity-60 hover:opacity-100 transition-opacity">
+
+        <!-- Payment trust row -->
+        <div class="mt-12 flex flex-col items-center gap-4">
+            <div class="flex items-center gap-6">
+                <img src="https://cdn.simpleicons.org/visa/1434CB" alt="Visa" class="h-5 opacity-50 hover:opacity-100 transition-opacity">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" class="h-6 opacity-50 hover:opacity-100 transition-opacity">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" class="h-6 opacity-50 hover:opacity-100 transition-opacity">
             </div>
-            <div
-                class="flex items-center gap-2 text-slate-400 text-xs font-medium uppercase tracking-widest bg-white/5 px-4 py-2 rounded-full border border-white/10">
-                <i class="fas fa-lock text-green-400"></i>
-                Secure payments processed by Stripe
+            <div class="flex items-center gap-2 text-slate-500 text-xs font-medium uppercase tracking-widest px-4 py-2 rounded-full border" style="border-color: rgba(255,255,255,0.08);">
+                <i class="fas fa-lock text-green-400"></i> Secure payments via Stripe
             </div>
-            <p class="text-slate-500 text-[10px] mt-4 max-w-md text-center">
-                Your payment information is encrypted and processed directly by Stripe. HangarLinks does not store your
-                full credit card details.
-            </p>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════ COMPARISON TABLE ═══════════════════════════ -->
+<section class="relative py-16">
+    <div class="max-w-4xl mx-auto px-6">
+        <h2 class="text-2xl font-bold text-white text-center mb-10">Full Feature Comparison</h2>
+        <div class="rounded-2xl overflow-hidden" style="border: 1px solid rgba(255,255,255,0.08);">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr style="background: rgba(255,255,255,0.05);">
+                        <th class="text-left py-4 px-6 text-slate-400 font-semibold">Feature</th>
+                        <th class="py-4 px-4 text-slate-400 font-semibold text-center">Free</th>
+                        <th class="py-4 px-4 text-amber-400 font-semibold text-center">Owner Pro</th>
+                        <th class="py-4 px-4 text-purple-400 font-semibold text-center">Renter Pro</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set rows = [
+                        ('Active listings', '1', 'Up to 20', '—'),
+                        ('Daily searches', '5/day', '—', 'Unlimited'),
+                        ('Featured placement', '✗', '✓', '✗'),
+                        ('Analytics dashboard', '✗', '✓', '✗'),
+                        ('Smart alerts', '✗', '✗', '✓'),
+                        ('Priority matching', '✗', '✗', '✓'),
+                        ('$5 convenience fee', 'Yes', 'Yes', 'Waived ✓'),
+                        ('Owner platform fee', '9%', '9%', '—'),
+                        ('Verified badge', '✗', '✓', '✓'),
+                        ('Export reports', '✗', '✓', '✗'),
+                    ] %}
+                    {% for row in rows %}
+                    <tr style="border-top: 1px solid rgba(255,255,255,0.05);">
+                        <td class="py-3.5 px-6 text-slate-300">{{ row[0] }}</td>
+                        <td class="py-3.5 px-4 text-center text-slate-500">{{ row[1] }}</td>
+                        <td class="py-3.5 px-4 text-center text-amber-300">{{ row[2] }}</td>
+                        <td class="py-3.5 px-4 text-center text-purple-300">{{ row[3] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════ FAQ ═══════════════════════════ -->
+<section class="relative py-16 pb-32">
+    <div class="max-w-3xl mx-auto px-6">
+        <h2 class="text-2xl font-bold text-white text-center mb-10">Frequently Asked Questions</h2>
+        <div class="space-y-4">
+            {% for q, a in [
+                ('Who pays the 9% fee?', 'The hangar owner. It is deducted from their payout when a booking is confirmed. Renters do not pay the 9% fee.'),
+                ('What is the $5 convenience fee?', 'A flat $5 charged to renters on short-term bookings (under 30 days). Monthly and long-term rentals have no renter-side fee.'),
+                ('Can Renter Pro waive the $5?', 'Yes. Renter Pro ($9.99/mo) waives the $5 flat convenience fee on every booking, paying for itself in just 2 bookings per month.'),
+                ('Does Owner Pro reduce the 9% fee?',  'The 9% supports the platform, secure payments, and dispute resolution. Owner Pro adds value through higher listing limits, analytics, and featured placement rather than fee reduction.'),
+                ('Can I cancel anytime?', 'Yes. Cancel at any time from your billing dashboard. Your Pro features remain active until the end of your billing period.'),
+            ] %}
+            <div class="rounded-xl p-6" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);">
+                <h4 class="text-white font-semibold mb-2">{{ q }}</h4>
+                <p class="text-slate-400 text-sm">{{ a }}</p>
+            </div>
+            {% endfor %}
         </div>
     </div>
 </section>
 
 <script>
-    function setBilling(cycle) {
-        const isYearly = cycle === 'yearly';
+function setBilling(cycle) {
+    const isYearly = cycle === 'yearly';
+    const activeStyle = 'background: rgba(255,255,255,0.12); color: white;';
+    const inactiveStyle = 'color: #64748b;';
+    document.getElementById('toggle-monthly').setAttribute('style', isYearly ? inactiveStyle : activeStyle);
+    document.getElementById('toggle-yearly').setAttribute('style', isYearly ? activeStyle : inactiveStyle);
 
-        // Toggle button styles
-        document.getElementById('toggle-monthly').className = 'flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ' +
-            (isYearly ? 'text-slate-400' : 'bg-white/15 text-white shadow');
-        document.getElementById('toggle-yearly').className = 'flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-300 relative ' +
-            (isYearly ? 'bg-white/15 text-white shadow' : 'text-slate-400');
-
-        // Toggle price displays
-        ['owner', 'renter'].forEach(role => {
-            document.getElementById(role + '-price-monthly').classList.toggle('hidden', isYearly);
-            document.getElementById(role + '-price-yearly').classList.toggle('hidden', !isYearly);
-            const btnMonthly = document.getElementById(role + '-btn-monthly');
-            const btnYearly = document.getElementById(role + '-btn-yearly');
-            if (btnMonthly) btnMonthly.classList.toggle('hidden', isYearly);
-            if (btnYearly) btnYearly.classList.toggle('hidden', !isYearly);
-
-            // Update the hidden item_type input
-            const itemInput = document.getElementById(role + '-item-type');
-            if (itemInput) {
-                itemInput.value = isYearly ? 'premium_' + role + '_yearly' : 'premium_' + role;
-            }
-        });
-    }
+    ['owner', 'renter'].forEach(role => {
+        document.getElementById(role + '-price-monthly').classList.toggle('hidden', isYearly);
+        document.getElementById(role + '-price-yearly').classList.toggle('hidden', !isYearly);
+        const btnM = document.getElementById(role + '-btn-monthly');
+        const btnY = document.getElementById(role + '-btn-yearly');
+        if (btnM) btnM.classList.toggle('hidden', isYearly);
+        if (btnY) btnY.classList.toggle('hidden', !isYearly);
+        const input = document.getElementById(role + '-item-type');
+        if (input) input.value = isYearly ? 'premium_' + role + '_yearly' : 'premium_' + role;
+    });
+}
 </script>
-
-<!-- ═══════════════════════════════════════════════════════════════
-     TRANSACTION FEE EXPLAINER
-     ═══════════════════════════════════════════════════════════════ -->
-<section class="relative py-16">
-    <div class="max-w-4xl mx-auto px-6">
-        <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 md:p-10">
-            <div class="flex items-start gap-6">
-                <div
-                    class="shrink-0 w-14 h-14 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center">
-                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <div class="flex-1">
-                    <h3 class="text-xl font-bold text-white mb-2">{{ fee_percent }}% Platform Fee — Simple & Transparent
-                    </h3>
-                    <p class="text-slate-300 mb-5">
-                        When a booking is completed, HangarLinks charges a flat <strong class="text-white">{{
-                            fee_percent }}% platform fee</strong> on the total rental amount — whether it's overnight or
-                        long-term. This covers payment processing, platform maintenance, and dispute resolution.
-                    </p>
-
-                    <!-- Primary: Short-term / Daily example -->
-                    <div
-                        class="bg-gradient-to-r from-sky-500/10 to-blue-600/10 border border-sky-500/20 rounded-xl p-5 mb-4">
-                        <div class="flex items-center gap-2 mb-3">
-                            <i class="fas fa-moon text-sky-400 text-sm"></i>
-                            <span class="text-sky-300 text-xs font-bold uppercase tracking-wider">Short-Term / Nightly
-                                Rental</span>
-                        </div>
-                        <p class="text-sm text-slate-400 mb-2">Example: For a <strong
-                                class="text-white">$150/night</strong> short-term hangar rental</p>
-                        <div class="flex items-center gap-3">
-                            <span class="text-3xl font-extrabold text-amber-400">${{ (150 * fee_percent / 100)|int
-                                }}</span>
-                            <div>
-                                <p class="text-white font-semibold text-sm">platform fee per night</p>
-                                <p class="text-slate-500 text-xs">{{ fee_percent }}% of $150</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Secondary: Monthly example -->
-                    <div class="bg-white/5 border border-white/10 rounded-xl p-5">
-                        <div class="flex items-center gap-2 mb-3">
-                            <i class="fas fa-calendar-alt text-purple-400 text-sm"></i>
-                            <span class="text-purple-300 text-xs font-bold uppercase tracking-wider">Monthly / Long-Term
-                                Rental</span>
-                        </div>
-                        <p class="text-sm text-slate-400 mb-2">Example: For a <strong
-                                class="text-white">$1,500/month</strong> hangar rental</p>
-                        <div class="flex items-center gap-3">
-                            <span class="text-3xl font-extrabold text-amber-400">${{ (1500 * fee_percent / 100)|int
-                                }}</span>
-                            <div>
-                                <p class="text-white font-semibold text-sm">platform fee per month</p>
-                                <p class="text-slate-500 text-xs">{{ fee_percent }}% of $1,500</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <p class="text-xs text-slate-500 mt-4">
-                        <i class="fas fa-info-circle mr-1"></i>Fee is charged to the renter upon booking completion.
-                        Owners receive the full listed amount. No fee on cancellations.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════════
-     FAQ SECTION
-     ═══════════════════════════════════════════════════════════════ -->
-<section class="relative py-16 pb-32">
-    <div class="max-w-3xl mx-auto px-6">
-        <h2 class="text-2xl font-bold text-white text-center mb-10">Frequently Asked Questions</h2>
-
-        <div class="space-y-4">
-            <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6">
-                <h4 class="text-white font-semibold mb-2">Can I cancel anytime?</h4>
-                <p class="text-slate-400 text-sm">Yes! You can cancel your subscription at any time. Your premium
-                    features will remain active until the end of your billing period.</p>
-            </div>
-
-            <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6">
-                <h4 class="text-white font-semibold mb-2">What payment methods do you accept?</h4>
-                <p class="text-slate-400 text-sm">We accept all major credit and debit cards through Stripe, including
-                    Visa, Mastercard, American Express, and Discover.</p>
-            </div>
-
-            <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6">
-                <h4 class="text-white font-semibold mb-2">When is the transaction fee charged?</h4>
-                <p class="text-slate-400 text-sm">The {{ fee_percent }}% fee is only charged when a booking is
-                    successfully completed. If a booking is cancelled, no fee is applied.</p>
-            </div>
-
-            <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6">
-                <h4 class="text-white font-semibold mb-2">Do I need Premium to use HangarLinks?</h4>
-                <p class="text-slate-400 text-sm">No! The free tier gives you access to core features. Premium simply
-                    removes limits and adds advanced tools like analytics, priority placement, and unlimited searches.
-                </p>
-            </div>
-        </div>
-    </div>
-</section>
 {% endblock %}

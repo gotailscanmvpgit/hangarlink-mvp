@@ -1,3 +1,13 @@
+import os
+from dotenv import load_dotenv
+
+# ── Load Envs First ──────────────────────────────────────────────
+if os.path.exists('.env'):
+    print("[CONFIG] Found .env file, loading...")
+    load_dotenv()
+else:
+    print("[CONFIG] No .env file found, using system environment variables.")
+
 from flask import Flask, render_template
 from config import Config
 from extensions import db, migrate, login_manager, cache, mail, limiter
@@ -5,21 +15,13 @@ from flask_compress import Compress
 from models import User, Listing, Message, Booking, Ad, WhiteLabelRequest, Payment
 from routes import bp as main_bp
 from flask_recaptcha import ReCaptcha
-import os
 import stripe
-from dotenv import load_dotenv
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
-# Load .env file if it exists
-if os.path.exists('.env'):
-    print("[CONFIG] Found .env file, loading...")
-    load_dotenv()
-else:
-    print("[CONFIG] No .env file found, using system environment variables.")
+import flask
 
 # Compatibility for flask-recaptcha which may expect flask.Markup
-import flask
 try:
     from markupsafe import Markup
     flask.Markup = Markup
@@ -33,13 +35,6 @@ logger = logging.getLogger(__name__)
 
 # Verify PORT for Railway
 print("PORT from env:", os.environ.get('PORT', '5000'))
-
-# Database initialization and migrations happen via extensions.py and create_app()
-
-
-
-
-# ─────────────────────────────────────────────────────────────────────────────
 
 # Define the create_app function for flexibility and testing
 def create_app(config_class=Config):
@@ -81,7 +76,6 @@ def create_app(config_class=Config):
     _mu = app.config.get('MAIL_USERNAME')
     print(f"[MAIL-INIT] Server: {app.config['MAIL_SERVER']}:{app.config['MAIL_PORT']} (TLS={app.config['MAIL_USE_TLS']})")
     print(f"[MAIL-INIT] User: {_mu if _mu else '(NOT CONFIGURED - FALLBACK TO CONSOLE)'}")
- 
 
 
     # Initialize extensions
@@ -162,8 +156,6 @@ def create_app(config_class=Config):
             import traceback
             traceback.print_exc()
 
-        from sqlalchemy import text, inspect as sa_inspect
-        
     @app.context_processor
     def utility_processor():
         def optimized_img(photo_filename, w=800, h=600):
@@ -175,102 +167,11 @@ def create_app(config_class=Config):
                 from flask import url_for
                 return url_for('static', filename='uploads/listings/' + photo_filename)
         return dict(optimized_img=optimized_img)
-        try:
-            inspector = sa_inspect(db.engine)
-            is_postgres = 'postgresql' in str(db.engine.url).lower()
 
-            def safe_add_column(table, col_name, col_type):
-                """Add a column if it doesn't already exist. PG-safe."""
-                try:
-                    existing = [c['name'] for c in inspector.get_columns(table)]
-                    if col_name not in existing:
-                        db.session.execute(text(
-                            f"ALTER TABLE {table} ADD COLUMN {col_name} {col_type}"
-                        ))
-                        db.session.commit()
-                        print(f"  ✅ Added {table}.{col_name}")
-                except Exception as col_err:
-                    db.session.rollback()
-                    # PostgreSQL raises if column already exists — safe to ignore
-                    errmsg = str(col_err).lower()
-                    if 'already exists' in errmsg or 'duplicate column' in errmsg:
-                        print(f"  ℹ️  {table}.{col_name} already exists (skipped)")
-                    else:
-                        print(f"  ⚠️  Could not add {table}.{col_name}: {col_err}")
-
-            # --- Listings ---
-            for col_name, col_type in [
-                ('available_sqft', 'FLOAT'),
-                ('price_night', 'FLOAT DEFAULT 0.0'),
-                ('min_stay_nights', 'INTEGER DEFAULT 1'),
-                ('door_type', 'TEXT'),
-                ('access_24_7', 'BOOLEAN DEFAULT FALSE'),
-                ('is_heated', 'BOOLEAN DEFAULT FALSE'),
-                ('battery_tender', 'BOOLEAN DEFAULT FALSE'),
-                ('engine_heater', 'BOOLEAN DEFAULT FALSE'),
-                ('snow_removal', 'BOOLEAN DEFAULT FALSE'),
-                ('hurricane_tiedowns', 'BOOLEAN DEFAULT FALSE'),
-                ('ramp_cam_url', 'TEXT'),
-                ('tail_height_clearance', 'FLOAT'),
-                ('nfpa_409_compliant', 'BOOLEAN DEFAULT FALSE'),
-                ('floor_loading_pcn', 'TEXT'),
-                ('gpu_power_available', 'BOOLEAN DEFAULT FALSE'),
-                ('shuttle_info', 'VARCHAR(255)'),
-                ('is_verified', 'BOOLEAN DEFAULT FALSE'),
-            ]:
-                safe_add_column('listings', col_name, col_type)
-
-            # Backfill available_sqft
-            try:
-                db.session.execute(text(
-                    "UPDATE listings SET available_sqft = size_sqft "
-                    "WHERE available_sqft IS NULL"
-                ))
-                db.session.commit()
-            except Exception:
-                db.session.rollback()
-
-            # --- Bookings ---
-            for col_name, col_type in [
-                ('owner_signed', 'BOOLEAN DEFAULT FALSE'),
-                ('renter_signed', 'BOOLEAN DEFAULT FALSE'),
-                ('lease_pdf_path', 'TEXT'),
-                ('sign_token_owner', 'TEXT'),
-                ('sign_token_renter', 'TEXT'),
-            ]:
-                safe_add_column('bookings', col_name, col_type)
-
-            # --- Messages (guest messaging) ---
-            for col_name, col_type in [
-                ('is_guest', 'BOOLEAN DEFAULT FALSE'),
-                ('guest_email', 'VARCHAR(120)'),
-                ('is_flagged', 'BOOLEAN DEFAULT FALSE'),
-                ('flag_reason', 'VARCHAR(100)'),
-            ]:
-                safe_add_column('messages', col_name, col_type)
-
-            # --- Users ---
-            for col_name, col_type in [
-                ('total_revenue', 'FLOAT DEFAULT 0.0'),
-                ('first_name', 'VARCHAR(50)'),
-                ('last_name', 'VARCHAR(50)'),
-            ]:
-                safe_add_column('users', col_name, col_type)
-
-            print("🚀 [DB] Schema migration complete.")
-        except Exception as migrate_err:
-            print(f"⚠️ Schema migration note: {migrate_err}")
-            try:
-                db.session.rollback()
-            except Exception:
-                pass
-
-    # Load airport lat/lon lookup table from OurAirports CSV (or bundled fallback)
+    # Load airport lat/lon lookup table
     from airport_coords import load_airport_coords, _COORDS_CACHE
     load_airport_coords()
     app.config['AIRPORT_COORDS'] = _COORDS_CACHE
-
-
     
     # Configure Login Manager
     login_manager.login_view = 'main.login'
@@ -303,10 +204,10 @@ def create_app(config_class=Config):
             'datetime': datetime.datetime
         }
 
-    # ── Health Check — Railway uses this to verify the app is alive ──────
+    # ── Health Check ──
     @app.route('/healthz')
     def healthz():
-        """Bare-minimum health check that bypasses all DB logic."""
+        """Bare-minimum health check."""
         import traceback
         status = {'alive': True, 'version': 'v2.2.0-secure'}
         try:
@@ -314,12 +215,6 @@ def create_app(config_class=Config):
             insp = sa_inspect(db.engine)
             tables = insp.get_table_names()
             status['tables'] = tables
-            if 'listings' in tables:
-                cols = [c['name'] for c in insp.get_columns('listings')]
-                status['listing_columns'] = cols
-                status['has_available_sqft'] = 'available_sqft' in cols
-                count = db.session.execute(text("SELECT COUNT(*) FROM listings")).scalar()
-                status['listing_count'] = count
             status['db'] = 'ok'
         except Exception as e:
             status['db'] = f'error: {e}'
@@ -327,60 +222,6 @@ def create_app(config_class=Config):
         from flask import jsonify
         return jsonify(status)
 
-    # ── Debug DB schema — admin-only, exposes column names for each table ──────
-    @app.route('/debug-db')
-    def debug_db():
-        """Inspect live DB schema. Remove after confirming columns are correct."""
-        from flask import request as freq, jsonify
-        secret = freq.args.get('key', '')
-        if secret != app.config.get('SECRET_KEY', 'no-key'):
-            return 'Forbidden', 403
-        from sqlalchemy import text, inspect as sa_inspect
-        result = {}
-        try:
-            insp = sa_inspect(db.engine)
-            for table in ['users', 'listings', 'bookings', 'messages', 'ad']:
-                try:
-                    cols = [c['name'] for c in insp.get_columns(table)]
-                    result[table] = cols
-                except Exception as e:
-                    result[table] = f'ERROR: {e}'
-            return jsonify({'schema': result, 'status': 'ok'})
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-
-    # ── Emergency DB init — force create_all() from browser ──────────────
-    @app.route('/init-db')
-    def init_db_route():
-        """Emergency: force db.create_all(). Requires SECRET_KEY as query param."""
-        from flask import request as freq, jsonify
-        import traceback
-        secret = freq.args.get('key', '')
-        if secret != app.config.get('SECRET_KEY', 'no-key'):
-            return 'Forbidden — pass ?key=YOUR_SECRET_KEY', 403
-        result = {
-            'db_url': str(db.engine.url).replace(
-                str(db.engine.url).split('@')[0] if '@' in str(db.engine.url) else '',
-                '***'
-            ),
-        }
-        try:
-            db.create_all()
-            from sqlalchemy import inspect as sa_inspect
-            insp = sa_inspect(db.engine)
-            tables = insp.get_table_names()
-            result['status'] = 'ok'
-            result['tables'] = tables
-            result['table_count'] = len(tables)
-            print(f"✅ [init-db] Tables after create_all: {tables}")
-        except Exception as e:
-            result['status'] = 'error'
-            result['error'] = str(e)
-            result['traceback'] = traceback.format_exc()
-            print(f"❌ [init-db] FAILED: {e}")
-        return jsonify(result)
-
-    # Error handlers
     @app.errorhandler(404)
     def not_found_error(error):
         try:
@@ -401,13 +242,9 @@ def create_app(config_class=Config):
 
     return app
 
-
-# Module-level app instance for Gunicorn (app:app) and direct import.
-# run.py should import this rather than calling create_app() again.
+# Module-level app instance
 app = create_app()
 
 if __name__ == '__main__':
     from extensions import socketio
     socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True, allow_unsafe_werkzeug=True)
-
-

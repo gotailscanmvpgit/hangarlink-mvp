@@ -1247,8 +1247,11 @@ def hangar_calculator():
                            avg_nightly=avg_nightly,
                            top_earner_avg=top_earner_avg)
 
-# ========== MONETIZATION & SUBSCRIPTIONS ==========
-TRANSACTION_FEE_PERCENT = 8
+# ========== MONETIZATION & SUBSCRIPTIONS (2026 Hybrid Model) ==========
+# Owners pay 9% platform fee on every booking (deducted from their payout)
+# Renters pay $5 flat convenience fee on every short-term booking
+TRANSACTION_FEE_PERCENT = 9          # 9% deducted from owner payout
+RENTER_CONVENIENCE_FEE = 5.00        # $5 flat fee added to renter total (short-term only)
 INSURANCE_RATES = {'daily': 15.00, 'base': 45.00}
 
 @bp.route('/book/<int:listing_id>', methods=['POST'])
@@ -1276,24 +1279,38 @@ def book_listing(listing_id):
         flash("Checkout date must be after check-in date.", "error")
         return redirect(url_for('main.listing_detail', id=listing.id))
         
-    # Calculate rental price
-    # If it's 30+ days, just charge the monthly rate. Otherwise use nightly rate.
-    base_rental = listing.price_month if duration_days >= 30 else (listing.price_night * duration_days)
-    
-    # Platform Service Fee (Airbnb Model - usually 10-15%, we'll use 10%)
-    platform_fee = base_rental * 0.10
-    base_total = base_rental + platform_fee
-    
+    # ── 2026 Hybrid Fee Model ────────────────────────────────────────────
+    # Long-term (30+ days): monthly rate, no convenience fee
+    # Short-term (<30 days): nightly rate + $5 flat renter convenience fee
+    is_short_term = duration_days < 30
+    base_rental = listing.price_month if not is_short_term else (listing.price_night * duration_days)
+
+    # Renter convenience fee — $5 flat on short-term bookings only
+    renter_convenience_fee = RENTER_CONVENIENCE_FEE if is_short_term else 0.0
+
+    # Total charged to renter (base + convenience fee)
+    renter_total = base_rental + renter_convenience_fee
+
+    # Owner platform fee (9%) is deducted at payout — NOT added to renter bill
+    owner_platform_fee = round(base_rental * (TRANSACTION_FEE_PERCENT / 100), 2)
+    owner_payout = round(base_rental - owner_platform_fee, 2)
+
     add_insurance = request.form.get('add_insurance') == 'on'
     insurance_fee = 0.0
-    
+
     if add_insurance:
-        # Scale insurance based on duration (Min 45, Max 150)
         base_insurance_daily = 15.00
         calculated_insurance = (base_insurance_daily * duration_days) + 45.00
         insurance_fee = min(150.00, calculated_insurance)
-        
-    final_total = base_total + insurance_fee
+
+    final_total = renter_total + insurance_fee
+
+    current_app.logger.info(
+        f"[BOOKING] listing={listing.id} duration={duration_days}d "
+        f"base=${base_rental:.2f} renter_fee=${renter_convenience_fee:.2f} "
+        f"renter_total=${renter_total:.2f} owner_platform_fee=${owner_platform_fee:.2f} "
+        f"owner_payout=${owner_payout:.2f}"
+    )
     
     try:
         stripe_lib = get_stripe()
@@ -1306,12 +1323,25 @@ def book_listing(listing_id):
                     'currency': 'usd',
                     'product_data': {
                         'name': f'Hangar Rental at {listing.airport_icao}',
-                        'description': f'{duration_days} nights ({start_date_str} to {end_date_str}) + Platform Fee',
+                        'description': f'{duration_days} {"nights" if is_short_term else "days"} ({start_date_str} to {end_date_str})',
                     },
-                    'unit_amount': int(base_total * 100),
+                    'unit_amount': int(base_rental * 100),
                 },
                 'quantity': 1,
             }]
+            # Add $5 renter convenience fee as separate line item (short-term only)
+            if is_short_term:
+                line_items.append({
+                    'price_data': {
+                        'currency': 'usd',
+                        'product_data': {
+                            'name': 'Renter Convenience Fee',
+                            'description': '$5 flat convenience fee (short-term booking)',
+                        },
+                        'unit_amount': int(renter_convenience_fee * 100),
+                    },
+                    'quantity': 1,
+                })
             
             if add_insurance:
                 line_items.append({
@@ -1342,11 +1372,11 @@ def book_listing(listing_id):
             session_id = checkout_session.id
         
         booking = Booking(
-            listing_id=listing.id, 
+            listing_id=listing.id,
             renter_id=current_user.id,
             start_date=start_date,
             end_date=end_date,
-            total_price=base_rental,
+            total_price=base_rental,   # base rental (no fees) — fees stored on Payment
             status='Pending',
             stripe_payment_id=session_id,
             insurance_opt_in=add_insurance,
@@ -1405,14 +1435,17 @@ def booking_success():
     booking.status = 'Confirmed'
     booking.listing.status = 'Rented'
     
-    # Calculate revenue (total - 10% platform fee)
-    platform_fee_rate = 0.10
-    owner_share = 1.0 - platform_fee_rate
-    revenue = booking.total_price * owner_share
-    
+    # 2026 Model: owner payout = base rental minus 9% platform fee
+    owner_platform_fee = round(booking.total_price * (TRANSACTION_FEE_PERCENT / 100), 2)
+    revenue = round(booking.total_price - owner_platform_fee, 2)
+
     owner = booking.listing.owner
     if owner.total_revenue is None: owner.total_revenue = 0.0
     owner.total_revenue += revenue
+    current_app.logger.info(
+        f"[PAYOUT] booking={booking.id} gross=${booking.total_price:.2f} "
+        f"fee=${owner_platform_fee:.2f} (9%) net_to_owner=${revenue:.2f}"
+    )
     
     # Update Payment status
     payment = Payment.query.filter_by(stripe_session_id=session_id).first()
@@ -1776,39 +1809,56 @@ def complete_booking(booking_id):
     flash('Rental completed and reviewed!', 'success')
     return redirect(url_for('main.index'))
 
+# ── 2026 Subscription Plans ─────────────────────────────────────────────────
 OWNER_PLAN = {
-    'name': 'Owner Premium',
-    'price': 999,
-    'price_display': '9.99',
+    'name': 'Owner Pro',
+    'price': 1999,              # $19.99/month
+    'price_display': '19.99',
     'interval': 'month',
-    'features': ['Unlimited active listings', 'Priority placement', 'Analytics', 'Premium badge', 'Verified Owner', 'Export reports']
+    'features': [
+        'Up to 20 active listings',
+        'Featured placement in search results',
+        'Full analytics & revenue dashboard',
+        'Verified Owner badge',
+        'Priority listing indexing',
+        'Export reports (CSV / PDF)',
+        '9% platform fee on all bookings',
+    ]
 }
 
 RENTER_PLAN = {
-    'name': 'Renter Premium',
-    'price': 699,
-    'price_display': '6.99',
+    'name': 'Renter Pro',
+    'price': 999,               # $9.99/month
+    'price_display': '9.99',
     'interval': 'month',
-    'features': ['Unlimited searches', 'Saved alerts', 'Priority support', 'Premium badge', 'Early access', 'Advanced filters']
+    'features': [
+        'Unlimited hangar searches',
+        'Smart availability alerts',
+        'Priority matching & recommendations',
+        'Renter Pro badge',
+        'Early access to new listings',
+        'Advanced filters (size, door type, heated)',
+        '$5 convenience fee waived on every booking',
+    ]
 }
 
 # Yearly plans — Save ~17%
 OWNER_PLAN_YEARLY = {
-    'name': 'Owner Premium (Yearly)',
-    'price': 9900,          # $99.00/year
-    'price_display': '99',
+    'name': 'Owner Pro (Yearly)',
+    'price': 19900,             # $199.00/year (~$16.58/mo)
+    'price_display': '199',
     'interval': 'year',
-    'monthly_equiv': '8.25',
+    'monthly_equiv': '16.58',
     'savings': 'Save 17%',
     'features': OWNER_PLAN['features']
 }
 
 RENTER_PLAN_YEARLY = {
-    'name': 'Renter Premium (Yearly)',
-    'price': 6900,          # $69.00/year
-    'price_display': '69',
+    'name': 'Renter Pro (Yearly)',
+    'price': 9900,              # $99.00/year (~$8.25/mo)
+    'price_display': '99',
     'interval': 'year',
-    'monthly_equiv': '5.75',
+    'monthly_equiv': '8.25',
     'savings': 'Save 17%',
     'features': RENTER_PLAN['features']
 }
