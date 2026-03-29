@@ -338,20 +338,9 @@ def listing_detail(id):
                 if active_booking:
                     has_access = True
 
-        # Fetch live weather for this airport
-        weather = None
-        try:
-            from weather_service import fetch_airport_weather
-            lat = listing.lat or 43.6275
-            lon = listing.lon or -79.3962
-            weather = fetch_airport_weather(lat, lon, listing.airport_icao or 'UNKN')
-        except Exception as we:
-            current_app.logger.warning(f"[WEATHER] Could not fetch weather: {we}")
-
         print(f"DEBUG: rendering listing_detail.html for listing {id}")
         return render_template('listing_detail.html', listing=listing,
-                               aircraft_sizes=aircraft_sizes, has_access=has_access,
-                               weather=weather)
+                               aircraft_sizes=aircraft_sizes, has_access=has_access)
 
     except NotFound:
         raise
