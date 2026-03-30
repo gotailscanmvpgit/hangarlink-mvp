@@ -1407,7 +1407,6 @@ def book_listing(listing_id):
         # Space Calculation via Aircraft Config
         booking_aircraft = request.form.get('booking_aircraft')
         if booking_aircraft:
-            from flask import current_app
             sizes = current_app.config.get('AIRCRAFT_SIZES', {})
             for cat, dicts in sizes.items():
                 if booking_aircraft in dicts:
