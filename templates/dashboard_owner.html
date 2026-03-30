@@ -20,11 +20,66 @@
         </div>
     </div>
 
+    <!-- ── Plan Status Banner ──────────────────────────────────────────────── -->
+    {% if current_user.is_premium %}
+    <div class="rounded-2xl p-5 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+        style="background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(249,115,22,0.08)); border: 1px solid rgba(245,158,11,0.35);">
+        <div class="flex items-center gap-4">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                style="background: linear-gradient(135deg, #f59e0b, #f97316);">
+                <i class="fas fa-star text-white"></i>
+            </div>
+            <div>
+                <div class="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    Owner Pro
+                    <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300">Active</span>
+                </div>
+                <div class="text-sm text-gray-600 dark:text-gray-300 mt-0.5">
+                    Unlimited listings &middot; Featured placement &middot; Analytics &middot; $14.99/mo
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="text-sm text-center">
+                <div class="text-gray-500 dark:text-gray-400 text-xs">HangarLinks service fee</div>
+                <div class="text-2xl font-extrabold text-amber-500">9.5%</div>
+                <div class="text-gray-400 text-xs">deducted from your payout</div>
+            </div>
+            <a href="{{ url_for('main.manage_subscription') }}"
+                class="text-xs font-bold px-4 py-2 rounded-xl border border-amber-400/40 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors whitespace-nowrap">
+                Manage Plan
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <div class="rounded-2xl p-5 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+        style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);">
+        <div class="flex items-center gap-4">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 bg-gray-100 dark:bg-gray-800">
+                <i class="fas fa-user text-gray-500 dark:text-gray-400"></i>
+            </div>
+            <div>
+                <div class="font-bold text-gray-900 dark:text-white">Free Plan</div>
+                <div class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                    1 active listing &middot; 9.5% service fee on bookings &middot; No monthly cost
+                </div>
+            </div>
+        </div>
+        <a href="{{ url_for('main.pricing') }}"
+            class="inline-flex items-center gap-2 text-sm font-bold px-5 py-2.5 rounded-xl text-white transition-all hover:scale-[1.02] whitespace-nowrap"
+            style="background: linear-gradient(135deg, #f59e0b, #f97316); box-shadow: 0 6px 20px rgba(245,158,11,0.25);">
+            <i class="fas fa-bolt text-yellow-200"></i>
+            Upgrade to Owner Pro &mdash; $14.99/mo
+        </a>
+    </div>
+    {% endif %}
+
     <!-- Quick Stats -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
         <div class="bg-white dark:bg-dark-900 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
-            <div class="text-gray-500 dark:text-gray-400 text-sm font-semibold mb-2">Total Earnings</div>
-            <div class="text-3xl font-bold text-green-600">${{ "{:,.2f}".format(total_earnings) }}</div>
+            <div class="text-gray-500 dark:text-gray-400 text-sm font-semibold mb-1">Total Earnings (after 9.5% fee)</div>
+            <div class="text-3xl font-bold text-green-600">${{ "{:,.2f}".format(total_earnings * 0.905) }}</div>
+            <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">You keep 90.5% of each booking</div>
         </div>
         <div class="bg-white dark:bg-dark-900 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
             <div class="text-gray-500 dark:text-gray-400 text-sm font-semibold mb-2">Occupancy Rate</div>
@@ -152,8 +207,9 @@
                         <td class="py-4 text-gray-600 dark:text-gray-300">
                             {{ b.start_date.strftime('%b %d') }} - {{ b.end_date.strftime('%b %d, %Y') }}
                         </td>
-                        <td class="py-4 font-bold text-green-600">
-                            ${{ "{:,.2f}".format(b.total_price * 0.9) }}
+                        <td class="py-4">
+                            <div class="font-bold text-green-600">${{ "{:,.2f}".format(b.total_price * 0.905) }}</div>
+                            <div class="text-[10px] text-gray-400 mt-0.5">after 9.5% fee</div>
                         </td>
                         <td class="py-4">
                             {% if b.status == 'Confirmed' %}

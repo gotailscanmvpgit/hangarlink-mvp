@@ -16,6 +16,53 @@
         </div>
     </div>
 
+    <!-- ── Plan Status Banner ───────────────────────────────────────────────── -->
+    {% if current_user.is_premium %}
+    <div class="rounded-2xl p-5 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+        style="background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(99,102,241,0.08)); border: 1px solid rgba(139,92,246,0.35);">
+        <div class="flex items-center gap-4">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                style="background: linear-gradient(135deg, #7c3aed, #6366f1);">
+                <i class="fas fa-search text-white"></i>
+            </div>
+            <div>
+                <div class="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    Renter Pro
+                    <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300">Active</span>
+                </div>
+                <div class="text-sm text-gray-600 dark:text-gray-300 mt-0.5">
+                    Unlimited searches &middot; Priority AI Match &middot; 10% off insurance &middot; $6.99/mo
+                </div>
+            </div>
+        </div>
+        <a href="{{ url_for('main.manage_subscription') }}"
+            class="text-xs font-bold px-4 py-2 rounded-xl border border-purple-400/40 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors whitespace-nowrap">
+            Manage Plan
+        </a>
+    </div>
+    {% else %}
+    <div class="rounded-2xl p-5 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+        style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);">
+        <div class="flex items-center gap-4">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 bg-gray-100 dark:bg-gray-800">
+                <i class="fas fa-user text-gray-500 dark:text-gray-400"></i>
+            </div>
+            <div>
+                <div class="font-bold text-gray-900 dark:text-white">Free Plan</div>
+                <div class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                    5 searches/day &middot; $5 flat fee on short-term bookings &middot; No monthly cost
+                </div>
+            </div>
+        </div>
+        <a href="{{ url_for('main.pricing') }}"
+            class="inline-flex items-center gap-2 text-sm font-bold px-5 py-2.5 rounded-xl text-white transition-all hover:scale-[1.02] whitespace-nowrap"
+            style="background: linear-gradient(135deg, #7c3aed, #6366f1); box-shadow: 0 6px 20px rgba(124,58,237,0.25);">
+            <i class="fas fa-bolt text-purple-200"></i>
+            Upgrade to Renter Pro &mdash; $6.99/mo
+        </a>
+    </div>
+    {% endif %}
+
     <!-- Quick Stats -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         <div class="bg-white dark:bg-dark-900 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
