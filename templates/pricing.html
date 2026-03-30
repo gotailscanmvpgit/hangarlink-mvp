@@ -19,7 +19,8 @@
             <span class="bg-clip-text text-transparent" style="background-image: linear-gradient(135deg, #f59e0b, #f97316, #ec4899);">Built for Pilots.</span>
         </h1>
         <p class="text-lg text-slate-400 max-w-2xl mx-auto">
-            No hidden fees. Owners keep 91% of every booking. Renters pay a flat $5 on short-term stays. That's it.
+            No hidden fees. Owners keep 90.5% of every booking. Renters pay a flat $5 on short-term stays.
+            Optional Pro plans starting at just $6.99/mo.
         </p>
     </div>
 </section>
@@ -47,8 +48,8 @@
                                 <div class="text-slate-500 text-xs">Deducted from payout</div>
                             </div>
                         </div>
-                        <div class="text-5xl font-extrabold text-white mb-1">9<span class="text-2xl text-amber-400">%</span></div>
-                        <p class="text-slate-400 text-sm">Platform fee charged on every confirmed booking. You receive <strong class="text-white">91% of the listed price</strong>, paid out automatically.</p>
+                        <div class="text-5xl font-extrabold text-white mb-1">9.5<span class="text-2xl text-amber-400">%</span></div>
+                        <p class="text-slate-400 text-sm">Platform fee charged on every confirmed booking. You receive <strong class="text-white">90.5% of the listed price</strong>, paid out automatically.</p>
                     </div>
 
                     <!-- Renter Fee -->
@@ -108,12 +109,12 @@
                                     <span class="text-white font-medium">$450.00</span>
                                 </div>
                                 <div class="flex justify-between text-slate-300">
-                                    <span>Platform fee (9%)</span>
-                                    <span class="text-red-400 font-medium">− $40.50</span>
+                                    <span>Platform fee (9.5%)</span>
+                                    <span class="text-red-400 font-medium">− $42.75</span>
                                 </div>
                                 <div class="border-t pt-2 mt-2 flex justify-between font-bold text-white" style="border-color: rgba(255,255,255,0.1);">
                                     <span>Owner receives</span>
-                                    <span class="text-xl text-green-400">$409.50</span>
+                                    <span class="text-xl text-green-400">$407.25</span>
                                 </div>
                             </div>
                         </div>
@@ -313,14 +314,15 @@
                 </thead>
                 <tbody>
                     {% set rows = [
-                        ('Active listings', '1', 'Up to 20', '—'),
-                        ('Daily searches', '5/day', '—', 'Unlimited'),
+                        ('Active listings', '1', 'Unlimited ✓', '—'),
+                        ('Daily searches', '5/day', '—', 'Unlimited ✓'),
                         ('Featured placement', '✗', '✓', '✗'),
                         ('Analytics dashboard', '✗', '✓', '✗'),
                         ('Smart alerts', '✗', '✗', '✓'),
-                        ('Priority matching', '✗', '✗', '✓'),
-                        ('$5 convenience fee', 'Yes', 'Yes', 'Waived ✓'),
-                        ('Owner platform fee', '9%', '9%', '—'),
+                        ('Priority AI Match', '✗', '✓', '✓'),
+                        ('$5 convenience fee', 'Yes', 'Yes', 'Yes'),
+                        ('10% off insurance', '✗', '✗', '✓'),
+                        ('Owner platform fee', '9.5%', '9.5%', '—'),
                         ('Verified badge', '✗', '✓', '✓'),
                         ('Export reports', '✗', '✓', '✗'),
                     ] %}
@@ -344,10 +346,11 @@
         <h2 class="text-2xl font-bold text-white text-center mb-10">Frequently Asked Questions</h2>
         <div class="space-y-4">
             {% for q, a in [
-                ('Who pays the 9% fee?', 'The hangar owner. It is deducted from their payout when a booking is confirmed. Renters do not pay the 9% fee.'),
-                ('What is the $5 convenience fee?', 'A flat $5 charged to renters on short-term bookings (under 30 days). Monthly and long-term rentals have no renter-side fee.'),
-                ('Can Renter Pro waive the $5?', 'Yes. Renter Pro ($9.99/mo) waives the $5 flat convenience fee on every booking, paying for itself in just 2 bookings per month.'),
-                ('Does Owner Pro reduce the 9% fee?',  'The 9% supports the platform, secure payments, and dispute resolution. Owner Pro adds value through higher listing limits, analytics, and featured placement rather than fee reduction.'),
+                ('Who pays the 9.5% fee?', 'The hangar owner. It is deducted from their payout when a booking is confirmed — renters never see or pay the platform percentage. It is a host-only fee, similar to how Airbnb works.'),
+                ('What is the $5 convenience fee?', 'A flat $5 charged to renters on short-term bookings (under 30 days). Monthly and long-term rentals have no renter-side fee. This covers payment processing and platform operations.'),
+                ('What does Renter Pro ($6.99/mo) include?', 'Unlimited searches (vs 5/day on free), Smart availability alerts, Priority AI Matching, and 10% off the insurance add-on per booking. Pays for itself after a few bookings.'),
+                ('What does Owner Pro ($14.99/mo) include?', 'Unlimited active listings (vs 1 on free), Featured placement in search results, full Analytics & Revenue Dashboard, Verified Owner badge, Priority AI Match placement, and CSV/PDF export.'),
+                ('Does Owner Pro reduce the 9.5% fee?', 'The 9.5% supports secure payments, dispute resolution, and platform infrastructure. Pro plans add listing power and analytics rather than reducing the fee — keeping the model simple and transparent.'),
                 ('Can I cancel anytime?', 'Yes. Cancel at any time from your billing dashboard. Your Pro features remain active until the end of your billing period.'),
             ] %}
             <div class="rounded-xl p-6" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);">

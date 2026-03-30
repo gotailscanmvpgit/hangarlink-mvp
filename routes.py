@@ -1237,9 +1237,10 @@ def hangar_calculator():
                            top_earner_avg=top_earner_avg)
 
 # ========== MONETIZATION & SUBSCRIPTIONS (2026 Hybrid Model) ==========
-# Owners pay 9% platform fee on every booking (deducted from their payout)
-# Renters pay $5 flat convenience fee on every short-term booking
-TRANSACTION_FEE_PERCENT = 9          # 9% deducted from owner payout
+# ── 2026 Optimal Monetization Model ────────────────────────────────────────
+# Host-only fee: 9.5% deducted from owner payout (renters never see platform %).
+# Renters pay $5 flat convenience fee on short-term bookings (<30 days).
+TRANSACTION_FEE_PERCENT = 9.5        # 9.5% deducted from owner payout
 RENTER_CONVENIENCE_FEE = 5.00        # $5 flat fee added to renter total (short-term only)
 INSURANCE_RATES = {'daily': 15.00, 'base': 45.00}
 
@@ -1280,7 +1281,7 @@ def book_listing(listing_id):
     # Total charged to renter (base + convenience fee)
     renter_total = base_rental + renter_convenience_fee
 
-    # Owner platform fee (9%) is deducted at payout — NOT added to renter bill
+    # Owner platform fee (9.5%) is deducted at payout — NOT added to renter bill
     owner_platform_fee = round(base_rental * (TRANSACTION_FEE_PERCENT / 100), 2)
     owner_payout = round(base_rental - owner_platform_fee, 2)
 
@@ -1312,7 +1313,7 @@ def book_listing(listing_id):
                     'currency': 'usd',
                     'product_data': {
                         'name': f'Hangar Rental at {listing.airport_icao}',
-                        'description': f'{duration_days} {"nights" if is_short_term else "days"} ({start_date_str} to {end_date_str})',
+                        'description': f'{duration_days} {"nights" if is_short_term else "days"} ({start_date_str} to {end_date_str}) · HangarLinks 9.5% service fee applied to owner payout',
                     },
                     'unit_amount': int(base_rental * 100),
                 },
@@ -1798,56 +1799,56 @@ def complete_booking(booking_id):
     flash('Rental completed and reviewed!', 'success')
     return redirect(url_for('main.index'))
 
-# ── 2026 Subscription Plans ─────────────────────────────────────────────────
+# ── 2026 Optimal Subscription Plans ────────────────────────────────────────
 OWNER_PLAN = {
     'name': 'Owner Pro',
-    'price': 1999,              # $19.99/month
-    'price_display': '19.99',
+    'price': 1499,              # $14.99/month
+    'price_display': '14.99',
     'interval': 'month',
     'features': [
-        'Up to 20 active listings',
+        'Unlimited active listings (Free: 1)',
         'Featured placement in search results',
         'Full analytics & revenue dashboard',
         'Verified Owner badge',
-        'Priority listing indexing',
+        'Priority AI Match placement',
         'Export reports (CSV / PDF)',
-        '9% platform fee on all bookings',
+        'Same 9.5% platform fee — transparent always',
     ]
 }
 
 RENTER_PLAN = {
     'name': 'Renter Pro',
-    'price': 999,               # $9.99/month
-    'price_display': '9.99',
+    'price': 699,               # $6.99/month
+    'price_display': '6.99',
     'interval': 'month',
     'features': [
-        'Unlimited hangar searches',
+        'Unlimited hangar searches (Free: 5/day)',
         'Smart availability alerts',
         'Priority matching & recommendations',
         'Renter Pro badge',
         'Early access to new listings',
         'Advanced filters (size, door type, heated)',
-        '$5 convenience fee waived on every booking',
+        '10% off insurance add-on per booking',
     ]
 }
 
 # Yearly plans — Save ~17%
 OWNER_PLAN_YEARLY = {
     'name': 'Owner Pro (Yearly)',
-    'price': 19900,             # $199.00/year (~$16.58/mo)
-    'price_display': '199',
+    'price': 14900,             # $149.00/year (~$12.42/mo)
+    'price_display': '149',
     'interval': 'year',
-    'monthly_equiv': '16.58',
+    'monthly_equiv': '12.42',
     'savings': 'Save 17%',
     'features': OWNER_PLAN['features']
 }
 
 RENTER_PLAN_YEARLY = {
     'name': 'Renter Pro (Yearly)',
-    'price': 9900,              # $99.00/year (~$8.25/mo)
-    'price_display': '99',
+    'price': 6900,              # $69.00/year (~$5.75/mo)
+    'price_display': '69',
     'interval': 'year',
-    'monthly_equiv': '8.25',
+    'monthly_equiv': '5.75',
     'savings': 'Save 17%',
     'features': RENTER_PLAN['features']
 }
