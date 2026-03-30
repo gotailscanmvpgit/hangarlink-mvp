@@ -159,11 +159,101 @@ HARDCODED_COORDS: dict[str, tuple[float, float]] = {
     "MMTJ": (32.5411, -116.9701),  # Tijuana
     "MMUN": (21.0365, -86.8771),   # Cancun
     "MMMX": (19.4363, -99.0721),   # Mexico City
+    # ── Florida Snowbird Corridor ─────────────────────────────────────────────
+    "KFMY": (26.5866, -81.8633),   # Page Field, Fort Myers FL
+    "KPBI": (26.6832, -80.0956),   # Palm Beach International FL
+    "KFXE": (26.1973, -80.1707),   # Fort Lauderdale Executive FL
+    "KSPG": (27.7651, -82.6268),   # Albert Whitted, St Petersburg FL
+    "KVNC": (27.0716, -82.4403),   # Venice Airport FL
+    "KSEF": (27.3966, -81.3423),   # Sebring Regional FL
+    "KLAL": (27.9889, -82.0186),   # Lakeland Linder (Sun 'n Fun) FL
+    "KBCT": (26.3785, -80.1077),   # Boca Raton Airport FL
+    "KOPF": (25.9073, -80.2783),   # Opa-locka Executive FL
+    "KDAB": (29.1799, -81.0581),   # Daytona Beach FL
+    "KSFB": (28.7776, -81.2375),   # Sanford Orlando FL
+    "KOCF": (29.1726, -82.2242),   # Ocala FL
+    "KGIF": (27.9006, -81.7534),   # Winter Haven FL
+    "KEYW": (24.5561, -81.7595),   # Key West FL
+    # ── Florida FAA LIDs (private / airpark) ─────────────────────────────────
+    "60J":  (30.3866, -82.9374),   # Riverbend Airpark, FL
+    "5FD5": (27.4831, -80.7217),   # Aero Acres Airpark, Okeechobee FL
+    "39FD": (29.2697, -82.0917),   # Ancient Oaks Airstrip, Ocala FL
+    "FA08": (28.0936, -81.4673),   # Rafter T Ranch, FL
+    "X14":  (30.7003, -81.6581),   # Yulee Airport (Nassau Co.) FL
+    "FD60": (30.2789, -82.6847),   # White Springs, FL
+    "2FD3": (27.9833, -81.5322),   # Lakeview Airstrip, FL
+    "FD29": (27.0561, -82.2064),   # Englewood Airstrip, FL
+    # ── Ontario, Canada (regional / private) ─────────────────────────────────
+    "CYHM": (43.1736, -79.9350),   # Hamilton John C. Munro, ON
+    "CYKF": (43.4608, -80.3786),   # Waterloo Region, ON
+    "CYKZ": (43.8628, -79.3703),   # Toronto Buttonville, ON
+    "CYPQ": (44.2300, -78.3633),   # Peterborough, ON
+    "CYOO": (43.9228, -78.8950),   # Oshawa, ON
+    "CYLS": (44.7481, -76.3331),   # Perth / Lanark, ON
+    "CYGK": (44.2253, -76.5967),   # Kingston Norman Rogers, ON
+    "CYSN": (43.1917, -79.0567),   # Niagara District, ON
+    "CZON": (44.9814, -74.4989),   # Cornwall, ON
+    "CYBF": (44.5442, -79.9156),   # Collingwood (Blue Mtn), ON
+    "CYHS": (44.8419, -79.2931),   # Muskoka, ON
+    "CYFD": (44.3017, -79.0183),   # Borden / Barrie, ON
+    # ── Popular GA (US) ──────────────────────────────────────────────────────
+    "KOSH": (43.9844, -88.5570),   # Oshkosh Wittman (EAA AirVenture)
+    "2NY":  (42.1400, -74.6300),   # Private, NY Catskill area
+    "7NY4": (43.0311, -76.1597),   # Cato-Meridian, NY
+    "3NY4": (42.5806, -76.7697),   # Ovid Airpark, NY
+    "CA-0516": (49.0500, -122.3000), # Private strip, Fraser Valley BC
+    "KANE": (45.1450, -93.2114),   # Anoka County, MN
 }
 
-# Default fallback when ICAO not found (Toronto downtown)
+# Default fallback when identifier not found (Toronto downtown)
 DEFAULT_LAT = 43.6532
 DEFAULT_LON = -79.3832
+
+# ── Human-readable names for datalist suggestions ─────────────────────────────
+KNOWN_AIRPORTS: dict[str, str] = {
+    # Canada
+    "CYTZ": "CYTZ — Billy Bishop, Toronto Island",
+    "CYHM": "CYHM — Hamilton John C. Munro, ON",
+    "CYYZ": "CYYZ — Toronto Pearson International",
+    "CYOW": "CYOW — Ottawa Macdonald-Cartier",
+    "CYVR": "CYVR — Vancouver International",
+    "CYYC": "CYYC — Calgary International",
+    "CYEG": "CYEG — Edmonton International",
+    "CYKF": "CYKF — Waterloo Region, ON",
+    "CYKZ": "CYKZ — Toronto Buttonville, ON",
+    "CYOO": "CYOO — Oshawa Airport, ON",
+    "CYSN": "CYSN — Niagara District, ON",
+    "CYBF": "CYBF — Collingwood / Blue Mountain, ON",
+    "CYHS": "CYHS — Muskoka Airport, ON",
+    # USA — Florida Snowbird
+    "KFMY": "KFMY — Page Field, Fort Myers FL",
+    "KPBI": "KPBI — Palm Beach International FL",
+    "KFXE": "KFXE — Fort Lauderdale Executive FL",
+    "KLAL": "KLAL — Lakeland Linder (Sun 'n Fun) FL",
+    "KSPG": "KSPG — Albert Whitted, St Petersburg FL",
+    "KVNC": "KVNC — Venice Airport FL",
+    "KSEF": "KSEF — Sebring Regional FL",
+    "KMIA": "KMIA — Miami International FL",
+    "KEYW": "KEYW — Key West International FL",
+    "KDAB": "KDAB — Daytona Beach International FL",
+    "KSFB": "KSFB — Orlando Sanford FL",
+    # FAA LIDs (private/airpark)
+    "60J":  "60J — Riverbend Airpark, FL (private)",
+    "5FD5": "5FD5 — Aero Acres Airpark, Okeechobee FL",
+    "39FD": "39FD — Ancient Oaks Airstrip, Ocala FL",
+    "X14":  "X14 — Yulee Airport, Nassau Co. FL",
+    # USA — Convention
+    "KOSH": "KOSH — Oshkosh Wittman (EAA AirVenture) WI",
+    # USA — General
+    "KJFK": "KJFK — New York JFK",
+    "KLAX": "KLAX — Los Angeles International",
+    "KORD": "KORD — Chicago O'Hare",
+    "KDEN": "KDEN — Denver International",
+    "KSEA": "KSEA — Seattle-Tacoma International",
+    "KBOS": "KBOS — Boston Logan",
+    "2NY":  "2NY — Private strip, Catskills NY",
+    "CA-0516": "CA-0516 — Private strip, Fraser Valley BC",
+}
 
 # ── In-memory cache ───────────────────────────────────────────────────────────
 _COORDS_CACHE: dict[str, tuple[float, float]] = {}

@@ -469,12 +469,39 @@ def post_listing():
                  except ValueError:
                     pass
     
-            # ── Auto-resolve lat/lon from ICAO ───────────────────────────────
+            # ── Auto-resolve lat/lon from identifier (ICAO, FAA LID, or custom) ─
             from airport_coords import get_coords
-            icao_upper = request.form.get('airport_icao', '').upper()
+            icao_upper = request.form.get('airport_icao', '').strip().upper()
             lat, lon, coord_found = get_coords(icao_upper)
+
             if not coord_found:
-                current_app.logger.warning(f"[AIRPORT-COORDS] unknown ICAO '{icao_upper}', using Toronto default")
+                # Try user-supplied manual coordinates (for private/unknown strips)
+                try:
+                    manual_lat = request.form.get('manual_lat', '').strip()
+                    manual_lon = request.form.get('manual_lon', '').strip()
+                    if manual_lat and manual_lon:
+                        lat = float(manual_lat)
+                        lon = float(manual_lon)
+                        coord_found = True
+                        current_app.logger.info(
+                            f"[AIRPORT-COORDS] '{icao_upper}' — using manual coords "
+                            f"({lat:.4f}, {lon:.4f})"
+                        )
+                    else:
+                        current_app.logger.warning(
+                            f"[AIRPORT-COORDS] unknown identifier '{icao_upper}', "
+                            f"no manual coords supplied — using Toronto default"
+                        )
+                        flash(
+                            f"'{icao_upper}' wasn't found in our airport database and no "
+                            "coordinates were provided. Your listing was saved but the map "
+                            "pin may be inaccurate — you can edit it later.",
+                            "warning"
+                        )
+                except (ValueError, TypeError):
+                    current_app.logger.warning(
+                        f"[AIRPORT-COORDS] invalid manual coords for '{icao_upper}'"
+                    )
 
             # Handle Airbnb-specific inputs
             price_month = float(request.form.get('price_month') or 0)

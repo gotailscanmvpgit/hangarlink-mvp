@@ -7,17 +7,122 @@
         <p class="text-gray-600 dark:text-platinum-300 mb-8">Fill out the details below to create your listing</p>
 
         <form method="POST" enctype="multipart/form-data" class="space-y-6">
-            <!-- Airport ICAO -->
+            <!-- Airport Identifier -->
             <div>
                 <label for="airport_icao" class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
-                    <i class="fas fa-plane-departure mr-2 text-blue-600"></i>Airport ICAO Code *
+                    <i class="fas fa-plane-departure mr-2 text-blue-600"></i>Airport Identifier (ICAO, FAA LID, Airpark Name, or Custom) *
                 </label>
-                <input type="text" id="airport_icao" name="airport_icao" required maxlength="4"
+                <input type="text" id="airport_icao" name="airport_icao" required maxlength="20"
+                    list="airport-suggestions"
                     class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-4"
-                    placeholder="KJFK" value="{{ airport or '' }}"
-                    onchange="if(this.value.length >= 3) window.location.href = '{{ url_for('main.post_listing') }}?airport=' + this.value">
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">4-letter ICAO code (e.g., KJFK, KLAX, KORD)</p>
+                    placeholder="e.g. CYHM, KJFK, 60J, 5FD5, Smith Airpark…"
+                    value="{{ airport or '' }}"
+                    oninput="onAirportInput(this.value)">
+
+                <!-- Datalist of known identifiers -->
+                <datalist id="airport-suggestions">
+                    <!-- Canada -->
+                    <option value="CYTZ">CYTZ — Billy Bishop, Toronto Island</option>
+                    <option value="CYHM">CYHM — Hamilton John C. Munro, ON</option>
+                    <option value="CYYZ">CYYZ — Toronto Pearson International</option>
+                    <option value="CYOW">CYOW — Ottawa Macdonald-Cartier</option>
+                    <option value="CYVR">CYVR — Vancouver International</option>
+                    <option value="CYYC">CYYC — Calgary International</option>
+                    <option value="CYEG">CYEG — Edmonton International</option>
+                    <option value="CYKF">CYKF — Waterloo Region, ON</option>
+                    <option value="CYKZ">CYKZ — Toronto Buttonville, ON</option>
+                    <option value="CYOO">CYOO — Oshawa Airport, ON</option>
+                    <option value="CYSN">CYSN — Niagara District, ON</option>
+                    <option value="CYBF">CYBF — Collingwood / Blue Mountain, ON</option>
+                    <option value="CYHS">CYHS — Muskoka Airport, ON</option>
+                    <!-- USA Florida -->
+                    <option value="KFMY">KFMY — Page Field, Fort Myers FL</option>
+                    <option value="KPBI">KPBI — Palm Beach International FL</option>
+                    <option value="KFXE">KFXE — Fort Lauderdale Executive FL</option>
+                    <option value="KLAL">KLAL — Lakeland Linder (Sun 'n Fun) FL</option>
+                    <option value="KSPG">KSPG — Albert Whitted, St Petersburg FL</option>
+                    <option value="KVNC">KVNC — Venice Airport FL</option>
+                    <option value="KSEF">KSEF — Sebring Regional FL</option>
+                    <option value="KDAB">KDAB — Daytona Beach FL</option>
+                    <option value="KSFB">KSFB — Orlando Sanford FL</option>
+                    <option value="KEYW">KEYW — Key West International FL</option>
+                    <option value="KMIA">KMIA — Miami International FL</option>
+                    <!-- FAA LIDs / private airparks -->
+                    <option value="60J">60J — Riverbend Airpark, FL (private)</option>
+                    <option value="5FD5">5FD5 — Aero Acres Airpark, Okeechobee FL</option>
+                    <option value="39FD">39FD — Ancient Oaks Airstrip, Ocala FL</option>
+                    <option value="X14">X14 — Yulee Airport, Nassau Co. FL</option>
+                    <option value="2NY">2NY — Private strip, Catskills NY</option>
+                    <option value="CA-0516">CA-0516 — Private strip, Fraser Valley BC</option>
+                    <!-- Popular US GA -->
+                    <option value="KOSH">KOSH — Oshkosh Wittman (EAA AirVenture) WI</option>
+                    <option value="KJFK">KJFK — New York JFK</option>
+                    <option value="KLAX">KLAX — Los Angeles International</option>
+                    <option value="KDEN">KDEN — Denver International</option>
+                    <option value="KSEA">KSEA — Seattle-Tacoma International</option>
+                    <option value="KBOS">KBOS — Boston Logan</option>
+                    <option value="KTPA">KTPA — Tampa International FL</option>
+                </datalist>
+
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    <i class="fas fa-info-circle mr-1 text-blue-400"></i>
+                    Examples: <strong>CYHM</strong>, <strong>KJFK</strong>, <strong>60J</strong> (private), <strong>2NY</strong>, <em>Smith Airpark</em>, or any known code.
+                    Private airparks, grass strips, and backcountry strips are all welcome!
+                </p>
+
+                <!-- Fallback lat/lon — shown when identifier not in database -->
+                <div id="manual-coords-section" class="hidden mt-4 rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/15 p-4">
+                    <div class="flex items-start gap-3 mb-3">
+                        <i class="fas fa-map-marker-alt text-amber-500 mt-0.5 flex-shrink-0"></i>
+                        <div>
+                            <div class="font-semibold text-amber-800 dark:text-amber-300 text-sm">Identifier not in our database</div>
+                            <p class="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+                                No worries — enter the approximate coordinates below so your listing shows on the map correctly.
+                                You can find them on
+                                <a href="https://www.airnav.com/" target="_blank" class="underline font-bold">AirNav</a> or
+                                <a href="https://maps.google.com" target="_blank" class="underline font-bold">Google Maps</a>.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-amber-800 dark:text-amber-300 mb-1">Latitude</label>
+                            <input type="number" step="0.0001" id="manual_lat" name="manual_lat"
+                                class="bg-white dark:bg-dark-900 border border-amber-300 dark:border-amber-600 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-amber-400 block w-full p-2.5 text-sm"
+                                placeholder="e.g. 43.1736">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-amber-800 dark:text-amber-300 mb-1">Longitude</label>
+                            <input type="number" step="0.0001" id="manual_lon" name="manual_lon"
+                                class="bg-white dark:bg-dark-900 border border-amber-300 dark:border-amber-600 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-amber-400 block w-full p-2.5 text-sm"
+                                placeholder="e.g. -79.9350">
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <script>
+            // Known identifiers that won't need manual coords
+            const KNOWN_IDS = new Set([
+                'CYTZ','CYHM','CYYZ','CYOW','CYVR','CYYC','CYEG','CYKF','CYKZ','CYOO',
+                'CYSN','CYBF','CYHS','KFMY','KPBI','KFXE','KLAL','KSPG','KVNC','KSEF',
+                'KDAB','KSFB','KEYW','KMIA','KTPA','60J','5FD5','39FD','X14','2NY',
+                'KOSH','KJFK','KLAX','KDEN','KSEA','KBOS','KATL','KORD','KLAS','KDFW',
+                'KMCO','KFLL','KIAD','KDCA','KSLC','KPDX','KSAN','KSTL','KCLE','KPIT',
+                'PANC','PHNL','CA-0516','KANE','7NY4','3NY4'
+            ]);
+            function onAirportInput(val) {
+                const normalized = val.trim().toUpperCase().replace(/\s+/g,' ');
+                const section = document.getElementById('manual-coords-section');
+                // Show manual coords only if identifier looks code-like but unknown
+                const looksLikeCode = /^[A-Z0-9\-]{2,10}$/.test(normalized);
+                if (normalized.length >= 2 && looksLikeCode && !KNOWN_IDS.has(normalized)) {
+                    section.classList.remove('hidden');
+                } else {
+                    section.classList.add('hidden');
+                }
+            }
+            </script>
 
             <!-- Size -->
             <div
