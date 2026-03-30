@@ -1271,60 +1271,71 @@ TRANSACTION_FEE_PERCENT = 9.5        # 9.5% deducted from owner payout
 RENTER_CONVENIENCE_FEE = 5.00        # $5 flat fee added to renter total (short-term only)
 INSURANCE_RATES = {'daily': 15.00, 'base': 45.00}
 
-@bp.route('/book/<int:listing_id>', methods=['POST'])
+@bp.route('/book/<int:listing_id>', methods=['GET', 'POST'])
 @login_required
 def book_listing(listing_id):
-    listing = Listing.query.get_or_404(listing_id)
-    
-    # ── Airbnb Style Dynamic Dates ──    
-    start_date_str = request.form.get('start_date')
-    end_date_str = request.form.get('end_date')
-    
-    if not start_date_str or not end_date_str:
-        flash("Start and end dates are required.", "error")
-        return redirect(url_for('main.listing_detail', id=listing.id))
-        
-    start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
-    end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
-    duration_days = (end_date - start_date).days
-    
-    if duration_days < listing.min_stay_nights:
-        flash(f"This listing requires a minimum stay of {listing.min_stay_nights} nights.", "error")
-        return redirect(url_for('main.listing_detail', id=listing.id))
-        
-    if duration_days <= 0:
-        flash("Checkout date must be after check-in date.", "error")
-        return redirect(url_for('main.listing_detail', id=listing.id))
-        
-    # ── 2026 Hybrid Fee Model ────────────────────────────────────────────
-    # Long-term (30+ days): monthly rate, no convenience fee
-    # Short-term (<30 days): nightly rate + $5 flat renter convenience fee
-    is_short_term = duration_days < 30
-    base_rental = listing.price_month if not is_short_term else (listing.price_night * duration_days)
-
-    # Renter convenience fee — $5 flat on short-term bookings only
-    renter_convenience_fee = RENTER_CONVENIENCE_FEE if is_short_term else 0.0
-
-    # Total charged to renter (base + convenience fee)
-    renter_total = base_rental + renter_convenience_fee
-
-    # Owner platform fee (9.5%) is deducted at payout — NOT added to renter bill
-    owner_platform_fee = round(base_rental * (TRANSACTION_FEE_PERCENT / 100), 2)
-    owner_payout = round(base_rental - owner_platform_fee, 2)
-
-    add_insurance = request.form.get('add_insurance') == 'on'
-    insurance_fee = 0.0 # Handled offline via affiliate partner link
-
-    final_total = renter_total + insurance_fee
-
-    current_app.logger.info(
-        f"[BOOKING] listing={listing.id} duration={duration_days}d "
-        f"base=${base_rental:.2f} renter_fee=${renter_convenience_fee:.2f} "
-        f"renter_total=${renter_total:.2f} owner_platform_fee=${owner_platform_fee:.2f} "
-        f"owner_payout=${owner_payout:.2f}"
-    )
-    
     try:
+        listing = Listing.query.get(listing_id)
+        if not listing:
+            flash("Sorry, we couldn't load this booking. Please try again or contact support.", "error")
+            return redirect(url_for('main.index'))
+            
+        if request.method == 'GET':
+            return redirect(url_for('main.listing_detail', id=listing.id))
+            
+        # ── Airbnb Style Dynamic Dates ──    
+        start_date_str = request.form.get('start_date')
+        end_date_str = request.form.get('end_date')
+        
+        if not start_date_str or not end_date_str:
+            flash("Start and end dates are required.", "error")
+            return redirect(url_for('main.listing_detail', id=listing.id))
+            
+        start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
+        end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
+        duration_days = (end_date - start_date).days
+        
+        min_stay = listing.min_stay_nights or 1
+        if duration_days < min_stay:
+            flash(f"This listing requires a minimum stay of {min_stay} nights.", "error")
+            return redirect(url_for('main.listing_detail', id=listing.id))
+            
+        if duration_days <= 0:
+            flash("Checkout date must be after check-in date.", "error")
+            return redirect(url_for('main.listing_detail', id=listing.id))
+            
+        # ── 2026 Hybrid Fee Model ────────────────────────────────────────────
+        # Long-term (30+ days): monthly rate, no convenience fee
+        # Short-term (<30 days): nightly rate + $5 flat renter convenience fee
+        is_short_term = duration_days < 30
+        
+        price_month = float(listing.price_month or 0.0)
+        price_night = float(listing.price_night or 0.0)
+        
+        base_rental = price_month if not is_short_term else (price_night * duration_days)
+
+        # Renter convenience fee — $5 flat on short-term bookings only
+        renter_convenience_fee = RENTER_CONVENIENCE_FEE if is_short_term else 0.0
+
+        # Total charged to renter (base + convenience fee)
+        renter_total = base_rental + renter_convenience_fee
+
+        # Owner platform fee (9.5%) is deducted at payout — NOT added to renter bill
+        owner_platform_fee = round(base_rental * (TRANSACTION_FEE_PERCENT / 100), 2)
+        owner_payout = round(base_rental - owner_platform_fee, 2)
+
+        add_insurance = request.form.get('add_insurance') == 'on'
+        insurance_fee = 0.0 # Handled offline via affiliate partner link
+
+        final_total = renter_total + insurance_fee
+
+        current_app.logger.info(
+            f"[BOOKING] listing={listing.id} duration={duration_days}d "
+            f"base=${base_rental:.2f} renter_fee=${renter_convenience_fee:.2f} "
+            f"renter_total=${renter_total:.2f} owner_platform_fee=${owner_platform_fee:.2f} "
+            f"owner_payout=${owner_payout:.2f}"
+        )
+        
         stripe_lib = get_stripe()
         if not stripe_lib:
             session_id = 'mock_session_' + str(uuid.uuid4().hex[:8])
@@ -1418,8 +1429,13 @@ def book_listing(listing_id):
             
         return redirect(checkout_session_url, code=303)
     except Exception as e:
-        flash(f'Payment Error: {str(e)}', 'error')
-        return redirect(url_for('main.listing_detail', id=listing.id))
+        current_app.logger.error(f"Error processing booking for listing_id {listing_id}: {str(e)}", exc_info=True)
+        flash("Sorry, we couldn't load this booking. Please try again or contact support.", "error")
+        # Try to redirect to listing detail if we have a listing, otherwise go to index
+        try:
+            return redirect(url_for('main.listing_detail', id=listing_id))
+        except:
+            return redirect(url_for('main.index'))
 
 @bp.route('/booking/success')
 @login_required

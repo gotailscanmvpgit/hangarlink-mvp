@@ -899,12 +899,12 @@
                     <label class="flex items-start gap-3 p-3 cursor-pointer">
                         <input type="checkbox" name="add_insurance" id="add_insurance_cb"
                             class="mt-1 w-5 h-5 accent-blue-500 rounded border-gray-300 dark:border-gray-600 shadow-sm cursor-pointer flex-shrink-0"
-                            onchange="updateInsuranceCost()">
+                            onchange="toggleInsuranceCTA()">
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center justify-between flex-wrap gap-1">
                                 <span class="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
                                     <i class="fas fa-shield-alt text-blue-500 dark:text-blue-400"></i>
-                                    Short-Term Insurance Protection
+                                    Add Short-Term Protection
                                 </span>
                                 <button type="button" onclick="toggleInsuranceInfo(event)"
                                     class="text-[10px] text-blue-600 dark:text-blue-400 font-semibold flex items-center gap-1 hover:underline whitespace-nowrap">
@@ -912,14 +912,8 @@
                                 </button>
                             </div>
                             <p class="text-xs text-gray-600 dark:text-gray-300 mt-0.5">
-                                Covers theft, physical damage &amp; liability during your rental period
+                                Get a personalized quote from partners. Covers theft, physical damage &amp; liability.
                             </p>
-                            <div class="flex items-center gap-2 mt-1.5">
-                                <span class="text-xs font-bold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 px-2 py-0.5 rounded-full">
-                                    $45 – $150
-                                </span>
-                                <span class="text-[10px] text-gray-500 dark:text-gray-400">calculated by stay length</span>
-                            </div>
                         </div>
                     </label>
 
@@ -1078,8 +1072,15 @@
                 const _origUpdateButtonText = typeof updateButtonText === 'function' ? updateButtonText : null;
                 function updateButtonText() {
                     if (_origUpdateButtonText) _origUpdateButtonText();
-                    updateInsuranceCost();
+                    toggleInsuranceCTA(); // Was previously updateInsuranceCost()
                 }
+
+                document.addEventListener('DOMContentLoaded', () => {
+                    const startRaw = document.getElementById('booking_start');
+                    const endRaw   = document.getElementById('booking_end');
+                    if (startRaw) startRaw.addEventListener('change', toggleInsuranceCTA);
+                    if (endRaw) endRaw.addEventListener('change', toggleInsuranceCTA);
+                });
             </script>
 
 
