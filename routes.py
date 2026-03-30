@@ -474,7 +474,7 @@ def post_listing():
             icao_upper = request.form.get('airport_icao', '').upper()
             lat, lon, coord_found = get_coords(icao_upper)
             if not coord_found:
-                logger.warning(f"[AIRPORT-COORDS] unknown ICAO '{icao_upper}', using Toronto default")
+                current_app.logger.warning(f"[AIRPORT-COORDS] unknown ICAO '{icao_upper}', using Toronto default")
 
             # Handle Airbnb-specific inputs
             price_month = float(request.form.get('price_month') or 0)
