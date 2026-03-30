@@ -927,7 +927,7 @@
                     <div id="insurance-info-panel" class="hidden px-4 pb-4">
                         <div class="rounded-lg p-3 text-xs space-y-1.5 bg-blue-100 dark:bg-blue-900 border border-blue-200 dark:border-blue-700">
                             <div class="font-bold text-blue-800 dark:text-blue-200 mb-2 flex items-center gap-1.5">
-                                <i class="fas fa-umbrella"></i> What's Included
+                                <i class="fas fa-umbrella"></i> Typical Coverage <span class="font-normal text-blue-600 dark:text-blue-400">(varies by partner &amp; policy)</span>
                             </div>
                             <div class="flex items-start gap-2 text-gray-700 dark:text-gray-200">
                                 <i class="fas fa-check text-green-500 mt-0.5 flex-shrink-0"></i>
@@ -939,25 +939,35 @@
                             </div>
                             <div class="flex items-start gap-2 text-gray-700 dark:text-gray-200">
                                 <i class="fas fa-check text-green-500 mt-0.5 flex-shrink-0"></i>
-                                Liability coverage ($1M limit)
+                                Liability coverage (limits vary by policy)
                             </div>
                             <div class="flex items-start gap-2 text-gray-700 dark:text-gray-200">
                                 <i class="fas fa-check text-green-500 mt-0.5 flex-shrink-0"></i>
-                                Covers your exact rental dates
+                                Coverage for your exact rental dates
                             </div>
-                            <div class="mt-2 pt-2 border-t border-blue-200 dark:border-blue-700 text-gray-600 dark:text-gray-300">
-                                <i class="fas fa-handshake mr-1 text-blue-500 dark:text-blue-400"></i>
-                                Policy activated via <strong class="text-gray-800 dark:text-white">Avemco / BWI Aviation Insurance</strong> after booking.
-                                No pre-inspection required.
+                            <!-- Trusted partner badges -->
+                            <div class="mt-2.5 pt-2 border-t border-blue-200 dark:border-blue-700">
+                                <div class="text-[10px] font-bold text-blue-700 dark:text-blue-300 mb-1.5 uppercase tracking-wider">Trusted Partners</div>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <span class="bg-white dark:bg-blue-950 border border-blue-200 dark:border-blue-700 rounded px-2 py-0.5 text-[10px] font-bold text-blue-800 dark:text-blue-200">Avemco</span>
+                                    <span class="bg-white dark:bg-blue-950 border border-blue-200 dark:border-blue-700 rounded px-2 py-0.5 text-[10px] font-bold text-blue-800 dark:text-blue-200">SkyWatch.ai</span>
+                                    <span class="bg-white dark:bg-blue-950 border border-blue-200 dark:border-blue-700 rounded px-2 py-0.5 text-[10px] font-bold text-blue-800 dark:text-blue-200">BWI Aviation</span>
+                                </div>
+                            </div>
+                            <div class="mt-2 pt-2 border-t border-blue-200 dark:border-blue-700 text-gray-500 dark:text-gray-400 italic text-[10px]">
+                                <i class="fas fa-info-circle mr-1 text-blue-400"></i>
+                                HangarLinks is <strong class="not-italic text-gray-700 dark:text-gray-300">not an insurance provider.</strong>
+                                Final coverage and pricing are provided by the licensed partner.
                             </div>
                         </div>
                     </div>
 
-                    <!-- Live cost row (shown when checked) -->
-                    <div id="insurance-cost-row" class="hidden px-4 pb-3">
-                        <div class="flex items-center justify-between text-xs border-t border-blue-200 dark:border-blue-700 pt-2">
-                            <span class="text-gray-600 dark:text-gray-300">Insurance added:</span>
-                            <span id="insurance-cost-display" class="font-bold text-blue-600 dark:text-blue-300">—</span>
+                    <!-- Partner CTA row (shown when checkbox is checked) -->
+                    <div id="insurance-cta-row" class="hidden px-4 pb-3">
+                        <div class="flex items-center gap-2 text-xs border-t border-blue-200 dark:border-blue-700 pt-2">
+                            <i class="fas fa-check-circle text-green-500 flex-shrink-0"></i>
+                            <span class="text-gray-700 dark:text-gray-200 font-semibold">Insurance interest noted.</span>
+                            <span class="text-gray-500 dark:text-gray-400">After booking you'll get a direct link to get your quote from Avemco, SkyWatch, or BWI.</span>
                         </div>
                     </div>
                 </div>
@@ -972,10 +982,6 @@
                     <div id="total-convenience-row" class="hidden flex justify-between text-purple-600 dark:text-purple-400 mb-1">
                         <span>Convenience fee</span>
                         <span class="font-medium">$5.00</span>
-                    </div>
-                    <div id="total-insurance-summary" class="hidden flex justify-between text-blue-600 dark:text-blue-400 mb-1">
-                        <span>Insurance protection</span>
-                        <span id="total-insurance-display" class="font-medium">—</span>
                     </div>
                     <div class="flex justify-between font-bold text-gray-900 dark:text-white border-t border-gray-200 dark:border-gray-600 pt-1.5 mt-1.5">
                         <span>Est. Total</span>
@@ -1015,13 +1021,6 @@
             </form>
 
             <script>
-                // Insurance cost calculation (mirrors backend logic)
-                function calcInsuranceCost(nights) {
-                    if (nights <= 0) return 0;
-                    const raw = (15 * nights) + 45;
-                    return Math.min(150, raw);
-                }
-
                 function getNights() {
                     const s = document.getElementById('booking_start');
                     const e = document.getElementById('booking_end');
@@ -1032,19 +1031,15 @@
                     return Math.max(0, Math.round((end - start) / 86400000));
                 }
 
-                function updateInsuranceCost() {
-                    const cb      = document.getElementById('add_insurance_cb');
-                    const costRow = document.getElementById('insurance-cost-row');
-                    const display = document.getElementById('insurance-cost-display');
-                    const nights  = getNights();
-                    const ins     = calcInsuranceCost(nights);
-
+                function toggleInsuranceCTA() {
+                    const cb = document.getElementById('add_insurance_cb');
+                    const ctaRow = document.getElementById('insurance-cta-row');
+                    
                     if (cb && cb.checked) {
-                        costRow.classList.remove('hidden');
-                        if (display) display.textContent = nights > 0 ? `+$${ins.toFixed(0)}` : 'Select dates first';
+                        if (ctaRow) ctaRow.classList.remove('hidden');
                         document.getElementById('insurance-box').style.borderColor = 'rgba(37,99,235,0.6)';
                     } else {
-                        costRow.classList.add('hidden');
+                        if (ctaRow) ctaRow.classList.add('hidden');
                         document.getElementById('insurance-box').style.borderColor = 'rgba(96,165,250,0.3)';
                     }
                     updateTotal();
@@ -1052,7 +1047,6 @@
 
                 function updateTotal() {
                     const nights  = getNights();
-                    const cb      = document.getElementById('add_insurance_cb');
                     const totalRow = document.getElementById('booking-total-row');
 
                     if (nights <= 0) { totalRow.classList.add('hidden'); return; }
@@ -1062,23 +1056,16 @@
                     const isShortTerm = nights < 30;
                     const base  = isShortTerm ? (nightlyRate * nights) : monthlyRate;
                     const convFee = isShortTerm ? 5 : 0;
-                    const ins   = (cb && cb.checked) ? calcInsuranceCost(nights) : 0;
-                    const grand = base + convFee + ins;
+                    const grand = base + convFee; // Insurance is handled offline
 
                     totalRow.classList.remove('hidden');
                     document.getElementById('total-rental-display').textContent = `$${base.toFixed(2)}`;
 
                     const convRow = document.getElementById('total-convenience-row');
-                    isShortTerm ? convRow.classList.remove('hidden') : convRow.classList.add('hidden');
-
-                    const insSummary = document.getElementById('total-insurance-summary');
-                    const insDisplay = document.getElementById('total-insurance-display');
-                    if (ins > 0) {
-                        insSummary.classList.remove('hidden');
-                        insDisplay.textContent = `$${ins.toFixed(0)}`;
-                    } else {
-                        insSummary.classList.add('hidden');
+                    if (convRow) {
+                        isShortTerm ? convRow.classList.remove('hidden') : convRow.classList.add('hidden');
                     }
+
                     document.getElementById('grand-total-display').textContent = `$${grand.toFixed(2)}`;
                 }
 

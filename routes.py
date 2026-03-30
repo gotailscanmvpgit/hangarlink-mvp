@@ -1313,12 +1313,7 @@ def book_listing(listing_id):
     owner_payout = round(base_rental - owner_platform_fee, 2)
 
     add_insurance = request.form.get('add_insurance') == 'on'
-    insurance_fee = 0.0
-
-    if add_insurance:
-        base_insurance_daily = 15.00
-        calculated_insurance = (base_insurance_daily * duration_days) + 45.00
-        insurance_fee = min(150.00, calculated_insurance)
+    insurance_fee = 0.0 # Handled offline via affiliate partner link
 
     final_total = renter_total + insurance_fee
 
@@ -1360,18 +1355,7 @@ def book_listing(listing_id):
                     'quantity': 1,
                 })
             
-            if add_insurance:
-                line_items.append({
-                    'price_data': {
-                        'currency': 'usd',
-                        'product_data': {
-                            'name': 'Short-Term Hangar Insurance',
-                            'description': 'Liability, Theft, & Hull coverage',
-                        },
-                        'unit_amount': int(insurance_fee * 100),
-                    },
-                    'quantity': 1,
-                })
+            # Insurance is now handled offline via affiliate links, so no Stripe line item.
                 
             checkout_session = stripe_lib.checkout.Session.create(
                 payment_method_types=['card'],

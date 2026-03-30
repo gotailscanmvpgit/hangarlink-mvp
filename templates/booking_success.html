@@ -75,9 +75,7 @@
                 </div>
                 <div>
                     <div class="text-slate-500 text-xs uppercase tracking-wider mb-1">Insurance Est.</div>
-                    <div class="text-white font-semibold">
-                        ${{ booking.insurance_fee|int if booking.insurance_fee else '45–150' }}
-                    </div>
+                    <div class="text-white font-semibold">Quote from partner</div>
                 </div>
                 <div>
                     <div class="text-slate-500 text-xs uppercase tracking-wider mb-1">Aircraft Parked At</div>
@@ -118,14 +116,14 @@
                     </span>
                 </a>
 
-                <!-- Travers / Global -->
-                <a href="https://www.traversaviation.com/?ref=hangarlinks&airport={{ booking.listing.airport_icao }}&booking={{ booking.id }}"
+                <!-- SkyWatch -->
+                <a href="https://www.skywatch.ai/aviation-insurance?ref=hangarlinks&airport={{ booking.listing.airport_icao }}"
                     target="_blank" rel="noopener"
                     class="group rounded-xl p-4 flex flex-col items-center text-center transition-all hover:scale-[1.02]"
                     style="background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.25);">
-                    <div class="text-2xl mb-2">🌐</div>
-                    <div class="font-bold text-white text-sm mb-1">Travers Aviation</div>
-                    <div class="text-xs text-slate-400 mb-3">GA &amp; jet coverage, flexible terms</div>
+                    <div class="text-2xl mb-2">☁️</div>
+                    <div class="font-bold text-white text-sm mb-1">SkyWatch.ai</div>
+                    <div class="text-xs text-slate-400 mb-3">Modern, flexible digital policies</div>
                     <span class="text-xs font-bold text-purple-400 group-hover:text-purple-300 flex items-center gap-1">
                         Get Quote <i class="fas fa-external-link-alt text-[9px]"></i>
                     </span>
