@@ -1827,34 +1827,29 @@ def complete_booking(booking_id):
 
 # ── 2026 Optimal Subscription Plans ────────────────────────────────────────
 OWNER_PLAN = {
-    'name': 'Owner Pro',
+    'name': 'Hangar Host Premium',
     'price': 1499,              # $14.99/month
     'price_display': '14.99',
     'interval': 'month',
     'features': [
-        'Unlimited active listings (Free: 1)',
+        'Unlimited active listings',
         'Featured placement in search results',
-        'Full analytics & revenue dashboard',
-        'Verified Owner badge',
-        'Priority AI Match placement',
-        'Export reports (CSV / PDF)',
-        'Same 9.5% platform fee — transparent always',
+        'Full analytics dashboard',
+        'Priority in AI Match',
+        'Higher overall visibility'
     ]
 }
 
 RENTER_PLAN = {
-    'name': 'Renter Pro',
+    'name': 'Pilot Premium',
     'price': 699,               # $6.99/month
     'price_display': '6.99',
     'interval': 'month',
     'features': [
-        'Unlimited hangar searches (Free: 5/day)',
-        'Smart availability alerts',
-        'Priority matching & recommendations',
-        'Renter Pro badge',
-        'Early access to new listings',
-        'Advanced filters (size, door type, heated)',
-        '10% off insurance add-on per booking',
+        'Unlimited premium searches',
+        'Priority matching capabilities',
+        '10% discount on insurance add-ons',
+        'Saved searches and early alerts'
     ]
 }
 
