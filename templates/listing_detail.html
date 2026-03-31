@@ -894,75 +894,40 @@
 
                 <!-- ── Insurance Add-on ─────────────────────────────── -->
                 <div id="insurance-box"
-                    class="mb-4 rounded-xl border-2 border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950 transition-all duration-300 overflow-hidden">
+                    class="mb-4 rounded-xl border-2 border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/20 transition-all duration-300 overflow-hidden shadow-inner font-sans">
                     <!-- Header row -->
-                    <label class="flex items-start gap-3 p-3 cursor-pointer">
+                    <label class="flex items-start gap-4 p-5 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/40 transition-colors">
                         <input type="checkbox" name="add_insurance" id="add_insurance_cb"
-                            class="mt-1 w-5 h-5 accent-blue-500 rounded border-gray-300 dark:border-gray-600 shadow-sm cursor-pointer flex-shrink-0"
+                            class="mt-1 w-5 h-5 accent-blue-600 rounded border-gray-300 dark:border-gray-500 shadow-sm cursor-pointer flex-shrink-0"
                             onchange="toggleInsuranceCTA()">
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center justify-between flex-wrap gap-1">
-                                <span class="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
-                                    <i class="fas fa-shield-alt text-blue-500 dark:text-blue-400"></i>
-                                    Add Short-Term Protection
+                                <span class="text-sm md:text-[15px] font-bold text-gray-900 dark:text-white flex items-center">
+                                    Add Short-Term Aircraft Protection (Recommended)
                                 </span>
-                                <button type="button" onclick="toggleInsuranceInfo(event)"
-                                    class="text-[10px] text-blue-600 dark:text-blue-400 font-semibold flex items-center gap-1 hover:underline whitespace-nowrap">
-                                    <i class="fas fa-info-circle"></i> What's covered?
-                                </button>
                             </div>
-                            <p class="text-xs text-gray-600 dark:text-gray-300 mt-0.5">
-                                Get a personalized quote from partners. Covers theft, physical damage &amp; liability.
+                            <p class="text-xs md:text-[13px] text-gray-600 dark:text-gray-300 mt-1.5 leading-relaxed pr-2 font-medium">
+                                Protect your aircraft with liability and hull damage coverage while parked. Get an instant personalized quote from SkyWatch, a trusted provider for GA pilots.
                             </p>
                         </div>
                     </label>
 
-                    <!-- Coverage info panel (hidden by default) -->
-                    <div id="insurance-info-panel" class="hidden px-4 pb-4">
-                        <div class="rounded-lg p-3 text-xs space-y-1.5 bg-blue-100 dark:bg-blue-900 border border-blue-200 dark:border-blue-700">
-                            <div class="font-bold text-blue-800 dark:text-blue-200 mb-2 flex items-center gap-1.5">
-                                <i class="fas fa-umbrella"></i> Typical Coverage <span class="font-normal text-blue-600 dark:text-blue-400">(varies by partner &amp; policy)</span>
+                    <!-- Partner CTA row (shown when checkbox is checked) -->
+                    <div id="insurance-cta-row" class="hidden px-5 pb-5">
+                        <div class="rounded-xl bg-white dark:bg-gray-800 border border-blue-100 dark:border-blue-800/60 p-4 mt-2 shadow-sm">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i class="fas fa-check-circle text-green-500 flex-shrink-0 text-base"></i>
+                                <span class="text-gray-800 dark:text-gray-100 font-bold text-sm tracking-tight">Insurance interest noted!</span>
                             </div>
-                            <div class="flex items-start gap-2 text-gray-700 dark:text-gray-200">
-                                <i class="fas fa-check text-green-500 mt-0.5 flex-shrink-0"></i>
-                                Aircraft physical damage (hull coverage)
-                            </div>
-                            <div class="flex items-start gap-2 text-gray-700 dark:text-gray-200">
-                                <i class="fas fa-check text-green-500 mt-0.5 flex-shrink-0"></i>
-                                Theft &amp; vandalism protection
-                            </div>
-                            <div class="flex items-start gap-2 text-gray-700 dark:text-gray-200">
-                                <i class="fas fa-check text-green-500 mt-0.5 flex-shrink-0"></i>
-                                Liability coverage (limits vary by policy)
-                            </div>
-                            <div class="flex items-start gap-2 text-gray-700 dark:text-gray-200">
-                                <i class="fas fa-check text-green-500 mt-0.5 flex-shrink-0"></i>
-                                Coverage for your exact rental dates
-                            </div>
-                            <!-- Trusted partner badges -->
-                            <div class="mt-2.5 pt-2 border-t border-blue-200 dark:border-blue-700">
-                                <div class="text-[10px] font-bold text-blue-700 dark:text-blue-300 mb-1.5 uppercase tracking-wider">Trusted Partners</div>
-                                <div class="flex flex-wrap gap-1.5">
-                                    <span class="bg-white dark:bg-blue-950 border border-blue-200 dark:border-blue-700 rounded px-2 py-0.5 text-[10px] font-bold text-blue-800 dark:text-blue-200">Avemco</span>
-                                    <span class="bg-white dark:bg-blue-950 border border-blue-200 dark:border-blue-700 rounded px-2 py-0.5 text-[10px] font-bold text-blue-800 dark:text-blue-200">SkyWatch.ai</span>
-                                    <span class="bg-white dark:bg-blue-950 border border-blue-200 dark:border-blue-700 rounded px-2 py-0.5 text-[10px] font-bold text-blue-800 dark:text-blue-200">BWI Aviation</span>
-                                </div>
-                            </div>
-                            <div class="mt-2 pt-2 border-t border-blue-200 dark:border-blue-700 text-gray-500 dark:text-gray-400 italic text-[10px]">
-                                <i class="fas fa-info-circle mr-1 text-blue-400"></i>
-                                HangarLinks is <strong class="not-italic text-gray-700 dark:text-gray-300">not an insurance provider.</strong>
-                                Final coverage and pricing are provided by the licensed partner.
+                            <div class="text-gray-500 dark:text-gray-400 text-xs pl-6 leading-relaxed">
+                                Upon completing your booking, you will be given a direct, instant link to calculate your protection.
                             </div>
                         </div>
                     </div>
 
-                    <!-- Partner CTA row (shown when checkbox is checked) -->
-                    <div id="insurance-cta-row" class="hidden px-4 pb-3">
-                        <div class="flex items-center gap-2 text-xs border-t border-blue-200 dark:border-blue-700 pt-2">
-                            <i class="fas fa-check-circle text-green-500 flex-shrink-0"></i>
-                            <span class="text-gray-700 dark:text-gray-200 font-semibold">Insurance interest noted.</span>
-                            <span class="text-gray-500 dark:text-gray-400">After booking you'll get a direct link to get your quote from Avemco, SkyWatch, or BWI.</span>
-                        </div>
+                    <!-- Disclaimer -->
+                    <div class="bg-white/60 dark:bg-black/20 px-5 py-3 border-t border-blue-200/60 dark:border-blue-800/50 text-gray-500 dark:text-gray-400 text-[11px] leading-relaxed">
+                        HangarLinks is not an insurance provider. We partner with licensed insurers like SkyWatch and Avemco to make it easy for you to get coverage. Final quotes, terms, and coverage are provided directly by the insurance company.
                     </div>
                 </div>
 
@@ -982,6 +947,21 @@
                         <span id="grand-total-display" class="text-blue-600 dark:text-blue-400">—</span>
                     </div>
                     <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-1">* Owner receives 90.5% of rental subtotal (9.5% HangarLinks service fee). Final total charged at checkout.</p>
+                </div>
+
+                <!-- ── Booking Total Summary ─────────────────────────── -->
+                <div id="booking-total-row"
+                    class="hidden mb-4 rounded-xl p-3 text-sm bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-all">
+                    <div class="flex justify-between text-gray-600 dark:text-gray-300 mb-1.5">
+                        <span>Rental subtotal</span>
+                        <span id="total-rental-display" class="font-medium text-gray-800 dark:text-gray-100">—</span>
+                    </div>
+                    <!-- Convenience fee was universally removed for renters! (0 platform fees) -->
+                    <div class="flex justify-between font-bold text-gray-900 dark:text-white border-t border-gray-200 dark:border-gray-600 pt-2 mt-2">
+                        <span>Est. Total</span>
+                        <span id="grand-total-display" class="text-blue-600 dark:text-blue-400 text-lg">—</span>
+                    </div>
+                    <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-1.5 leading-tight">* Owner receives 90.5% of rental subtotal (9.5% host fee). Renter pays ZERO platform fees. Final total is charged securely at checkout.</p>
                 </div>
 
 
@@ -1049,17 +1029,10 @@
                     const monthlyRate = {{ listing.price_month if listing.price_month else 0 }};
                     const isShortTerm = nights < 30;
                     const base  = isShortTerm ? (nightlyRate * nights) : monthlyRate;
-                    const convFee = isShortTerm ? 5 : 0;
-                    const grand = base + convFee; // Insurance is handled offline
+                    const grand = base; // No renter convenience fees under 2026 monetization!
 
                     totalRow.classList.remove('hidden');
                     document.getElementById('total-rental-display').textContent = `$${base.toFixed(2)}`;
-
-                    const convRow = document.getElementById('total-convenience-row');
-                    if (convRow) {
-                        isShortTerm ? convRow.classList.remove('hidden') : convRow.classList.add('hidden');
-                    }
-
                     document.getElementById('grand-total-display').textContent = `$${grand.toFixed(2)}`;
                 }
 
