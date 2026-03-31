@@ -831,13 +831,13 @@
                         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-1.5 ml-1">Check-in</label>
                         <input type="date" id="booking_start" name="start_date" required
                             min="{{ datetime.now().strftime('%Y-%m-%d') }}"
-                            class="w-full bg-white dark:bg-zinc-800 border-2 border-gray-200 dark:border-zinc-700 rounded-xl p-3.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:text-white dark:focus:ring-blue-400 [color-scheme:light] dark:[color-scheme:dark] shadow-sm transition-all text-gray-900"
+                            class="w-full bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-3.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:text-white dark:focus:ring-blue-400 [color-scheme:light] dark:[color-scheme:dark] shadow-sm transition-all"
                             onchange="calculateDates()">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-1.5 ml-1">Checkout</label>
                         <input type="date" id="booking_end" name="end_date" required
-                            class="w-full bg-white dark:bg-zinc-800 border-2 border-gray-200 dark:border-zinc-700 rounded-xl p-3.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:text-white dark:focus:ring-blue-400 [color-scheme:light] dark:[color-scheme:dark] shadow-sm transition-all disabled:opacity-50 disabled:bg-gray-100 disabled:dark:bg-zinc-900 disabled:cursor-not-allowed text-gray-900"
+                            class="w-full bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-3.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:text-white dark:focus:ring-blue-400 [color-scheme:light] dark:[color-scheme:dark] shadow-sm transition-all disabled:opacity-50 disabled:bg-gray-100 disabled:dark:bg-black disabled:cursor-not-allowed"
                             disabled onchange="updateButtonText()">
                     </div>
                 </div>
