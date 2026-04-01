@@ -575,7 +575,7 @@
                     <!-- Photo Container -->
                     <div class="h-56 relative overflow-hidden">
                         {% set photos = (listing.photos or '').split(',') if listing.photos and listing.photos.strip() else [] %}
-                        {% set first_photo = photos[0].strip() if photos and photos[0]|strip else None %}
+                        {% set first_photo = photos[0].strip() if photos and photos[0] and photos[0].strip() else None %}
                         {% set final_img = optimized_img(first_photo) if first_photo else 'https://res.cloudinary.com/hangarlinks/image/upload/v1/hangars/hangar-modern-1.jpg' %}
                         <img src="{{ final_img }}" 
                              alt="{{ listing.airport_icao }}" 
