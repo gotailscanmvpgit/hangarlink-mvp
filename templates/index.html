@@ -1,11 +1,7 @@
 {% extends "base.html" %}
 
-{% block extra_head %}
-<script>
-    // Injected from Flask backend
-    window.mapMarkers = {{ markers | tojson | safe }};
-</script>
-{% endblock %}
+{% block map_logic %}{% endblock %}
+{% block extra_head %}{% endblock %}
 
 {% block content %}
 <!-- Cinematic Hero Section -->
@@ -714,52 +710,7 @@
     </div>
 </section>
 
-<!-- Map Section -->
-<div class="bg-white dark:bg-dark-800 py-20 sm:py-24">
-    <div class="max-w-7xl mx-auto px-6 lg:px-8">
-        <div class="text-center mb-10 sm:mb-12">
-            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-platinum-100 mb-4">Explore
-                Nearby Opportunities</h2>
-            <p class="text-lg sm:text-xl text-gray-600 dark:text-platinum-300 max-w-3xl mx-auto">
-                Discover available parking spaces across the region with our interactive map.
-            </p>
-        </div>
 
-        <div
-            class="bg-white dark:bg-dark-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
-            <div id="map" style="height: 400px; width: 100%;" class="rounded-xl sm:h-[500px]"></div>
-            <div class="mt-6 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm">
-                <div class="flex items-center">
-                    <div class="w-3 h-3 sm:w-4 sm:h-4 bg-blue-600 rounded-full mr-2"></div><span
-                        class="text-gray-700 dark:text-platinum-200 text-xs sm:text-sm">Available</span>
-                </div>
-                <div class="flex items-center">
-                    <div class="w-3 h-3 sm:w-4 sm:h-4 bg-green-600 rounded-full mr-2"></div><span
-                        class="text-gray-700 dark:text-platinum-200 text-xs sm:text-sm">Verified</span>
-                </div>
-                <div class="flex items-center">
-                    <div class="w-3 h-3 sm:w-4 sm:h-4 bg-amber-500 rounded-full mr-2"></div><span
-                        class="text-gray-700 dark:text-platinum-200 text-xs sm:text-sm">Premium</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-3 gap-6 sm:gap-8 mt-10 sm:mt-12">
-            <div class="text-center">
-                <div class="text-3xl sm:text-4xl font-bold text-blue-600 mb-1 sm:mb-2">50+</div>
-                <div class="text-gray-600 dark:text-platinum-300 text-xs sm:text-base">Active Listings</div>
-            </div>
-            <div class="text-center">
-                <div class="text-3xl sm:text-4xl font-bold text-blue-600 mb-1 sm:mb-2">25+</div>
-                <div class="text-gray-600 dark:text-platinum-300 text-xs sm:text-base">Airports</div>
-            </div>
-            <div class="text-center">
-                <div class="text-3xl sm:text-4xl font-bold text-blue-600 mb-1 sm:mb-2">100%</div>
-                <div class="text-gray-600 dark:text-platinum-300 text-xs sm:text-base">Verified</div>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Success Stories: Real Pilots, Real Spots -->
 <section class="relative py-24 bg-[#000a18] border-t border-white/5">
