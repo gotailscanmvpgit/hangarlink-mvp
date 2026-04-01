@@ -148,6 +148,7 @@ def index():
             show_onboarding = session.pop('show_onboarding', False)
 
         # Get map markers (all active listings with coordinates)
+        # Get map markers (all active listings with coordinates)
         map_listings = Listing.query.filter_by(status='Active').all()
         markers = []
         for l in map_listings:
@@ -164,13 +165,45 @@ def index():
                     'price_unit': price_unit,
                     'is_premium': l.is_premium_listing or (l.owner and l.owner.is_premium)
                 })
-            
-        return render_template('index.html', 
-                              listings_count=listings_count, 
-                              messages_count=messages_count, 
+
+        # Featured Short-Term Listings (Mock for 2026 Strategy)
+        featured_listings = [
+            {
+                'id': 101,
+                'icao': 'KJFK',
+                'city': 'New York',
+                'price': 75,
+                'photo_url': 'https://res.cloudinary.com/hangarlinks/image/upload/v1/hangars/hangar-modern-1.jpg',
+                'distance': '1.2 km to terminal',
+                'badges': ['Covered', 'Verified']
+            },
+            {
+                'id': 102,
+                'icao': 'KLAX',
+                'city': 'Los Angeles',
+                'price': 110,
+                'photo_url': 'https://res.cloudinary.com/hangarlinks/image/upload/v1/hangars/hangar-premium-2.jpg',
+                'distance': '0.8 km to terminal',
+                'badges': ['Climate Controlled', 'Verified']
+            },
+            {
+                'id': 103,
+                'icao': 'KORD',
+                'city': 'Chicago',
+                'price': 55,
+                'photo_url': 'https://res.cloudinary.com/hangarlinks/image/upload/v1/hangars/hangar-economic-3.jpg',
+                'distance': '2.5 km to terminal',
+                'badges': ['Outdoor Secured', 'Best Value']
+            }
+        ]
+
+        return render_template('index.html',
+                              listings_count=listings_count,
+                              messages_count=messages_count,
                               saved_searches_count=saved_searches_count,
                               show_onboarding=show_onboarding,
-                              markers=markers)
+                              markers=markers,
+                              featured_listings=featured_listings)
     except Exception as e:
         print(f"CRITICAL ERROR in index route: {str(e)}")
         import traceback
