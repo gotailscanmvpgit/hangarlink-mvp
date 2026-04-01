@@ -835,24 +835,42 @@
     // Legacy carousel logic removed in favor of high-performance static grid
 </script>
 
-<!-- Final CTA -->
-<div class="bg-gradient-to-br from-navy-900 via-navy-800 to-black py-20 sm:py-24">
-    <div class="max-w-4xl mx-auto px-6 lg:px-8 text-center">
-        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">Ready to get started?</h2>
-        <p class="text-lg sm:text-xl text-platinum-200 mb-10 sm:mb-12 font-light">Join thousands of pilots and aircraft
-            owners on HangarLinks</p>
-        <div class="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="{{ url_for('main.register') }}"
-                class="bg-white text-navy-900 hover:bg-platinum-100 font-bold py-4 px-10 rounded-xl text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-0.5">
-                Sign Up Free
+<!-- Final CTA: The Founding Push -->
+<section class="relative py-24 bg-[#000a18] border-t border-white/5 overflow-hidden">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(37,99,235,0.08),transparent_70%)]"></div>
+    
+    <div class="relative z-10 max-w-4xl mx-auto px-6 lg:px-8 text-center">
+        <!-- Founding Badge -->
+        <div class="inline-flex items-center bg-emerald-500/10 border border-emerald-500/30 rounded-full px-5 py-2 mb-8 animate-pulse">
+            <span class="relative flex h-2 w-2 mr-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span class="text-emerald-400 text-xs font-black uppercase tracking-[0.2em]">Only 84/100 Founding Host spots remaining</span>
+        </div>
+
+        <h2 class="text-4xl sm:text-6xl font-black text-white mb-6 leading-[1.1] tracking-tight">
+            Ready to Stop Parking <br>
+            <span class="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">on the Ramp?</span>
+        </h2>
+        
+        <p class="text-lg sm:text-xl text-blue-100/70 mb-12 max-w-2xl mx-auto leading-relaxed">
+            Join the first 100 Founding Hosts and claim <strong class="text-emerald-400 text-lg">3 months of Premium for free.</strong><br>
+            Pilots: Start searching the <strong class="text-blue-300">Snowbird Corridor</strong> for free today.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row justify-center items-center gap-6 mb-8">
+            <a href="{{ url_for('main.post_listing') }}" class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-navy-900 font-black py-5 px-12 rounded-2xl text-xl shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98] group">
+                List Your Space Free <i class="fas fa-gem ml-2 group-hover:animate-bounce"></i>
             </a>
-            <a href="{{ url_for('main.listings') }}"
-                class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-10 rounded-xl text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-0.5 border-2 border-blue-500">
-                Browse Listings
+            <a href="{{ url_for('main.listings') }}" class="w-full sm:w-auto border-2 border-white/20 hover:border-white/40 text-white font-bold py-5 px-12 rounded-2xl text-xl transition-all hover:bg-white/5 active:scale-[0.98]">
+                Find Your Next Stop
             </a>
         </div>
+        
+        <p class="text-white/30 text-xs font-medium uppercase tracking-[0.2em] mb-4">9.5% Host Platform Fee — No Upfront Cost to List</p>
     </div>
-</div>
+</section>
 
 <!-- Animations -->
 <style>
