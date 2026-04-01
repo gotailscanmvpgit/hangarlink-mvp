@@ -75,9 +75,9 @@
                         </label>
                         <div class="flex gap-2 h-[60px]">
                             <input type="hidden" name="duration" id="duration-input" value="{{ duration or '7' }}">
-                            <button type="button" onclick="setDuration('1', this)" class="duration-chip flex-1 py-4 rounded-xl text-[11px] font-black border transition-all duration-300 {{ 'border-blue-500 bg-blue-600 text-white shadow-lg shadow-blue-500/30' if duration=='1' else 'border-white/10 bg-white/5 text-white/60 hover:bg-white/10' }}">1 NIGHT</button>
-                            <button type="button" onclick="setDuration('3', this)" class="duration-chip flex-1 py-4 rounded-xl text-[11px] font-black border transition-all duration-300 {{ 'border-blue-500 bg-blue-600 text-white shadow-lg shadow-blue-500/30' if duration=='3' else 'border-white/10 bg-white/5 text-white/60 hover:bg-white/10' }}">2-3</button>
-                            <button type="button" onclick="setDuration('7', this)" class="duration-chip flex-1 py-4 rounded-xl text-[11px] font-black border transition-all duration-300 {{ 'border-blue-500 bg-blue-600 text-white shadow-lg shadow-blue-500/30' if duration=='7' or not duration or duration=='' else 'border-white/10 bg-white/5 text-white/60 hover:bg-white/10' }}">4-7</button>
+                            <button type="button" onclick="setDuration('1', this)" class="duration-chip flex-1 rounded-xl text-[11px] font-black border transition-all duration-300 border-white/10 bg-white/5 text-white/60 hover:bg-white/10 {{ 'active' if duration=='1' }}">1 NIGHT</button>
+                            <button type="button" onclick="setDuration('3', this)" class="duration-chip flex-1 rounded-xl text-[11px] font-black border transition-all duration-300 border-white/10 bg-white/5 text-white/60 hover:bg-white/10 {{ 'active' if duration=='3' }}">2-3</button>
+                            <button type="button" onclick="setDuration('7', this)" class="duration-chip flex-1 rounded-xl text-[11px] font-black border transition-all duration-300 border-white/10 bg-white/5 text-white/60 hover:bg-white/10 {{ 'active' if duration=='7' or not duration or duration=='' }}">4-7</button>
                         </div>
                     </div>
 
@@ -88,9 +88,9 @@
                         </label>
                         <div class="flex gap-2 h-[60px]">
                             <input type="hidden" name="radius" id="radius-input" value="{{ radius or '250' }}">
-                            <button type="button" onclick="setRadius('100', this)" class="radius-chip flex-1 py-4 rounded-xl text-[11px] font-black border transition-all duration-300 {{ 'border-blue-500 bg-blue-600 text-white shadow-lg shadow-blue-500/30' if radius=='100' else 'border-white/10 bg-white/5 text-white/60 hover:bg-white/10' }}">100</button>
-                            <button type="button" onclick="setRadius('250', this)" class="radius-chip flex-1 py-4 rounded-xl text-[11px] font-black border transition-all duration-300 {{ 'border-blue-500 bg-blue-600 text-white shadow-lg shadow-blue-500/30' if radius=='250' or not radius or radius=='None' else 'border-white/10 bg-white/5 text-white/60 hover:bg-white/10' }}">250</button>
-                            <button type="button" onclick="setRadius('500', this)" class="radius-chip flex-1 py-4 rounded-xl text-[11px] font-black border transition-all duration-300 {{ 'border-blue-500 bg-blue-600 text-white shadow-lg shadow-blue-500/30' if radius=='500' else 'border-white/10 bg-white/5 text-white/60 hover:bg-white/10' }}">500</button>
+                            <button type="button" onclick="setRadius('100', this)" class="radius-chip flex-1 rounded-xl text-[11px] font-black border transition-all duration-300 border-white/10 bg-white/5 text-white/60 hover:bg-white/10 {{ 'active' if radius=='100' }}">100</button>
+                            <button type="button" onclick="setRadius('250', this)" class="radius-chip flex-1 rounded-xl text-[11px] font-black border transition-all duration-300 border-white/10 bg-white/5 text-white/60 hover:bg-white/10 {{ 'active' if radius=='250' or not radius or radius=='None' }}">250</button>
+                            <button type="button" onclick="setRadius('500', this)" class="radius-chip flex-1 rounded-xl text-[11px] font-black border transition-all duration-300 border-white/10 bg-white/5 text-white/60 hover:bg-white/10 {{ 'active' if radius=='500' }}">500</button>
                         </div>
                     </div>
                 </div>
@@ -196,6 +196,18 @@
         </div>
     </div>
 </section>
+<style>
+    .duration-chip, .radius-chip {
+        transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .duration-chip.active, .radius-chip.active {
+        border-color: #3b82f6 !important;
+        background-color: #2563eb !important;
+        color: white !important;
+        box-shadow: 0 0 15px rgba(37,99,235,0.4);
+    }
+</style>
+
 <script>
     function toggleMoreFilters() {
         const filters = document.getElementById('more-filters');
@@ -214,23 +226,17 @@
     }
 
     function setDuration(val, el) {
+        if (event) event.preventDefault();
         document.getElementById('duration-input').value = val;
-        document.querySelectorAll('.duration-chip').forEach(btn => {
-            btn.classList.remove('border-blue-500', 'bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-500/30');
-            btn.classList.add('border-white/10', 'bg-white/5', 'text-white/60');
-        });
-        el.classList.remove('border-white/10', 'bg-white/5', 'text-white/60');
-        el.classList.add('border-blue-500', 'bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-500/30');
+        document.querySelectorAll('.duration-chip').forEach(btn => btn.classList.remove('active'));
+        el.classList.add('active');
     }
 
     function setRadius(val, el) {
+        if (event) event.preventDefault();
         document.getElementById('radius-input').value = val;
-        document.querySelectorAll('.radius-chip').forEach(btn => {
-            btn.classList.remove('border-blue-500', 'bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-500/30');
-            btn.classList.add('border-white/10', 'bg-white/5', 'text-white/60');
-        });
-        el.classList.remove('border-white/10', 'bg-white/5', 'text-white/60');
-        el.classList.add('border-blue-500', 'bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-500/30');
+        document.querySelectorAll('.radius-chip').forEach(btn => btn.classList.remove('active'));
+        el.classList.add('active');
     }
 
     function checkRouteSearch(val) {
