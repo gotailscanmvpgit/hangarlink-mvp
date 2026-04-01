@@ -194,6 +194,14 @@ def listings():
     """Search and browse all listings"""
     print("DEBUG: /listings route entered")
 
+    # Safely check search limit (never let this crash the page)
+    search_limited = False
+    try:
+        if not check_search_limit():
+            search_limited = True
+    except Exception as lim_err:
+        print(f"WARN: check_search_limit failed: {lim_err}")
+
     airport = request.args.get('airport', '').strip().upper()
     radius = request.args.get('radius', 250, type=int)
     covered = request.args.get('covered', '')
@@ -206,7 +214,18 @@ def listings():
     nfpa_409_compliant = request.args.get('nfpa_409_compliant')
     gpu_power_available = request.args.get('gpu_power_available')
 
-    search_limited = False # Search is now unlimited for basic use
+    # If search limit is reached, return immediately with empty results — no DB query needed
+    if search_limited:
+        return render_template('listings.html',
+                               listings=[],
+                               pagination=None,
+                               airport=airport,
+                               radius=radius,
+                               covered=covered,
+                               min_price=min_price,
+                               max_price=max_price,
+                               search_limited=True,
+                               markers=[])
 
     def _run_query():
         q = Listing.query.filter_by(status='Active')
@@ -283,39 +302,6 @@ def listings():
             except Exception:
                 pass
 
-    suggested_route = None
-    if any(q in airport for q in [" TO ", "FLYING", "FLORIDA", "OSH", "SUN", "LAKELAND"]):
-        if any(q in airport for q in ["FLORIDA", "KFMY", "KFLL", "MIA", "MYERS"]):
-            suggested_route = {
-                "title": "Snowbird Corridor (Canada/NE to Florida)",
-                "note": "Popular overnight stops used by Snowbird pilots and early spring flyers.",
-                "stops": [
-                    {"icao": "KAGC", "name": "Allegheny County (Pittsburgh, PA)", "flight_time": "1h 45m from CYTZ", "available_spots": 2, "price": 45},
-                    {"icao": "KHKY", "name": "Hickory Regional (Hickory, NC)", "flight_time": "2h 15m from KAGC", "available_spots": 4, "price": 35},
-                    {"icao": "KSSI", "name": "St Simons Island (Brunswick, GA)", "flight_time": "2h 30m from KHKY", "available_spots": 1, "price": 55}
-                ]
-            }
-        elif any(q in airport for q in ["OSH", "KOSH", "AIRVENTURE"]):
-            suggested_route = {
-                "title": "The Road to AirVenture (Oshkosh)",
-                "note": "Popular overnight stops used by AirVenture flyers avoiding weather or fatigue.",
-                "stops": [
-                    {"icao": "KARB", "name": "Ann Arbor Municipal (Ann Arbor, MI)", "flight_time": "1h 20m from East", "available_spots": 3, "price": 40},
-                    {"icao": "KVPZ", "name": "Porter County (Valparaiso, IN)", "flight_time": "1h 10m from KARB", "available_spots": 5, "price": 30},
-                    {"icao": "KENW", "name": "Kenosha Regional (Kenosha, WI)", "flight_time": "50m from KVPZ (Fisk Staging)", "available_spots": 2, "price": 60}
-                ]
-            }
-        elif any(q in airport for q in ["SUN", "KLAL", "LAKELAND"]):
-            suggested_route = {
-                "title": "Sun 'n Fun Route (to Lakeland)",
-                "note": "Top stops for pilots heading to Sun 'n Fun Aerospace Expo.",
-                "stops": [
-                    {"icao": "KCRW", "name": "Yeager Airport (Charleston, WV)", "flight_time": "2h 10m from NE", "available_spots": 2, "price": 40},
-                    {"icao": "KCAE", "name": "Columbia Metropolitan (Columbia, SC)", "flight_time": "2h 00m from KCRW", "available_spots": 3, "price": 45},
-                    {"icao": "KCRG", "name": "Craig Airport (Jacksonville, FL)", "flight_time": "1h 45m from KCAE", "available_spots": 4, "price": 50}
-                ]
-            }
-
     print(f"DEBUG: /listings returning {len(listings_items)} results")
     return render_template('listings.html',
                            listings=listings_items,
@@ -326,8 +312,63 @@ def listings():
                            min_price=min_price,
                            max_price=max_price,
                            search_limited=search_limited,
-                           markers=markers,
-                           suggested_route=suggested_route)
+                           markers=markers)
+
+@bp.route('/api/search')
+def api_search():
+    """AJAX search endpoint for homepage instant results"""
+    airport = request.args.get('airport', '').strip().upper()
+    duration = request.args.get('duration', '7')
+    
+    # We follow the same core query logic as the main listings page
+    q = Listing.query.filter_by(status='Active')
+    if airport:
+        q = q.filter_by(airport_icao=airport)
+    
+    # Simple limit for instant search
+    listings = q.order_by(
+        Listing.is_featured.desc(),
+        Listing.created_at.desc()
+    ).limit(6).all()
+    
+    results = []
+    for l in listings:
+        photo_url = None
+        if l.photos:
+            first_photo = l.photos.split(',')[0]
+            if first_photo.startswith('http'):
+                photo_url = first_photo.replace('/upload/', '/upload/w_800,h_600,c_fill,f_webp/')
+            else:
+                photo_url = url_for('static', filename='uploads/listings/' + first_photo)
+        
+        # Determine display price
+        price_val = 0
+        price_unit = "/night"
+        if duration in ['1', '2', '3', '7']:
+            price_val = int(l.price_night) if l.price_night else (int(l.price_month / 30) if l.price_month else 0)
+        else:
+            price_val = int(l.price_month) if l.price_month else 0
+            price_unit = "/mo"
+
+        results.append({
+            'id': l.id,
+            'airport_icao': l.airport_icao,
+            'price': price_val,
+            'price_unit': price_unit,
+            'photo_url': photo_url,
+            'is_featured': l.is_featured,
+            'is_premium': bool(l.owner and (l.owner.is_premium or l.is_premium_listing)),
+            'min_stay': l.min_stay_nights,
+            'url': url_for('main.listing_detail', id=l.id),
+            'condition_verified': getattr(l, 'condition_verified', False),
+            'virtual_tour_url': getattr(l, 'virtual_tour_url', None)
+        })
+    
+    return jsonify({
+        'status': 'success',
+        'count': len(results),
+        'listings': results
+    })
 
 @bp.route('/listing/<int:id>')
 def listing_detail(id):
@@ -2010,10 +2051,44 @@ def cancel_subscription():
 
 def check_search_limit():
     """
-    Search is now unlimited for all users as of 2026 update.
-    Returns True always.
+    Rate-limit free users and guests to 5 searches per day.
+    Uses Flask session (cookie) for tracking — no DB columns required.
+    Returns True = allowed, False = limit reached.
     """
-    return True
+    try:
+        # Admins and premium users always bypass limits
+        if current_user.is_authenticated:
+            if getattr(current_user, 'is_admin', False):
+                return True
+            if getattr(current_user, 'subscription_tier', None) == 'premium':
+                return True
+            # Owners can search freely too
+            if getattr(current_user, 'role', 'renter') != 'renter':
+                return True
+
+        # Use session cookie to track count — works for both guests and free users
+        today_str = date.today().isoformat()
+        session_date = session.get('search_date')
+        session_count = session.get('search_count', 0)
+
+        # Reset counter if it's a new day
+        if session_date != today_str:
+            session['search_date'] = today_str
+            session['search_count'] = 0
+            session_count = 0
+
+        FREE_SEARCH_LIMIT = 5
+
+        if session_count >= FREE_SEARCH_LIMIT:
+            return False  # Limit reached
+
+        # Increment and save counter to session cookie
+        session['search_count'] = session_count + 1
+        return True
+
+    except Exception as e:
+        print(f"WARN: check_search_limit error (allowing): {e}")
+        return True  # Fail open — never block users on errors
 
 SPONSORED_TIERS = {
     'silver': {'price': 4900, 'name': 'Silver Featured', 'days': 30, 'boost': '2x'},
