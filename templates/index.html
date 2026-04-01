@@ -117,48 +117,79 @@
         {% endif %}
 
         <!-- Premium Search Bar -->
-        <div id="search-bar" class="max-w-3xl mx-auto animate-fade-in-up" style="animation-delay: 0.2s;">
+        <div id="search-bar" class="max-w-4xl mx-auto animate-fade-in-up" style="animation-delay: 0.2s;">
             <form action="{{ url_for('main.listings') }}" method="GET" id="homepage-search-form"
-                class="rounded-2xl p-6 sm:p-8 shadow-2xl border border-white/20 transition-all duration-500"
-                style="background: rgba(0,18,41,0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
-                    <!-- Airport ICAO -->
-                    <div class="md:col-span-2">
-                        <label for="airport" class="block text-xs font-bold mb-2 text-left uppercase tracking-wider"
-                            style="color: rgba(255,255,255,0.85);">
-                            <i class="fas fa-plane-departure mr-1.5" style="color: #60a5fa;"></i>Where are you flying?
+                class="rounded-3xl p-6 sm:p-10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] border border-white/20 transition-all duration-500 overflow-hidden"
+                style="background: rgba(0,21,48,0.8); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);">
+                
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 mb-8">
+                    <!-- Location / Route -->
+                    <div class="md:col-span-12 lg:col-span-6">
+                        <label for="airport" class="block text-xs font-black mb-3 text-left uppercase tracking-[0.2em] text-white/60">
+                            <i class="fas fa-plane-departure mr-2 text-blue-400"></i>Where are you flying?
                         </label>
-                        <input type="text" id="airport" name="airport"
-                            class="block w-full rounded-xl p-4 text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all uppercase"
-                            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25); color: #FAFAFA;"
-                            placeholder="CYHM, 60J, Toronto to Florida, etc." maxlength="50" required
-                            onfocus="this.style.background='rgba(255,255,255,0.18)'; this.style.borderColor='rgba(96,165,250,0.7)';"
-                            onblur="this.style.background='rgba(255,255,255,0.1)'; this.style.borderColor='rgba(255,255,255,0.25)';">
+                        <div class="relative group">
+                            <input type="text" id="airport" name="airport"
+                                class="block w-full rounded-2xl p-5 text-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all uppercase placeholder:normal-case placeholder:text-white/20"
+                                style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #FAFAFA;"
+                                placeholder="CYHM, 60J, Toronto to Florida, or airport name" maxlength="100" required
+                                value="{{ airport or '' }}"
+                                oninput="checkRouteSearch(this.value)">
+                            <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none group-focus-within:text-blue-400 text-white/20">
+                                <i class="fas fa-search text-xl transition-colors"></i>
+                            </div>
+                        </div>
+
+                        <!-- Smart Stopover Suggestions Box -->
+                        <div id="stopover-suggestions" class="mt-4 hidden animate-fade-in">
+                            <div class="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 border border-blue-500/30 rounded-xl p-4 flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
+                                    <i class="fas fa-route text-blue-400"></i>
+                                </div>
+                                <div class="text-left text-white">
+                                    <h4 class="text-sm font-bold">Smart Route Detected</h4>
+                                    <p class="text-blue-200/60 text-xs">Viewing suggested overnight stops along your route.</p>
+                                </div>
+                                <div class="ml-auto">
+                                    <span class="bg-blue-500 text-[10px] font-black text-white px-2 py-1 rounded">BETA</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <!-- Radius (Hidden for now as it's less critical for the clean look) -->
-                    <div class="hidden">
-                        <input type="hidden" name="radius" value="250">
-                    </div>
+
                     <!-- Duration Chips -->
-                    <div class="md:col-span-1">
-                        <label class="block text-xs font-bold mb-2 text-left uppercase tracking-wider"
-                            style="color: rgba(255,255,255,0.85);">
-                            <i class="fas fa-clock mr-1.5" style="color: #60a5fa;"></i>Duration
+                    <div class="md:col-span-6 lg:col-span-3">
+                        <label class="block text-xs font-black mb-3 text-left uppercase tracking-[0.2em] text-white/60">
+                            <i class="fas fa-calendar-day mr-2 text-blue-400"></i>Stay Length
                         </label>
-                        <div class="flex gap-2 h-[58px]">
-                            <input type="hidden" name="duration" id="duration-input" value="7">
-                            <button type="button" onclick="setDuration('1', this)" class="duration-chip flex-1 rounded-xl text-xs font-bold border border-white/20 transition-all hover:bg-white/10 text-white/70">1 Night</button>
-                            <button type="button" onclick="setDuration('3', this)" class="duration-chip flex-1 rounded-xl text-xs font-bold border border-white/20 transition-all hover:bg-white/10 text-white/70">2-3 Nights</button>
-                            <button type="button" onclick="setDuration('7', this)" class="duration-chip flex-1 rounded-xl text-xs font-bold border-blue-500 bg-blue-600/30 text-white">4-7 Nights</button>
+                        <div class="flex gap-2 flex-wrap">
+                            <input type="hidden" name="duration" id="duration-input" value="{{ duration or '7' }}">
+                            <button type="button" onclick="setDuration('1', this)" class="duration-chip flex-1 py-4 rounded-xl text-sm font-bold border transition-all duration-300 {{ 'border-blue-500 bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)]' if duration=='1' else 'border-white/10 bg-white/5 text-white/60 hover:bg-white/10' }}">1 Night</button>
+                            <button type="button" onclick="setDuration('3', this)" class="duration-chip flex-1 py-4 rounded-xl text-sm font-bold border transition-all duration-300 {{ 'border-blue-500 bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)]' if duration=='3' else 'border-white/10 bg-white/5 text-white/60 hover:bg-white/10' }}">2-3</button>
+                            <button type="button" onclick="setDuration('7', this)" class="duration-chip flex-1 py-4 rounded-xl text-sm font-bold border transition-all duration-300 {{ 'border-blue-500 bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)]' if duration=='7' or not duration else 'border-white/10 bg-white/5 text-white/60 hover:bg-white/10' }}">4-7</button>
+                        </div>
+                    </div>
+
+                    <!-- Radius Chips -->
+                    <div class="md:col-span-6 lg:col-span-3">
+                        <label class="block text-xs font-black mb-3 text-left uppercase tracking-[0.2em] text-white/60">
+                            <i class="fas fa-bullseye mr-2 text-blue-400"></i>Radius (km)
+                        </label>
+                        <div class="flex gap-2">
+                            <input type="hidden" name="radius" id="radius-input" value="{{ radius or '250' }}">
+                            <button type="button" onclick="setRadius('100', this)" class="radius-chip flex-1 py-4 rounded-xl text-sm font-bold border transition-all duration-300 {{ 'border-blue-500 bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)]' if radius=='100' else 'border-white/10 bg-white/5 text-white/60 hover:bg-white/10' }}">100</button>
+                            <button type="button" onclick="setRadius('250', this)" class="radius-chip flex-1 py-4 rounded-xl text-sm font-bold border transition-all duration-300 {{ 'border-blue-500 bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)]' if radius=='250' or not radius else 'border-white/10 bg-white/5 text-white/60 hover:bg-white/10' }}">250</button>
+                            <button type="button" onclick="setRadius('500', this)" class="radius-chip flex-1 py-4 rounded-xl text-sm font-bold border transition-all duration-300 {{ 'border-blue-500 bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)]' if radius=='500' else 'border-white/10 bg-white/5 text-white/60 hover:bg-white/10' }}">500</button>
                         </div>
                     </div>
                 </div>
-                <!-- Submit -->
+
+                <!-- Submit Button -->
                 <button type="submit" id="search-submit-btn"
-                    class="w-full font-bold py-4 sm:py-5 px-8 rounded-xl text-lg transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
-                    style="background: linear-gradient(135deg, #1a56db 0%, #0e9f6e 100%); color: white; box-shadow: 0 8px 24px rgba(26,86,219,0.35);">
+                    class="w-full font-black py-5 px-8 rounded-2xl text-xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.98] flex items-center justify-center gap-3"
+                    style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; box-shadow: 0 10px 40px -10px rgba(37,99,235,0.5);">
                     <i class="fas fa-search" id="search-icon"></i>
-                    <span id="search-text">Find Instantly</span>
+                    <span id="search-text">Search Available Parking</span>
                 </button>
             </form>
 
@@ -177,11 +208,26 @@
     function setDuration(val, el) {
         document.getElementById('duration-input').value = val;
         document.querySelectorAll('.duration-chip').forEach(c => {
-            c.classList.remove('border-blue-500', 'bg-blue-600/30', 'text-white');
-            c.classList.add('border-white/20', 'text-white/70');
+            c.className = "duration-chip flex-1 py-4 rounded-xl text-sm font-bold border transition-all duration-300 border-white/10 bg-white/5 text-white/60 hover:bg-white/10";
         });
-        el.classList.add('border-blue-500', 'bg-blue-600/30', 'text-white');
-        el.classList.remove('border-white/20', 'text-white/70');
+        el.className = "duration-chip flex-1 py-4 rounded-xl text-sm font-bold border transition-all duration-300 border-blue-500 bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)]";
+    }
+
+    function setRadius(val, el) {
+        document.getElementById('radius-input').value = val;
+        document.querySelectorAll('.radius-chip').forEach(c => {
+            c.className = "radius-chip flex-1 py-4 rounded-xl text-sm font-bold border transition-all duration-300 border-white/10 bg-white/5 text-white/60 hover:bg-white/10";
+        });
+        el.className = "radius-chip flex-1 py-4 rounded-xl text-sm font-bold border transition-all duration-300 border-blue-500 bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)]";
+    }
+
+    function checkRouteSearch(val) {
+        const box = document.getElementById('stopover-suggestions');
+        if (val.toLowerCase().includes(' to ')) {
+            box.classList.remove('hidden');
+        } else {
+            box.classList.add('hidden');
+        }
     }
 
     document.getElementById('homepage-search-form').addEventListener('submit', function(e) {
@@ -193,6 +239,7 @@
         const resultsContainer = document.getElementById('search-results-container');
         const airport = document.getElementById('airport').value;
         const duration = document.getElementById('duration-input').value;
+        const radius = document.getElementById('radius-input').value;
         
         // Show loading state
         btn.disabled = true;
@@ -201,13 +248,13 @@
         text.textContent = 'Searching for parking...';
         
         // AJAX Fetch
-        fetch(`/api/search?airport=${encodeURIComponent(airport)}&duration=${duration}`)
+        fetch(`/api/search?airport=${encodeURIComponent(airport)}&duration=${duration}&radius=${radius}`)
             .then(res => res.json())
             .then(data => {
                 btn.disabled = false;
                 btn.classList.remove('opacity-80', 'cursor-not-allowed');
                 icon.className = 'fas fa-search';
-                text.textContent = 'Find Instantly';
+                text.textContent = 'Search Available Parking';
                 
                 resultsContainer.innerHTML = '';
                 resultsContainer.classList.remove('hidden');
@@ -240,7 +287,7 @@
                                         </div>
                                         ${listing.is_premium ? `<div class="absolute top-3 right-3 z-10"><span class="inline-flex items-center bg-amber-100/90 backdrop-blur text-amber-700 text-[10px] font-black px-2 py-1 rounded-full shadow"><i class="fas fa-star mr-1"></i>PREMIUM</span></div>` : ''}
                                     </div>
-                                    <div class="p-5">
+                                    <div class="p-5 text-left">
                                         <div class="flex items-center justify-between mb-2">
                                             <h3 class="text-lg font-bold text-gray-900 dark:text-platinum-100">${listing.airport_icao}</h3>
                                             <span class="text-xl font-bold text-blue-600">$${listing.price}</span>
@@ -264,8 +311,7 @@
                 btn.disabled = false;
                 btn.classList.remove('opacity-80', 'cursor-not-allowed');
                 icon.className = 'fas fa-search';
-                text.textContent = 'Find Instantly';
-                alert('Search failed. Please try again.');
+                text.textContent = 'Search Available Parking';
             });
     });
 </script>
