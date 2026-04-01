@@ -51,7 +51,7 @@
                             <input type="text" id="airport" name="airport"
                                 class="block w-full rounded-2xl p-4 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all uppercase placeholder:normal-case placeholder:text-white/20"
                                 style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #FAFAFA;"
-                                placeholder="CYHM, 60J, Toronto to Florida..." maxlength="100" required
+                                placeholder="CYHM, 60J, Toronto to Florida, or airport name" maxlength="100" required
                                 value="{{ airport or '' }}"
                                 oninput="checkRouteSearch(this.value)">
                             <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none group-focus-within:text-blue-400 text-white/20">
@@ -71,7 +71,7 @@
                     <!-- Duration Chips -->
                     <div class="md:col-span-6 lg:col-span-3">
                         <label class="block text-[10px] font-black mb-2 uppercase tracking-[0.2em] text-white/50">
-                            <i class="fas fa-calendar-day mr-2 text-blue-400"></i>Stay Length
+                            <i class="fas fa-calendar-day mr-2 text-blue-400"></i>Duration (1-7 nights focus)
                         </label>
                         <div class="flex gap-2 h-[60px]">
                             <input type="hidden" name="duration" id="duration-input" value="{{ duration or '7' }}">
@@ -91,6 +91,88 @@
                             <button type="button" onclick="setRadius('100', this)" class="radius-chip flex-1 py-4 rounded-xl text-[11px] font-black border transition-all duration-300 {{ 'border-blue-500 bg-blue-600 text-white shadow-lg shadow-blue-500/30' if radius=='100' else 'border-white/10 bg-white/5 text-white/60 hover:bg-white/10' }}">100</button>
                             <button type="button" onclick="setRadius('250', this)" class="radius-chip flex-1 py-4 rounded-xl text-[11px] font-black border transition-all duration-300 {{ 'border-blue-500 bg-blue-600 text-white shadow-lg shadow-blue-500/30' if radius=='250' or not radius or radius=='None' else 'border-white/10 bg-white/5 text-white/60 hover:bg-white/10' }}">250</button>
                             <button type="button" onclick="setRadius('500', this)" class="radius-chip flex-1 py-4 rounded-xl text-[11px] font-black border transition-all duration-300 {{ 'border-blue-500 bg-blue-600 text-white shadow-lg shadow-blue-500/30' if radius=='500' else 'border-white/10 bg-white/5 text-white/60 hover:bg-white/10' }}">500</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- More Filters Toggle -->
+                <div class="flex justify-start mb-6">
+                    <button type="button" onclick="toggleMoreFilters()" class="text-blue-400 hover:text-blue-300 text-sm font-bold flex items-center transition-all">
+                        <i id="filter-icon" class="fas fa-chevron-down mr-2 transition-transform"></i>
+                        <span id="filter-text">More Filters</span>
+                    </button>
+                </div>
+
+                <!-- Technical Filters (Hidden by Default) -->
+                <div id="more-filters" class="hidden animate-fade-in-up mb-8 border-t border-white/10 pt-8">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left mb-8">
+                        <!-- Covered -->
+                        <div>
+                            <label class="block text-[10px] font-black mb-2 uppercase tracking-[0.2em] text-white/50">
+                                <i class="fas fa-warehouse mr-2 text-blue-400"></i>Covered
+                            </label>
+                            <select name="covered"
+                                class="block w-full rounded-2xl p-4 text-base font-bold shadow-inner focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                                style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #FAFAFA;">
+                                <option value="" style="background:#001F3F; color:#FAFAFA;">Any</option>
+                                <option value="yes" {% if covered=='yes' %}selected{% endif %} style="background:#001F3F; color:#FAFAFA;">Yes — Covered</option>
+                                <option value="no" {% if covered=='no' %}selected{% endif %} style="background:#001F3F; color:#FAFAFA;">No — Outdoor</option>
+                            </select>
+                        </div>
+
+                        <!-- Price Range -->
+                        <div class="md:col-span-2 grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[10px] font-black mb-2 uppercase tracking-[0.2em] text-white/50">
+                                    <i class="fas fa-dollar-sign mr-2 text-blue-400"></i>Min Price / day
+                                </label>
+                                <input type="number" name="min_price" value="{{ min_price or '' }}"
+                                    class="block w-full rounded-2xl p-4 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all uppercase"
+                                    style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #FAFAFA;"
+                                    placeholder="200">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black mb-2 uppercase tracking-[0.2em] text-white/50">
+                                    <i class="fas fa-dollar-sign mr-2 text-blue-400"></i>Max Price / day
+                                </label>
+                                <input type="number" name="max_price" value="{{ max_price or '' }}"
+                                    class="block w-full rounded-2xl p-4 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all uppercase"
+                                    style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #FAFAFA;"
+                                    placeholder="800">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Safety & Features -->
+                    <div class="text-left">
+                        <label class="block text-[10px] font-black mb-4 uppercase tracking-[0.2em] text-white/50">
+                            <i class="fas fa-shield-alt mr-2 text-blue-400"></i>Safety & Features
+                        </label>
+                        <div class="flex flex-wrap gap-3">
+                            <label class="flex items-center space-x-3 text-white/80 font-bold text-sm cursor-pointer group hover:text-white transition-all bg-white/5 hover:bg-white/10 p-3 rounded-xl border border-white/10">
+                                <input type="checkbox" name="is_heated" value="1" {% if request.args.get('is_heated')=='1' %}checked{% endif %} class="w-5 h-5 text-blue-500 rounded border-gray-500 bg-gray-800/50 focus:ring-blue-500 transition-all shadow-inner">
+                                <span class="flex items-center"><i class="fas fa-thermometer-half text-red-500 mr-2"></i>Heated Only</span>
+                            </label>
+
+                            <label class="flex items-center space-x-3 text-white/80 font-bold text-sm cursor-pointer group hover:text-white transition-all bg-white/5 hover:bg-white/10 p-3 rounded-xl border border-white/10">
+                                <input type="checkbox" name="access_24_7" value="1" {% if request.args.get('access_24_7')=='1' %}checked{% endif %} class="w-5 h-5 text-blue-500 rounded border-gray-500 bg-gray-800/50 focus:ring-blue-500 transition-all shadow-inner">
+                                <span class="flex items-center"><i class="fas fa-key text-blue-400 mr-2"></i>24/7 Access</span>
+                            </label>
+
+                            <label class="flex items-center space-x-3 text-white/80 font-bold text-sm cursor-pointer group hover:text-white transition-all bg-white/5 hover:bg-white/10 p-3 rounded-xl border border-white/10">
+                                <input type="checkbox" name="electric_doors_only" value="1" {% if request.args.get('electric_doors_only')=='1' %}checked{% endif %} class="w-5 h-5 text-amber-500 rounded border-gray-500 bg-gray-800/50 focus:ring-amber-500 transition-all shadow-inner">
+                                <span class="flex items-center"><i class="fas fa-bolt text-amber-400 mr-2"></i>Electric/Hydraulic Doors</span>
+                            </label>
+
+                            <label class="flex items-center space-x-3 text-white/80 font-bold text-sm cursor-pointer group hover:text-white transition-all bg-white/5 hover:bg-white/10 p-3 rounded-xl border border-white/10 border-l-2 border-l-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.1)]">
+                                <input type="checkbox" name="nfpa_409_compliant" value="1" {% if request.args.get('nfpa_409_compliant')=='1' %}checked{% endif %} class="w-5 h-5 text-amber-500 rounded border-amber-500/50 bg-gray-800/50 focus:ring-amber-500 transition-all shadow-inner">
+                                <span class="flex items-center"><i class="fas fa-fire-extinguisher text-amber-500 mr-2"></i>NFPA 409 Compliant <span class="ml-2 text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded-sm font-black">GOLD</span></span>
+                            </label>
+
+                            <label class="flex items-center space-x-3 text-white/80 font-bold text-sm cursor-pointer group hover:text-white transition-all bg-white/5 hover:bg-white/10 p-3 rounded-xl border border-white/10">
+                                <input type="checkbox" name="gpu_power_available" value="1" {% if request.args.get('gpu_power_available')=='1' %}checked{% endif %} class="w-5 h-5 text-blue-500 rounded border-gray-500 bg-gray-800/50 focus:ring-blue-500 transition-all shadow-inner">
+                                <span class="flex items-center"><i class="fas fa-plug text-blue-400 mr-2"></i>GPU Available</span>
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -115,6 +197,22 @@
     </div>
 </section>
 <script>
+    function toggleMoreFilters() {
+        const filters = document.getElementById('more-filters');
+        const icon = document.getElementById('filter-icon');
+        const text = document.getElementById('filter-text');
+        
+        if (filters.classList.contains('hidden')) {
+            filters.classList.remove('hidden');
+            icon.style.transform = 'rotate(180deg)';
+            text.textContent = 'Hide Filters';
+        } else {
+            filters.classList.add('hidden');
+            icon.style.transform = 'rotate(0deg)';
+            text.textContent = 'More Filters';
+        }
+    }
+
     function setDuration(val, el) {
         document.getElementById('duration-input').value = val;
         document.querySelectorAll('.duration-chip').forEach(btn => {
