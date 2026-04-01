@@ -76,11 +76,14 @@
                     <select name="duration"
                         class="block w-full rounded-xl p-3 text-base font-semibold shadow-inner focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
                         style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #FAFAFA;">
-                        <option value="7" {% if request.args.get('duration') == '7' or not request.args.get('duration') %}selected{% endif %} style="background:#001F3F; color:#FAFAFA;">Short-Term (1–7 nights)</option>
+                        <option value="7" {% if request.args.get('duration') == '7' or (not request.args.get('duration') and not duration) %}selected{% endif %} style="background:#001F3F; color:#FAFAFA;">Short-Term (1–7 nights)</option>
                         <option value="30" {% if request.args.get('duration') == '30' %}selected{% endif %} style="background:#001F3F; color:#FAFAFA;">Monthly</option>
                         <option value="" {% if request.args.get('duration') == '' %}selected{% endif %} style="background:#001F3F; color:#FAFAFA;">Flexible</option>
                     </select>
                 </div>
+
+                <!-- Hidden Radius to keep state -->
+                <input type="hidden" name="radius" value="{{ radius or request.args.get('radius', 250) }}">
 
                 <!-- Min Price -->
                 <div>
@@ -143,57 +146,64 @@
     </div>
 
     <div class="text-center">
-        <button type="submit"
-            class="w-full sm:w-auto min-w-[250px] font-bold py-3.5 px-8 rounded-xl shadow-lg transition-all hover:-translate-y-0.5 active:translate-y-0"
+        <button type="submit" id="listing-search-btn"
+            class="w-full sm:w-auto min-w-[250px] font-bold py-3.5 px-8 rounded-xl shadow-lg transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 mx-auto"
             style="background: linear-gradient(135deg, #1a56db 0%, #0e9f6e 100%); color: white;">
-            <i class="fas fa-search mr-2"></i>Search Available Hangars
+            <i class="fas fa-search" id="listing-search-icon"></i>
+            <span id="listing-search-text">Search Available Hangars</span>
         </button>
     </div>
     </form>
 </div>
 </div>
 
-<!-- Page Main Content Wrap -->
-<div class="animate-fade-in" style="animation-delay: 0.1s;">
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchForm = document.getElementById('listing-search-btn')?.closest('form');
+        if (searchForm) {
+            searchForm.addEventListener('submit', function(e) {
+                const btn = document.getElementById('listing-search-btn');
+                const icon = document.getElementById('listing-search-icon');
+                const text = document.getElementById('listing-search-text');
+                
+                if (btn && icon && text) {
+                    btn.disabled = true;
+                    btn.classList.add('opacity-80', 'cursor-not-allowed');
+                    icon.className = 'fas fa-spinner fa-spin';
+                    text.textContent = 'Searching...';
+                }
+            });
+        }
+    });
+</script>
+</div>
+</div>
+
+<!-- Search Limit Banner -->
+{% if search_limited %}
+<div class="max-w-7xl mx-auto px-6 lg:px-8 mt-8">
+    <div
+        class="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-400/30 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+            <div
+                class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shrink-0">
+                <i class="fas fa-lock text-white text-lg"></i>
+            </div>
+            <div>
+                <h3 class="text-white font-bold">Daily Search Limit Reached</h3>
+                <p class="text-slate-400 text-sm">Free accounts get 5 searches per day. Upgrade for unlimited.</p>
+            </div>
+        </div>
+        <a href="{{ url_for('main.pricing') }}"
+            class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold transition-all whitespace-nowrap">
+            Upgrade to Premium
+        </a>
+    </div>
+</div>
+{% endif %}
 
 <!-- Listings Results -->
 <div class="max-w-7xl mx-auto px-6 lg:px-8 py-12">
-    <!-- Smart Stopover Suggestions (Phase 1) -->
-    {% if suggested_route %}
-    <div class="mb-10 animate-fade-in-up">
-        <div class="bg-gradient-to-r from-emerald-900 to-teal-900 border border-emerald-500/30 rounded-2xl p-6 md:p-8 shadow-xl relative overflow-hidden">
-            <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(16,185,129,0.15),transparent_50%)]"></div>
-            <div class="relative z-10">
-                <div class="flex items-center gap-3 mb-2">
-                    <i class="fas fa-route text-emerald-400 text-2xl"></i>
-                    <h2 class="text-xl md:text-2xl font-bold text-white">Smart Stopovers: {{ suggested_route.title }}</h2>
-                </div>
-                <p class="text-emerald-100/80 text-sm mb-6">{{ suggested_route.note }}</p>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6">
-                    {% for stop in suggested_route.stops %}
-                    <div class="bg-white/10 backdrop-blur-md border border-emerald-400/20 rounded-xl p-5 hover:bg-white/15 transition-all group shadow-lg">
-                        <div class="flex justify-between items-start mb-3">
-                            <span class="inline-block bg-emerald-500 text-emerald-950 font-black text-xs px-2 py-0.5 rounded shadow">STOP {{ loop.index }}</span>
-                            <span class="text-emerald-300 font-bold">${{ stop.price }}<span class="text-xs font-normal opacity-70">/night</span></span>
-                        </div>
-                        <h3 class="text-lg font-bold text-white mb-1">{{ stop.icao }}</h3>
-                        <p class="text-emerald-50 text-sm mb-3 truncate" title="{{ stop.name }}">{{ stop.name }}</p>
-                        <div class="flex flex-col gap-2 text-xs text-emerald-100/70 mb-4">
-                            <div class="flex items-center"><i class="fas fa-plane w-4 text-emerald-400/70"></i> {{ stop.flight_time }}</div>
-                            <div class="flex items-center"><i class="fas fa-warehouse w-4 text-emerald-400/70"></i> {{ stop.available_spots }} short-term spots available</div>
-                        </div>
-                        <a href="{{ url_for('main.listings', airport=stop.icao) }}" class="block w-full text-center bg-white hover:bg-emerald-50 text-emerald-900 font-bold py-2.5 rounded-lg text-sm transition-colors shadow hover:shadow-md">
-                            View Stops
-                        </a>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
     {% if listings %}
     <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
         <p class="text-gray-600 dark:text-platinum-300">
