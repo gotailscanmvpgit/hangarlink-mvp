@@ -166,36 +166,8 @@ def index():
                     'is_premium': l.is_premium_listing or (l.owner and l.owner.is_premium)
                 })
 
-        # Featured Short-Term Listings (Mock for 2026 Strategy)
-        featured_listings = [
-            {
-                'id': 101,
-                'icao': 'KJFK',
-                'city': 'New York',
-                'price': 75,
-                'photo_url': 'https://res.cloudinary.com/hangarlinks/image/upload/v1/hangars/hangar-modern-1.jpg',
-                'distance': '1.2 km to terminal',
-                'badges': ['Covered', 'Verified']
-            },
-            {
-                'id': 102,
-                'icao': 'KLAX',
-                'city': 'Los Angeles',
-                'price': 110,
-                'photo_url': 'https://res.cloudinary.com/hangarlinks/image/upload/v1/hangars/hangar-premium-2.jpg',
-                'distance': '0.8 km to terminal',
-                'badges': ['Climate Controlled', 'Verified']
-            },
-            {
-                'id': 103,
-                'icao': 'KORD',
-                'city': 'Chicago',
-                'price': 55,
-                'photo_url': 'https://res.cloudinary.com/hangarlinks/image/upload/v1/hangars/hangar-economic-3.jpg',
-                'distance': '2.5 km to terminal',
-                'badges': ['Outdoor Secured', 'Best Value']
-            }
-        ]
+        # Featured Short-Term Listings: Dynamic Database Query
+        featured_listings = Listing.query.filter_by(is_featured=True, status='Active').limit(3).all()
 
         return render_template('index.html',
                               listings_count=listings_count,
