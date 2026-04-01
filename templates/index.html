@@ -4,24 +4,15 @@
 {% block extra_head %}{% endblock %}
 
 {% block content %}
-<!-- Cinematic Hero Section -->
-<section class="hero relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-    <!-- Background Image: Premium GA Hangar (Cirrus/Cessna Golden Hour) -->
-    <div class="absolute inset-0 z-0">
-        <div class="w-full h-full bg-cover bg-center bg-no-repeat bg-[#000a18]"
-            style="background-image: url('https://res.cloudinary.com/hangarlinks/image/upload/c_fill,g_auto,w_1920,q_auto,f_auto/v1/hangars/hero-premium-ga-cirrus.jpg');"></div>
-    </div>
-    <!-- Premium Overlay Loop -->
-    <div class="absolute inset-0 z-[5] bg-gradient-to-b from-black/70 via-black/30 to-transparent"></div>
-    <div class="absolute inset-0 z-[6] bg-black/40"></div>
-    <!-- Cinematic Gradient Overlay -->
-    <div class="absolute inset-0 z-10"
-        style="background: linear-gradient(to bottom, rgba(0,18,41,0.6) 0%, rgba(0,31,63,0.3) 50%, rgba(0,10,24,0.95) 100%);">
-    </div>
-    <!-- Warm golden glow accent -->
-    <div class="absolute inset-0 z-10 bg-gradient-to-tr from-transparent via-amber-500/5 to-transparent"></div>
-
-    <!-- Hero Content -->
+<!-- Cinematic Hero Section: Premium GA Visual Transformation -->
+<section class="hero relative bg-cover bg-center bg-no-repeat min-h-[80vh] flex items-center justify-center overflow-hidden bg-scroll md:bg-fixed" 
+         style="background-image: url('https://images.unsplash.com/photo-1520437358207-353af3a5159e?auto=format&fit=crop&q=80&w=1920');">
+    
+    <!-- Dark Slate Readability Overlay -->
+    <div class="absolute inset-0 bg-slate-900/60 z-[5]"></div>
+    <div class="absolute inset-0 z-[6] bg-gradient-to-tr from-[#000a18]/40 via-transparent to-[#000a18]/40"></div>
+    
+    <!-- Hero Content: Relative for layering -->
     <div class="relative z-20 text-center max-w-5xl mx-auto px-6 lg:px-8 py-20">
         <!-- Micro-badge -->
         <div
