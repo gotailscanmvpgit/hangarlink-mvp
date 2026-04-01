@@ -302,6 +302,39 @@ def listings():
             except Exception:
                 pass
 
+    suggested_route = None
+    if any(q in airport for q in [" TO ", "FLYING", "FLORIDA", "OSH", "SUN", "LAKELAND"]):
+        if any(q in airport for q in ["FLORIDA", "KFMY", "KFLL", "MIA", "MYERS"]):
+            suggested_route = {
+                "title": "Snowbird Corridor (Canada/NE to Florida)",
+                "note": "Popular overnight stops used by Snowbird pilots and early spring flyers.",
+                "stops": [
+                    {"icao": "KAGC", "name": "Allegheny County (Pittsburgh, PA)", "flight_time": "1h 45m from CYTZ", "available_spots": 2, "price": 45},
+                    {"icao": "KHKY", "name": "Hickory Regional (Hickory, NC)", "flight_time": "2h 15m from KAGC", "available_spots": 4, "price": 35},
+                    {"icao": "KSSI", "name": "St Simons Island (Brunswick, GA)", "flight_time": "2h 30m from KHKY", "available_spots": 1, "price": 55}
+                ]
+            }
+        elif any(q in airport for q in ["OSH", "KOSH", "AIRVENTURE"]):
+            suggested_route = {
+                "title": "The Road to AirVenture (Oshkosh)",
+                "note": "Popular overnight stops used by AirVenture flyers avoiding weather or fatigue.",
+                "stops": [
+                    {"icao": "KARB", "name": "Ann Arbor Municipal (Ann Arbor, MI)", "flight_time": "1h 20m from East", "available_spots": 3, "price": 40},
+                    {"icao": "KVPZ", "name": "Porter County (Valparaiso, IN)", "flight_time": "1h 10m from KARB", "available_spots": 5, "price": 30},
+                    {"icao": "KENW", "name": "Kenosha Regional (Kenosha, WI)", "flight_time": "50m from KVPZ (Fisk Staging)", "available_spots": 2, "price": 60}
+                ]
+            }
+        elif any(q in airport for q in ["SUN", "KLAL", "LAKELAND"]):
+            suggested_route = {
+                "title": "Sun 'n Fun Route (to Lakeland)",
+                "note": "Top stops for pilots heading to Sun 'n Fun Aerospace Expo.",
+                "stops": [
+                    {"icao": "KCRW", "name": "Yeager Airport (Charleston, WV)", "flight_time": "2h 10m from NE", "available_spots": 2, "price": 40},
+                    {"icao": "KCAE", "name": "Columbia Metropolitan (Columbia, SC)", "flight_time": "2h 00m from KCRW", "available_spots": 3, "price": 45},
+                    {"icao": "KCRG", "name": "Craig Airport (Jacksonville, FL)", "flight_time": "1h 45m from KCAE", "available_spots": 4, "price": 50}
+                ]
+            }
+
     print(f"DEBUG: /listings returning {len(listings_items)} results")
     return render_template('listings.html',
                            listings=listings_items,
@@ -312,7 +345,8 @@ def listings():
                            min_price=min_price,
                            max_price=max_price,
                            search_limited=search_limited,
-                           markers=markers)
+                           markers=markers,
+                           suggested_route=suggested_route)
 
 @bp.route('/listing/<int:id>')
 def listing_detail(id):
