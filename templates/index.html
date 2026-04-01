@@ -761,82 +761,78 @@
     </div>
 </div>
 
-<!-- Success Stories -->
-<div class="bg-gray-50 dark:bg-dark-900 py-20 sm:py-24 border-t border-gray-200 dark:border-gray-800">
-    <div class="max-w-5xl mx-auto px-6 text-center">
-        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-platinum-100 mb-2">Success Stories
-        </h2>
-        <p class="text-lg sm:text-xl text-gray-600 dark:text-platinum-300 font-light mb-10 sm:mb-12">Hear from the
-            HangarLinks community</p>
-
-        <div class="relative min-h-[250px] sm:min-h-[300px] flex items-center justify-center">
-            <div class="testimonial-slide absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-1000 opacity-100"
-                data-index="0">
-                <i class="fas fa-quote-left text-3xl sm:text-4xl text-blue-200 dark:text-blue-900 mb-4 sm:mb-6"></i>
-                <p
-                    class="text-lg sm:text-2xl text-gray-700 dark:text-platinum-200 font-light italic mb-6 sm:mb-8 max-w-3xl leading-relaxed px-4">
-                    "I found a perfect hangar at CYHM within 2 days. The condition badges gave me total peace of mind."
-                </p>
-                <div>
-                    <div class="font-bold text-base sm:text-lg text-gray-900 dark:text-white">Capt. James R.</div>
-                    <div class="text-sm text-blue-600 font-semibold">Citation CJ3 Owner</div>
-                </div>
-            </div>
-            <div class="testimonial-slide absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-1000 opacity-0 pointer-events-none"
-                data-index="1">
-                <i class="fas fa-quote-left text-3xl sm:text-4xl text-blue-200 dark:text-blue-900 mb-4 sm:mb-6"></i>
-                <p
-                    class="text-lg sm:text-2xl text-gray-700 dark:text-platinum-200 font-light italic mb-6 sm:mb-8 max-w-3xl leading-relaxed px-4">
-                    "Listing my empty space was effortless. I'm now covering 60% of my own hangar lease costs."
-                </p>
-                <div>
-                    <div class="font-bold text-base sm:text-lg text-gray-900 dark:text-white">Sarah M.</div>
-                    <div class="text-sm text-blue-600 font-semibold">Cirrus SR22 Owner</div>
-                </div>
-            </div>
-            <div class="testimonial-slide absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-1000 opacity-0 pointer-events-none"
-                data-index="2">
-                <i class="fas fa-quote-left text-3xl sm:text-4xl text-blue-200 dark:text-blue-900 mb-4 sm:mb-6"></i>
-                <p
-                    class="text-lg sm:text-2xl text-gray-700 dark:text-platinum-200 font-light italic mb-6 sm:mb-8 max-w-3xl leading-relaxed px-4">
-                    "The price intelligence tool helped me set the right rate immediately. Completely transformed my
-                    FBO."
-                </p>
-                <div>
-                    <div class="font-bold text-base sm:text-lg text-gray-900 dark:text-white">Mike T.</div>
-                    <div class="text-sm text-blue-600 font-semibold">FBO Manager</div>
-                </div>
-            </div>
+<!-- Success Stories: Real Pilots, Real Spots -->
+<section class="relative py-24 bg-[#000a18] border-t border-white/5">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl sm:text-5xl font-black text-white mb-4">Success Stories</h2>
+            <p class="text-lg text-blue-200/50 font-light">Join the growing community of pilots and hosts who are done with the ramp.</p>
         </div>
 
-        <div class="flex justify-center space-x-3 mt-6 sm:mt-8">
-            <button
-                class="w-3 h-3 rounded-full bg-blue-600 transition-all duration-300 hover:scale-125 focus:outline-none"
-                onclick="setSlide(0)"></button>
-            <button
-                class="w-3 h-3 rounded-full bg-gray-300 dark:bg-gray-700 transition-all duration-300 hover:scale-125 focus:outline-none"
-                onclick="setSlide(1)"></button>
-            <button
-                class="w-3 h-3 rounded-full bg-gray-300 dark:bg-gray-700 transition-all duration-300 hover:scale-125 focus:outline-none"
-                onclick="setSlide(2)"></button>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Story 1: The Snowbird -->
+            <div class="flex flex-col bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-10 relative group hover:border-blue-500/30 transition-all duration-300">
+                <div class="absolute top-6 right-6">
+                    <span class="bg-blue-500/10 text-blue-400 text-[10px] font-black px-3 py-1 rounded-full border border-blue-500/20 uppercase tracking-widest">Founding Member</span>
+                </div>
+                <div class="mb-8">
+                    <i class="fas fa-quote-left text-blue-500/30 text-4xl mb-4 block"></i>
+                    <p class="text-white text-lg leading-relaxed italic">"Flying my Seneca from <strong class="text-blue-300">Hamilton to Fort Myers</strong> used to be a stress-test for overnight parking. HangarLinks found me a secure spot in Georgia in minutes. No ramp fees, no stress."</p>
+                </div>
+                <div class="mt-auto flex items-center gap-4">
+                    <div class="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center border border-blue-500/30">
+                        <i class="fas fa-plane text-blue-400"></i>
+                    </div>
+                    <div>
+                        <div class="text-white font-bold">Dave H.</div>
+                        <div class="text-blue-300/60 text-xs">PA-34 Pilot (Hamilton, ON)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Story 2: The Host -->
+            <div class="flex flex-col bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-10 relative group hover:border-emerald-500/30 transition-all duration-300">
+                <div class="absolute top-6 right-6">
+                    <span class="bg-emerald-500/10 text-emerald-400 text-[10px] font-black px-3 py-1 rounded-full border border-emerald-500/20 uppercase tracking-widest">Founding Host</span>
+                </div>
+                <div class="mb-8">
+                    <i class="fas fa-quote-left text-emerald-500/30 text-4xl mb-4 block"></i>
+                    <p class="text-white text-lg leading-relaxed italic">"I travel 2 weeks a month. Listing my T-Hangar was easy, and the short-term bookings now cover my <strong class="text-emerald-300">entire monthly insurance</strong> and then some."</p>
+                </div>
+                <div class="mt-auto flex items-center gap-4">
+                    <div class="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center border border-emerald-500/30">
+                        <i class="fas fa-home text-emerald-400"></i>
+                    </div>
+                    <div>
+                        <div class="text-white font-bold">Robert S.</div>
+                        <div class="text-emerald-300/60 text-xs">Cessna 182 Owner (Orlando, FL)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Story 3: The Manager -->
+            <div class="flex flex-col bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-10 relative group hover:border-purple-500/30 transition-all duration-300">
+                <div class="absolute top-6 right-6">
+                    <span class="bg-purple-500/10 text-purple-400 text-[10px] font-black px-3 py-1 rounded-full border border-purple-500/20 uppercase tracking-widest">Premium Partner</span>
+                </div>
+                <div class="mb-8">
+                    <i class="fas fa-quote-left text-purple-500/30 text-4xl mb-4 block"></i>
+                    <p class="text-white text-lg leading-relaxed italic">"Managing 50 spots at our airpark was a manual nightmare. HangarLinks gave us a <strong class="text-purple-300">professional platform</strong> to fill empty spaces instantly."</p>
+                </div>
+                <div class="mt-auto flex items-center gap-4">
+                    <div class="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center border border-purple-500/30">
+                        <i class="fas fa-building text-purple-400"></i>
+                    </div>
+                    <div>
+                        <div class="text-white font-bold">Carlos P.</div>
+                        <div class="text-purple-300/60 text-xs">Airpark Manager</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
-
 <script>
-    let currentTestimonial = 0;
-    const slides = document.querySelectorAll('.testimonial-slide');
-    const buttons = document.querySelectorAll('.flex.justify-center button');
-    function showTestimonial(n) {
-        slides.forEach(s => { s.classList.remove('opacity-100'); s.classList.add('opacity-0', 'pointer-events-none'); });
-        buttons.forEach(b => { b.classList.remove('bg-blue-600'); b.classList.add('bg-gray-300', 'dark:bg-gray-700'); });
-        slides[n].classList.remove('opacity-0', 'pointer-events-none'); slides[n].classList.add('opacity-100');
-        buttons[n].classList.remove('bg-gray-300', 'dark:bg-gray-700'); buttons[n].classList.add('bg-blue-600');
-        currentTestimonial = n;
-    }
-    function nextTestimonial() { showTestimonial((currentTestimonial + 1) % slides.length); }
-    function setSlide(n) { showTestimonial(n); }
-    setInterval(nextTestimonial, 6000);
+    // Legacy carousel logic removed in favor of high-performance static grid
 </script>
 
 <!-- Final CTA -->
