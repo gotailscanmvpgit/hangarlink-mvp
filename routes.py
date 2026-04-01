@@ -194,14 +194,6 @@ def listings():
     """Search and browse all listings"""
     print("DEBUG: /listings route entered")
 
-    # Safely check search limit (never let this crash the page)
-    search_limited = False
-    try:
-        if not check_search_limit():
-            search_limited = True
-    except Exception as lim_err:
-        print(f"WARN: check_search_limit failed: {lim_err}")
-
     airport = request.args.get('airport', '').strip().upper()
     radius = request.args.get('radius', 250, type=int)
     covered = request.args.get('covered', '')
@@ -214,18 +206,7 @@ def listings():
     nfpa_409_compliant = request.args.get('nfpa_409_compliant')
     gpu_power_available = request.args.get('gpu_power_available')
 
-    # If search limit is reached, return immediately with empty results — no DB query needed
-    if search_limited:
-        return render_template('listings.html',
-                               listings=[],
-                               pagination=None,
-                               airport=airport,
-                               radius=radius,
-                               covered=covered,
-                               min_price=min_price,
-                               max_price=max_price,
-                               search_limited=True,
-                               markers=[])
+    search_limited = False # Search is now unlimited for basic use
 
     def _run_query():
         q = Listing.query.filter_by(status='Active')
@@ -2029,44 +2010,10 @@ def cancel_subscription():
 
 def check_search_limit():
     """
-    Rate-limit free users and guests to 5 searches per day.
-    Uses Flask session (cookie) for tracking — no DB columns required.
-    Returns True = allowed, False = limit reached.
+    Search is now unlimited for all users as of 2026 update.
+    Returns True always.
     """
-    try:
-        # Admins and premium users always bypass limits
-        if current_user.is_authenticated:
-            if getattr(current_user, 'is_admin', False):
-                return True
-            if getattr(current_user, 'subscription_tier', None) == 'premium':
-                return True
-            # Owners can search freely too
-            if getattr(current_user, 'role', 'renter') != 'renter':
-                return True
-
-        # Use session cookie to track count — works for both guests and free users
-        today_str = date.today().isoformat()
-        session_date = session.get('search_date')
-        session_count = session.get('search_count', 0)
-
-        # Reset counter if it's a new day
-        if session_date != today_str:
-            session['search_date'] = today_str
-            session['search_count'] = 0
-            session_count = 0
-
-        FREE_SEARCH_LIMIT = 5
-
-        if session_count >= FREE_SEARCH_LIMIT:
-            return False  # Limit reached
-
-        # Increment and save counter to session cookie
-        session['search_count'] = session_count + 1
-        return True
-
-    except Exception as e:
-        print(f"WARN: check_search_limit error (allowing): {e}")
-        return True  # Fail open — never block users on errors
+    return True
 
 SPONSORED_TIERS = {
     'silver': {'price': 4900, 'name': 'Silver Featured', 'days': 30, 'boost': '2x'},
