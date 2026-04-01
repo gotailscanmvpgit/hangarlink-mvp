@@ -199,12 +199,26 @@
 <style>
     .duration-chip, .radius-chip {
         transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        border: 1px solid rgba(255,255,255,0.15) !important;
+        background: rgba(255,255,255,0.06) !important;
+        color: rgba(255,255,255,0.8) !important;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        outline: none !important;
+    }
+    .duration-chip:hover, .radius-chip:hover {
+        background: rgba(255,255,255,0.12) !important;
+        color: white !important;
     }
     .duration-chip.active, .radius-chip.active {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
         border-color: #3b82f6 !important;
-        background-color: #2563eb !important;
         color: white !important;
-        box-shadow: 0 0 15px rgba(37,99,235,0.4);
+        box-shadow: 0 8px 20px -5px rgba(37,99,235,0.5) !important;
+        font-weight: 900 !important;
     }
 </style>
 
