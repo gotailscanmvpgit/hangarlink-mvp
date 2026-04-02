@@ -158,19 +158,35 @@ def create_app(config_class=Config):
                     missing.append("public_location_description TEXT")
                 if 'private_access_instructions' not in columns:
                     missing.append("private_access_instructions TEXT")
+                if 'tail_height_clearance' not in columns:
+                    missing.append("tail_height_clearance FLOAT")
                     
                 if missing:
                     print(f"[DB-REPAIR] Adding missing columns to listings: {missing}")
                     for col_def in missing:
                         try:
                             # Use text() to safely execute the ALTER TABLE command
-                            col_name = col_def.split()[0]
-                            db.session.execute(text(f"ALTER TABLE listings ADD COLUMN {col_name} TEXT"))
+                            parts = col_def.split()
+                            col_name = parts[0]
+                            col_type = parts[1]
+                            db.session.execute(text(f"ALTER TABLE listings ADD COLUMN {col_name} {col_type}"))
                             db.session.commit()
                             print(f"✅ [DB-REPAIR] Added column: {col_name}")
                         except Exception as e:
                             db.session.rollback()
                             print(f"⚠️ [DB-REPAIR] Failed to add {col_name}: {e}")
+
+            # Check users table
+            if 'users' in insp.get_table_names():
+                user_cols = [c['name'] for c in insp.get_columns('users')]
+                if 'saved_aircraft' not in user_cols:
+                    try:
+                        db.session.execute(text("ALTER TABLE users ADD COLUMN saved_aircraft VARCHAR(100)"))
+                        db.session.commit()
+                        print("✅ [DB-REPAIR] Added saved_aircraft to users")
+                    except Exception as e:
+                        db.session.rollback()
+                        print(f"⚠️ [DB-REPAIR] Failed to add saved_aircraft: {e}")
             
             db.create_all()
             print("✅ [DB] Schema check & db.create_all() completed.")
