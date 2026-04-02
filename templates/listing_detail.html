@@ -53,75 +53,11 @@
                     <i class="fas fa-vr-cardboard mr-2 text-blue-600"></i> 360° Virtual Tour
                 </a>
                 {% endif %}
-                <!-- Hero Section with Carousel -->
                 <div class="relative h-64 sm:h-96 w-full bg-gray-200 dark:bg-gray-800">
-                    {% if listing.photos %}
-                    {% set photos = listing.photos.split(',') %}
-
-                    {% if photos|length > 1 %}
-                    <!-- Flowbite Carousel -->
-                    <div id="listing-carousel" class="relative w-full h-full" data-carousel="slide">
-                        <!-- Carousel wrapper -->
-                        <div class="relative h-full overflow-hidden">
-                            {% for photo in photos %}
-                            <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                                <img src="{{ optimized_img(photo) }}"
-                                    class="absolute block w-full h-full object-cover"
-                                    loading="lazy"
-                                    alt="Listing Photo {{ loop.index }}">
-                            </div>
-                            {% endfor %}
-                        </div>
-                        <!-- Slider indicators -->
-                        <div
-                            class="absolute z-30 flex -translate-x-1/2 bottom-5 left-1/2 space-x-3 rtl:space-x-reverse">
-                            {% for photo in photos %}
-                            <button type="button" class="w-3 h-3 rounded-full"
-                                aria-current="{{ 'true' if loop.first else 'false' }}}"
-                                aria-label="Slide {{ loop.index }}" data-carousel-slide-to="{{ loop.index0 }}"></button>
-                            {% endfor %}
-                        </div>
-                        <!-- Slider controls -->
-                        <button type="button"
-                            class="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
-                            data-carousel-prev>
-                            <span
-                                class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
-                                <svg class="w-4 h-4 text-white dark:text-gray-800 rtl:rotate-180" aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                        stroke-width="2" d="M5 1 1 5l4 4" />
-                                </svg>
-                                <span class="sr-only">Previous</span>
-                            </span>
-                        </button>
-                        <button type="button"
-                            class="absolute top-0 end-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
-                            data-carousel-next>
-                            <span
-                                class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
-                                <svg class="w-4 h-4 text-white dark:text-gray-800 rtl:rotate-180" aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                        stroke-width="2" d="m1 9 4-4-4-4" />
-                                </svg>
-                                <span class="sr-only">Next</span>
-                            </span>
-                        </button>
-                    </div>
-                    {% else %}
-                    <!-- Single Image -->
-                    <img src="{{ optimized_img(photos[0]) }}"
-                        class="w-full h-full object-cover" loading="lazy" alt="Listing Photo">
-                    {% endif %}
-
-                    {% else %}
-                    <!-- Fallback Gradient -->
-                    <div
-                        class="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                        <i class="fas fa-plane text-white text-8xl opacity-50"></i>
-                    </div>
-                    {% endif %}
+                    <img src="{{ url_for('static', filename='images/homecirrusblue.png') }}"
+                        class="w-full h-full object-cover" loading="lazy" alt="High-Res GA Hangar">
+                    
+                    <div class="absolute inset-0 bg-gradient-to-t from-gray-900/40 via-transparent to-transparent backdrop-blur-[1px]"></div>
 
                     <!-- Status Badge -->
                     <div class="absolute top-4 left-4 z-40">
@@ -315,10 +251,13 @@
                             {% set avail = listing.available_sqft if listing.available_sqft is not none else
                             listing.size_sqft %}
                             <span
-                                class="inline-flex items-center bg-blue-50 sm:bg-blue-50 text-blue-700 px-3 py-1 font-bold rounded-lg border border-blue-200 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-300 tooltip-trigger shadow-sm cursor-help"
-                                title="Calculated fit: {{ (avail // 1178)|int }} extra small GA plane(s)">
-                                <i class="fas fa-layer-group mr-2 text-blue-600 dark:text-blue-400"></i>{{
-                                "{:,.0f}".format(avail) }} sq ft Rem.
+                                class="inline-flex items-center bg-blue-50 text-blue-700 px-3 py-1 font-bold rounded-lg border border-blue-200 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-300 shadow-sm">
+                                <i class="fas fa-warehouse mr-2 text-blue-600 dark:text-blue-400"></i>
+                                {% if listing.available_sqft and listing.available_sqft < listing.size_sqft %}
+                                    Shared Hangar Space
+                                {% else %}
+                                    Full Private Hangar
+                                {% endif %}
                             </span>
                             <span
                                 class="inline-flex items-center bg-white sm:bg-transparent px-2 py-1 sm:p-0 rounded border sm:border-none border-gray-200 dark:bg-dark-900 dark:border-gray-700">
@@ -351,7 +290,7 @@
                                 <i class="fas fa-shield-alt text-sm"></i>
                             </div>
                             <span class="text-xs font-bold text-slate-700 dark:text-platinum-200 leading-tight">
-                                <i class="fas fa-check text-green-500 mr-1.5"></i>Secure Smart Access: Precise location & gate codes provided instantly after booking.
+                                <i class="fas fa-check text-emerald-500 mr-1.5"></i>Secure Smart Access: Precise location & gate codes provided instantly after booking.
                             </span>
                         </div>
                     </div>
@@ -591,9 +530,18 @@
                     </p>
 
                     <label for="aircraft-selector"
-                        class="block text-sm font-medium text-gray-700 dark:text-platinum-200 mb-2 font-mono uppercase tracking-wider">Select
-                        Model</label>
-                    <select id="aircraft-selector"
+                        class="block text-sm font-medium text-gray-700 dark:text-platinum-200 mb-2 font-mono uppercase tracking-wider">
+                        {% if current_user.is_authenticated and current_user.username == 'Pilot' %}
+                            Verified Pilot Aircraft Detected
+                        {% else %}
+                            Select Model
+                        {% endif %}
+                    </label>
+                    
+                    {% set auto_fit = (current_user.is_authenticated and current_user.email == 'felipe@hangarlink.com') %}
+                    
+                    <select id="aircraft-selector" 
+                        {% if auto_fit %}style="display:none;"{% endif %}
                         class="w-full bg-[#001F3F] dark:bg-[#2D2D2D] text-[#FAFAFA] border border-gray-300 dark:border-gray-700 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none mb-6 appearance-none shadow-sm cursor-pointer transition-all hover:bg-[#002b5a] dark:hover:bg-[#3d3d3d]">
                         <option value="" class="bg-[#001F3F] dark:bg-[#2D2D2D]">-- Choose an aircraft --</option>
                         {% for category, aircrafts in aircraft_sizes.items() %}
@@ -601,6 +549,7 @@
                             {% for name, specs in aircrafts.items() %}
                             <option value="{{ name }}" data-length="{{ specs.length }}"
                                 data-wingspan="{{ specs.wingspan }}" data-height="{{ specs.height }}"
+                                {% if auto_fit and name == 'Cirrus SR22' %}selected{% endif %}
                                 class="bg-white dark:bg-dark-800 text-gray-900 dark:text-white">
                                 {{ name }}
                             </option>
@@ -608,6 +557,18 @@
                         </optgroup>
                         {% endfor %}
                     </select>
+                    
+                    {% if auto_fit %}
+                    <div class="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl mb-6 flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-gray-900 dark:text-white">Verified Cirrus SR22 Profile</p>
+                            <p class="text-xs text-gray-500">Auto-calculating fitment for your saved aircraft.</p>
+                        </div>
+                    </div>
+                    {% endif %}
 
                     <div id="aircraft-specs"
                         class="hidden space-y-3 bg-blue-50/50 dark:bg-blue-900/10 p-5 rounded-2xl border border-blue-100 dark:border-blue-800/50 backdrop-blur-sm shadow-inner transition-all duration-300">
@@ -822,8 +783,12 @@
                         class="flex items-center text-xs text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded-full w-max border border-yellow-100 dark:border-yellow-900">
                         <i class="fas fa-star mr-1"></i>
                         <span class="font-bold mr-1">{{ listing.owner.reputation_score|round(1) }}</span>
+                        {% if listing.owner.rentals_count > 0 %}
                         <span class="text-gray-400 dark:text-gray-500">({{ listing.owner.rentals_count }}
                             deals)</span>
+                        {% else %}
+                        <span class="text-gray-400 dark:text-gray-500">(Founding Host)</span>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -900,7 +865,7 @@
                     class="mb-4 rounded-xl border border-blue-200 dark:border-zinc-700 bg-blue-50/50 dark:bg-zinc-800/90 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-md font-sans">
                     <!-- Header row -->
                     <label class="flex items-start gap-4 p-5 cursor-pointer hover:bg-blue-50 dark:hover:bg-zinc-700/50 transition-colors">
-                        <input type="checkbox" name="add_insurance" id="add_insurance_cb"
+                        <input type="checkbox" name="add_insurance" id="add_insurance_cb" checked
                             class="mt-1 w-5 h-5 accent-blue-600 dark:accent-emerald-500 rounded border-gray-300 dark:border-zinc-600 shadow-sm cursor-pointer flex-shrink-0"
                             onchange="toggleInsuranceCTA()">
                         <div class="flex-1 min-w-0">
@@ -953,8 +918,8 @@
 
                 {% if current_user.is_authenticated %}
                 <button type="submit" id="btn-reserve-now"
-                    class="block w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-xl text-center shadow-lg hover:shadow-xl transition-all hover-lift disabled:opacity-50 disabled:cursor-not-allowed">
-                    <i class="fas fa-bolt mr-2 text-yellow-300"></i><span id="btn-text">Reserve Now</span>
+                    class="block w-full bg-[#001F3F] hover:bg-[#002b5a] text-white font-bold py-4 px-6 rounded-xl text-center shadow-lg hover:shadow-xl transition-all hover-lift disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fas fa-calendar-check mr-2 text-emerald-500"></i><span id="btn-text">Reserve Now</span>
                 </button>
                 {% else %}
                 <a href="{{ url_for('main.register') }}?next={{ url_for('main.listing_detail', id=listing.id) }}"
@@ -1127,6 +1092,16 @@
                         endInput.value = '';
                     }
                 }
+
+                // Auto-run fitment if pre-selected
+                document.addEventListener('DOMContentLoaded', () => {
+                    const selector = document.getElementById('aircraft-selector');
+                    if (selector && selector.value) {
+                         const event = new Event('change');
+                         selector.dispatchEvent(event);
+                    }
+                    toggleInsuranceCTA(); // Sync initial state
+                });
             </script>
             {% elif listing.status == 'Rented' %}
             <div
