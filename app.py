@@ -161,6 +161,21 @@ def create_app(config_class=Config):
                 if 'tail_height_clearance' not in columns:
                     missing.append("tail_height_clearance FLOAT")
                     
+                # Drop NOT NULL constraint if it exists (2026 Strategy: price_month is optional)
+                try:
+                    # Generic PG syntax for making column nullable
+                    db.session.execute(text("ALTER TABLE listings ALTER COLUMN price_month DROP NOT NULL"))
+                    # Also handle price_week if it exists
+                    if 'price_week' in columns:
+                        db.session.execute(text("ALTER TABLE listings ALTER COLUMN price_week DROP NOT NULL"))
+                    db.session.commit()
+                    print("✅ [DB-REPAIR] Made price_month and price_week nullable")
+                except Exception as e:
+                    db.session.rollback()
+                    # Skip print for SQLite or other DBs where this syntax fails but isn't needed
+                    if "syntax error" not in str(e).lower():
+                        print(f"⚠️ [DB-REPAIR] Nullability update: {e}")
+
                 if missing:
                     print(f"[DB-REPAIR] Adding missing columns to listings: {missing}")
                     for col_def in missing:

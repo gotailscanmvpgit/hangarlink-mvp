@@ -99,7 +99,7 @@ class Listing(db.Model):
     size_sqft = db.Column(db.Integer, nullable=False)
     available_sqft = db.Column(db.Float, nullable=True) # Tracks specific sub-let space after rentals
     covered = db.Column(db.Boolean, default=False)
-    price_month = db.Column(db.Float, nullable=False)
+    price_month = db.Column(db.Float, nullable=True)
     price_night = db.Column(db.Float, nullable=True) # Airbnb-style daily rate
     min_stay_nights = db.Column(db.Integer, default=1) # Airbnb-style min stay
     description = db.Column(db.Text, nullable=True)
