@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Pilot Arrival & Parking Guide - HangarLinks{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50 dark:bg-dark-950 min-h-screen">
+    <!-- Header Section -->
+    <div class="bg-navy-900 border-b border-emerald-500/20 py-12 px-6">
+        <div class="max-w-4xl mx-auto text-center">
+            <div class="inline-flex items-center px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-black uppercase tracking-widest mb-6 animate-fade-in text-center">
+                <i class="fas fa-check-circle mr-2"></i> Verified Parking Protocol
+            </div>
+            <h1 class="text-4xl lg:text-5xl font-black text-white mb-4 tracking-tight">Pilot Arrival Guide</h1>
+            <p class="text-xl text-platinum-300 font-medium max-w-2xl mx-auto leading-relaxed">
+                Flight Bag Ready: Essential steps for a safe arrival, parking, and tie-down at your HangarLinks destination.
+            </p>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-6 py-12">
+        <!-- Quick Start Section -->
+        <div class="bg-white dark:bg-dark-900 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden mb-12">
+            <div class="bg-emerald-600 px-8 py-4">
+                <h2 class="text-xl font-black text-white uppercase tracking-wider flex items-center">
+                    <i class="fas fa-bolt mr-3"></i> Quick Start: 5 Steps to Perfect Arrival
+                </h2>
+            </div>
+            <div class="p-8">
+                <div class="space-y-8">
+                    <div class="flex gap-6">
+                        <div class="flex-shrink-0 w-12 h-12 bg-gray-900 dark:bg-emerald-500 rounded-2xl flex items-center justify-center text-white text-xl font-black">1</div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Pre-Landing Review</h3>
+                            <p class="text-gray-600 dark:text-platinum-300 text-lg">Check your booking confirmation for exact gate codes, frequency info, and any "Private Access Instructions" from the host.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-6">
+                        <div class="flex-shrink-0 w-12 h-12 bg-gray-900 dark:bg-emerald-500 rounded-2xl flex items-center justify-center text-white text-xl font-black">2</div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Follow the Blue Pin</h3>
+                            <p class="text-gray-600 dark:text-platinum-300 text-lg">The HangarLinks map pin is precision-set by the host. Taxi precisely to those coordinates to find your designated space.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-6">
+                        <div class="flex-shrink-0 w-12 h-12 bg-gray-900 dark:bg-emerald-500 rounded-2xl flex items-center justify-center text-white text-xl font-black">3</div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Chock Before You Walk</h3>
+                            <p class="text-gray-600 dark:text-platinum-300 text-lg">Never leave your aircraft unchocked, even for a "quick" step into the FBO. High winds start suddenly.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-6">
+                        <div class="flex-shrink-0 w-12 h-12 bg-gray-900 dark:bg-emerald-500 rounded-2xl flex items-center justify-center text-white text-xl font-black">4</div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Secure Tie-Downs</h3>
+                            <p class="text-gray-600 dark:text-platinum-300 text-lg">Use the standard HangarLinks knot (see diagram below). Avoid taut lines that put stress on airframe hardpoints.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-6">
+                        <div class="flex-shrink-0 w-12 h-12 bg-gray-900 dark:bg-emerald-500 rounded-2xl flex items-center justify-center text-white text-xl font-black">5</div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Photo Confirmation</h3>
+                            <p class="text-gray-600 dark:text-platinum-300 text-lg">Snap a quick photo of your parked aircraft and message it to the host via the app. This builds trust and confirms arrival status.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diagrams Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            <!-- Tie Down KNOT -->
+            <div class="bg-white dark:bg-dark-900 rounded-3xl p-8 border border-gray-100 dark:border-gray-800 shadow-lg">
+                <h3 class="text-lg font-black text-navy-900 dark:text-white uppercase mb-6 flex items-center">
+                    <i class="fas fa-scroll mr-3 text-emerald-500"></i> Standard Tie-Down Knot
+                </h3>
+                <div class="aspect-square bg-gray-100 dark:bg-dark-800 rounded-2xl flex items-center justify-center border-2 border-dashed border-gray-200 dark:border-gray-700 relative overflow-hidden">
+                    <div class="text-center p-6">
+                        <i class="fas fa-anchor text-6xl text-emerald-500 mb-4 opacity-20"></i>
+                        <p class="text-sm font-bold text-gray-500">2-Loop Locking Hangar Hitch Diagram</p>
+                        <p class="text-[10px] text-gray-400 mt-2 uppercase tracking-tighter">Recommended for 1/2" - 3/4" Braided Line</p>
+                    </div>
+                    <!-- Mock Graphic Overlays -->
+                    <div class="absolute inset-0 pointer-events-none">
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 border-4 border-emerald-500/30 rounded-full"></div>
+                        <div class="absolute top-1/2 left-1/2 w-[200%] h-1 bg-emerald-500 -rotate-45 opacity-40"></div>
+                        <div class="absolute top-1/2 left-1/2 w-[200%] h-1 bg-emerald-500 rotate-45 opacity-40"></div>
+                    </div>
+                </div>
+                <p class="mt-4 text-sm text-gray-500 leading-snug">Ensure at least 1 inch of "slop" in the line. Too tight can damage wing attachment points during cold fronts.</p>
+            </div>
+
+            <!-- Hangar Clearance -->
+            <div class="bg-white dark:bg-dark-900 rounded-3xl p-8 border border-gray-100 dark:border-gray-800 shadow-lg">
+                <h3 class="text-lg font-black text-navy-900 dark:text-white uppercase mb-6 flex items-center">
+                    <i class="fas fa-ruler-combined mr-3 text-emerald-500"></i> Hangar Clearance
+                </h3>
+                <div class="aspect-square bg-gray-900 dark:bg-black rounded-2xl flex items-center justify-center relative">
+                    <div class="absolute inset-x-8 top-12 bottom-12 border-2 border-emerald-500/50 rounded-lg"></div>
+                    <div class="z-10 text-center px-6 text-center">
+                        <i class="fas fa-plane text-5xl text-white mb-4"></i>
+                        <p class="text-xs font-black text-emerald-400 uppercase">Min 2ft Gap Warning</p>
+                    </div>
+                    <div class="absolute top-1/2 -left-2 transform -translate-y-1/2 flex flex-col items-center">
+                        <div class="h-24 w-1 bg-emerald-500"></div>
+                        <div class="text-[9px] font-bold text-emerald-500 rotate-90 mt-4 uppercase">Tail Height</div>
+                    </div>
+                </div>
+                <p class="mt-4 text-sm text-gray-500 leading-snug">Verify tail clearance against door header. If towing, ensure the tug path is clear of floor drains and ledges.</p>
+            </div>
+        </div>
+
+        <!-- Safety Card -->
+        <div class="bg-navy-900 rounded-3xl p-8 border border-emerald-500/30 shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4">
+                <i class="fas fa-exclamation-triangle text-emerald-500/20 text-8xl"></i>
+            </div>
+            <div class="relative z-10">
+                <h3 class="text-2xl font-black text-white mb-4 uppercase italic">Safety Notification</h3>
+                <p class="text-emerald-100/80 text-lg leading-relaxed mb-6">
+                    HangarLinks hosts are independent owners. Always verify the structural integrity of tie-down rings and ground anchors before securing your aircraft. If you notice a hazard, report it via the app immediately.
+                </p>
+                <div class="flex flex-wrap gap-4">
+                    <a href="tel:911" class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-black rounded-xl text-sm transition-all">
+                        Emergency Services
+                    </a>
+                    <button onclick="window.print()" class="px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-black rounded-xl text-sm transition-all border border-white/20">
+                        <i class="fas fa-print mr-2"></i> Print for Knee Board
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Flight Bag Optimized Fonts */
+    body {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+    h1, h2, h3 {
+        font-family: 'Outfit', sans-serif;
+    }
+    /* Fast load optimizations */
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}

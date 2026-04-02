@@ -70,7 +70,9 @@ class User(UserMixin, db.Model):
     # Financials
     total_revenue = db.Column(db.Float, default=0.0)
     
-    # 2026 Profile Features
+    # 2026 Social Auth & Verification
+    profile_pic = db.Column(db.String(255), nullable=True)
+    is_verified = db.Column(db.Boolean, default=False)
     saved_aircraft = db.Column(db.String(100), nullable=True) # e.g. "Cirrus SR22" or "Cessna 182"
 
     

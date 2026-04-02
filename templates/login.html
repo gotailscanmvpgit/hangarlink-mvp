@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 {% block title %}Sign In | HangarLinks{% endblock %}
 
 {% block content %}
@@ -35,6 +35,26 @@
                 {% endfor %}
                 {% endif %}
                 {% endwith %}
+            </div>
+
+            <!-- Social Login -->
+            <div class="px-8 pt-6 space-y-3">
+                <a href="{{ url_for('main.google_login') }}" 
+                   class="flex items-center justify-center w-full px-4 py-3.5 rounded-xl bg-white text-gray-900 text-sm font-bold border border-gray-100 hover:bg-gray-50 transition-all shadow-sm active:scale-[0.98]">
+                    <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-5 h-5 mr-3" alt="Google">
+                    Continue with Google
+                </a>
+                <a href="{{ url_for('main.apple_login') }}" 
+                   class="flex items-center justify-center w-full px-4 py-3.5 rounded-xl bg-black text-white text-sm font-bold hover:bg-gray-900 transition-all shadow-sm active:scale-[0.98]">
+                    <i class="fab fa-apple text-xl mr-3"></i>
+                    Continue with Apple
+                </a>
+                
+                <div class="flex items-center gap-4 py-2">
+                    <div class="flex-grow h-px bg-white/10"></div>
+                    <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">or sign in with email</span>
+                    <div class="flex-grow h-px bg-white/10"></div>
+                </div>
             </div>
 
             <!-- Form -->

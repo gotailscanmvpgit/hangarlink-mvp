@@ -3,11 +3,13 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from werkzeug.utils import secure_filename
-from extensions import db, mail, limiter, cache
+from extensions import db, mail, limiter, cache, oauth
 from models import User, Listing, Message, Booking, Ad, WhiteLabelRequest, Payment
 import os
 import secrets
 import datetime
+
+# --- Database Helpers ---
 try:
     if os.name == 'nt':
         # Add common GTK+ installers to PATH for Windows users
@@ -81,6 +83,83 @@ EVENTS = {
 }
 
 bp = Blueprint('main', __name__)
+
+# --- Social Auth (OAuth2) ---
+
+@bp.route('/login/google')
+def google_login():
+    redirect_uri = url_for('main.google_authorize', _external=True)
+    return oauth.google.authorize_redirect(redirect_uri)
+
+@bp.route('/authorize/google')
+def google_authorize():
+    token = oauth.google.authorize_access_token()
+    user_info = token.get('userinfo')
+    if not user_info:
+        flash("Could not retrieve user info from Google.", "error")
+        return redirect(url_for('main.login'))
+    
+    email = user_info.get('email')
+    username = user_info.get('name') or email.split('@')[0]
+    profile_pic = user_info.get('picture')
+    
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        # Auto-signup social users
+        user = User(
+            email=email,
+            username=username,
+            profile_pic=profile_pic,
+            role='renter',
+            is_verified=True # Google verified
+        )
+        # Use a random password as fallback
+        user.set_password(secrets.token_urlsafe(16))
+        db.session.add(user)
+        db.session.commit()
+        flash(f"Welcome to HangarLinks, {username}!", "success")
+    else:
+        # Sync profile pic if missing
+        if not user.profile_pic and profile_pic:
+            user.profile_pic = profile_pic
+            db.session.commit()
+    
+    login_user(user)
+    return redirect(url_for('main.index'))
+
+@bp.route('/login/apple')
+def apple_login():
+    redirect_uri = url_for('main.apple_authorize', _external=True)
+    return oauth.apple.authorize_redirect(redirect_uri)
+
+@bp.route('/authorize/apple')
+def apple_authorize():
+    token = oauth.apple.authorize_access_token()
+    # Apple user info is usually in the token response for the first login
+    user_info = token.get('userinfo')
+    if not user_info:
+        flash("Could not retrieve user info from Apple.", "error")
+        return redirect(url_for('main.login'))
+        
+    email = user_info.get('email')
+    # Apple name is often tricky on subsequent logins, but provided on first
+    name = user_info.get('name', {})
+    username = f"{name.get('firstName', '')} {name.get('lastName', '')}".strip() or email.split('@')[0]
+    
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        user = User(
+            email=email,
+            username=username,
+            role='renter',
+            is_verified=True
+        )
+        user.set_password(secrets.token_urlsafe(16))
+        db.session.add(user)
+        db.session.commit()
+    
+    login_user(user)
+    return redirect(url_for('main.index'))
 
 def get_stripe():
     if not stripe:
@@ -193,6 +272,11 @@ def health():
         return {"status": "ok", "database": "connected"}
     except Exception as e:
         return {"status": "error", "database": str(e)}, 500
+
+@bp.route('/guide')
+def pilot_guide():
+    """Pilot Arrival & Tie-Down Guide"""
+    return render_template('guide.html')
 
 @bp.route('/listings')
 def listings():

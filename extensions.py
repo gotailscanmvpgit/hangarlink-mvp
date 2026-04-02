@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_caching import Cache
+from authlib.integrations.flask_client import OAuth
 try:
     from flask_socketio import SocketIO
     socketio = SocketIO(cors_allowed_origins="*")
@@ -36,3 +37,4 @@ db = SQLAlchemy()
 login_manager = LoginManager()
 migrate = Migrate()
 cache = Cache(config={'CACHE_TYPE': 'SimpleCache', 'CACHE_DEFAULT_TIMEOUT': 300})
+oauth = OAuth()

@@ -10,7 +10,7 @@ else:
 
 from flask import Flask, render_template
 from config import Config
-from extensions import db, migrate, login_manager, cache, mail, limiter
+from extensions import db, migrate, login_manager, cache, mail, limiter, oauth
 from flask_compress import Compress
 from models import User, Listing, Message, Booking, Ad, WhiteLabelRequest, Payment
 from routes import bp as main_bp
@@ -144,6 +144,33 @@ def create_app(config_class=Config):
     app.config.setdefault('RECAPTCHA_PRIVATE_KEY', os.environ.get('RECAPTCHA_PRIVATE_KEY', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe')) # Dummy key
     app.config.setdefault('RECAPTCHA_ENABLED', os.environ.get('RECAPTCHA_ENABLED', 'False') == 'True')
 
+    # 🔐 OAuth Registration (New for Social Login)
+    oauth.init_app(app)
+    
+    # Google OAuth Client
+    oauth.register(
+        name='google',
+        client_id=os.environ.get('GOOGLE_CLIENT_ID'),
+        client_secret=os.environ.get('GOOGLE_CLIENT_SECRET'),
+        server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+        client_kwargs={
+            'scope': 'openid email profile'
+        }
+    )
+    
+    # Apple OAuth Client
+    oauth.register(
+        name='apple',
+        client_id=os.environ.get('APPLE_CLIENT_ID'),
+        client_secret=os.environ.get('APPLE_CLIENT_SECRET'),
+        server_metadata_url='https://appleid.apple.com/.well-known/openid-configuration',
+        client_kwargs={
+            'scope': 'name email'
+        }
+    )
+    
+    print("[OAUTH] Google & Apple clients registered.")
+
     # ── Self-Heal Database Schema (Railway/Postgres Strategy) ──
     with app.app_context():
         try:
@@ -276,6 +303,10 @@ def create_app(config_class=Config):
                     missing_user.append("is_premium BOOLEAN DEFAULT FALSE")
                 if 'role' not in user_cols:
                     missing_user.append("role VARCHAR(20) DEFAULT 'renter'")
+                if 'profile_pic' not in user_cols:
+                    missing_user.append("profile_pic VARCHAR(255)")
+                if 'is_verified' not in user_cols:
+                    missing_user.append("is_verified BOOLEAN DEFAULT FALSE")
                 
                 if missing_user:
                     print(f"[DB-REPAIR] Adding missing columns to users: {missing_user}")
