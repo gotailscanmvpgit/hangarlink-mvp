@@ -172,7 +172,10 @@ class Listing(db.Model):
         if not similar_listings:
             return None
             
-        prices = [l.price_month for l in similar_listings]
+        prices = [l.price_month for l in similar_listings if l.price_month is not None]
+        if not prices:
+            return None
+            
         return {
             'min': min(prices),
             'max': max(prices),

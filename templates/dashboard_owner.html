@@ -115,8 +115,8 @@
         </div>
     </div>
 
-    <!-- AI Optimizer -->
-    {% if event_suggestions %}
+    <!-- AI Optimizer (Premium Only) -->
+    {% if current_user.is_premium and event_suggestions %}
     <div class="bg-purple-900/10 border border-purple-500/30 rounded-2xl p-6 shadow-lg mb-12 animate-fade-in">
         <h3 class="text-xl font-bold text-gray-900 dark:text-platinum-100 flex items-center mb-4">
             <i class="fas fa-robot text-purple-500 mr-2"></i> AI Rental Optimizer
@@ -148,15 +148,31 @@
             {% endfor %}
         </div>
     </div>
+    {% elif not current_user.is_premium %}
+    <!-- Upsell for Non-Premium -->
+    <div class="bg-gray-50 dark:bg-dark-800 rounded-2xl p-8 text-center mb-12 border border-dashed border-gray-300 dark:border-gray-700">
+        <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-purple-600">
+            <i class="fas fa-lock text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Unlock Dynamic Pricing Alerts</h3>
+        <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-lg mx-auto">Get real-time AI suggestions during fly-ins, Oshkosh, and Sun 'n Fun to maximize your revenue automatically.</p>
+        <a href="{{ url_for('main.pricing') }}" class="inline-flex items-center px-6 py-3 bg-purple-600 text-white font-bold rounded-xl hover:bg-purple-700 transition-all">
+            Upgrade to Pro
+        </a>
+    </div>
     {% endif %}
 
-    <!-- Charts Section -->
+    <!-- Charts Section (Premium Only) -->
+    {% if current_user.is_premium %}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
         <!-- Earnings Chart -->
         <div class="bg-white dark:bg-dark-900 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-700">
             <h3 class="text-xl font-bold text-gray-900 dark:text-platinum-100 mb-6">Monthly Revenue</h3>
             <canvas id="earningsChart"></canvas>
         </div>
+    {% else %}
+    <div class="grid grid-cols-1 lg:grid-cols-1 gap-8 mb-12">
+    {% endif %}
 
         <!-- Active Listings List -->
         <div
@@ -171,7 +187,14 @@
                             {{ listing.airport_icao }}
                         </div>
                         <div>
-                            <div class="font-bold text-gray-900 dark:text-white">{{ listing.size_sqft }} sq ft</div>
+                            <div class="font-bold text-gray-900 dark:text-white">
+                                {{ listing.size_sqft|int }} sq ft &middot; 
+                                {% if listing.covered %}
+                                <span class="text-blue-500"><i class="fas fa-warehouse mr-1 text-[10px]"></i>Covered</span>
+                                {% else %}
+                                <span class="text-orange-500"><i class="fas fa-cloud-sun mr-1 text-[10px]"></i>Outdoor</span>
+                                {% endif %}
+                            </div>
                             {% set avail = listing.available_sqft if listing.available_sqft is not none else
                             listing.size_sqft %}
                             <div class="text-xs text-blue-600 dark:text-blue-400 mt-1 mb-1 font-bold tooltip-trigger"
@@ -209,10 +232,16 @@
                                 <i class="fas fa-bolt mr-1"></i> Short-Term Ready
                             </span>
                             {% endif %}
-                            <a href="{{ url_for('main.listing_detail', id=listing.id) }}"
-                                class="inline-flex items-center px-3 py-1 bg-gray-900 dark:bg-dark-700 text-white text-[10px] font-bold rounded-lg hover:bg-gray-800 transition-all">
-                                View <i class="fas fa-chevron-right ml-1.5 text-[8px]"></i>
-                            </a>
+                            <div class="flex gap-2">
+                                <a href="{{ url_for('main.listing_detail', id=listing.id) }}"
+                                    class="inline-flex items-center px-3 py-1 bg-gray-900 dark:bg-dark-700 text-white text-[10px] font-bold rounded-lg hover:bg-gray-800 transition-all">
+                                    View <i class="fas fa-chevron-right ml-1.5 text-[8px]"></i>
+                                </a>
+                                <a href="{{ url_for('main.edit_listing', id=listing.id) }}"
+                                    class="inline-flex items-center px-3 py-1 border border-gray-300 dark:border-gray-600 dark:text-platinum-300 text-[10px] font-bold rounded-lg hover:bg-gray-100 dark:hover:bg-dark-600 transition-all">
+                                    Edit
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>

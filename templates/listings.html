@@ -451,10 +451,12 @@
                             listing.airport_icao }}</h3>
                         <span class="text-xl sm:text-2xl font-bold text-blue-600">
                             {% if request.args.get('duration', '7') in ['1', '2', '3', '7'] and listing.price_night %}
-                            ${{ listing.price_night|default(listing.price_month/30, true)|int }}<span
+                            ${{ listing.price_night|int }}<span
                                 class="text-xs font-normal text-gray-500">/night</span>
-                            {% else %}
+                            {% elif listing.price_month %}
                             ${{ listing.price_month|int }}<span class="text-xs font-normal text-gray-500">/mo</span>
+                            {% else %}
+                            <span class="text-sm font-normal text-red-500">Price not set</span>
                             {% endif %}
                         </span>
                     </div>

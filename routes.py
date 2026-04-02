@@ -264,8 +264,10 @@ def listings():
             flash('Database is temporarily unavailable. Please try again in a moment.', 'error')
             return f"<h1>500 Internal Server Error</h1><p>A critical database error occurred while fetching listings.</p><pre>{tb}</pre>", 500
 
+    print(f"DEBUG: listings count fetched: {len(pagination.items)}")
     listings_items = pagination.items
     markers = []
+    print("DEBUG: Processing markers...")
     for l in listings_items:
         if l.lat is not None and l.lon is not None:
             try:
@@ -279,12 +281,13 @@ def listings():
                     'icao': l.airport_icao,
                     'price': f"${price_val}",
                     'price_unit': price_unit,
-                    'is_premium': l.is_premium_listing or (l.owner and l.owner.is_premium)
+                    'is_premium': bool(l.is_premium_listing or (l.owner.is_premium if l.owner else False))
                 })
-            except Exception:
+            except Exception as e:
+                print(f"ERROR: marker building failed for listing {l.id}: {e}")
                 pass
 
-    print(f"DEBUG: /listings returning {len(listings_items)} results")
+    print(f"DEBUG: /listings returning {len(listings_items)} results and {len(markers)} markers")
     return render_template('listings.html',
                            listings=listings_items,
                            pagination=pagination,
@@ -545,7 +548,7 @@ def post_listing():
             raw_night_price = request.form.get('price_night')
             if not raw_night_price or not raw_night_price.strip():
                 flash("Nightly Rate is mandatory for all listings.", "danger")
-                return render_template('post_listing.html')
+                return render_template('post_listing.html', form_data=request.form)
             
             price_night = float(raw_night_price)
             

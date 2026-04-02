@@ -160,6 +160,52 @@ def create_app(config_class=Config):
                     missing.append("private_access_instructions TEXT")
                 if 'tail_height_clearance' not in columns:
                     missing.append("tail_height_clearance FLOAT")
+                if 'price_night' not in columns:
+                    missing.append("price_night FLOAT")
+                if 'min_stay_nights' not in columns:
+                    missing.append("min_stay_nights INTEGER DEFAULT 1")
+                if 'is_premium_listing' not in columns:
+                    missing.append("is_premium_listing BOOLEAN DEFAULT FALSE")
+                if 'is_featured' not in columns:
+                    missing.append("is_featured BOOLEAN DEFAULT FALSE")
+                if 'is_verified' not in columns:
+                    missing.append("is_verified BOOLEAN DEFAULT FALSE")
+                if 'lat' not in columns:
+                    missing.append("lat FLOAT")
+                if 'lon' not in columns:
+                    missing.append("lon FLOAT")
+                if 'is_heated' not in columns:
+                    missing.append("is_heated BOOLEAN DEFAULT FALSE")
+                if 'access_24_7' not in columns:
+                    missing.append("access_24_7 BOOLEAN DEFAULT FALSE")
+                if 'door_type' not in columns:
+                    missing.append("door_type TEXT")
+                if 'nfpa_409_compliant' not in columns:
+                    missing.append("nfpa_409_compliant BOOLEAN DEFAULT FALSE")
+                if 'gpu_power_available' not in columns:
+                    missing.append("gpu_power_available BOOLEAN DEFAULT FALSE")
+                if 'is_reported' not in columns:
+                    missing.append("is_reported BOOLEAN DEFAULT FALSE")
+                if 'report_count' not in columns:
+                    missing.append("report_count INTEGER DEFAULT 0")
+                if 'report_reason' not in columns:
+                    missing.append("report_reason TEXT")
+                if 'health_score' not in columns:
+                    missing.append("health_score INTEGER DEFAULT 0")
+                if 'condition_verified' not in columns:
+                    missing.append("condition_verified BOOLEAN DEFAULT FALSE")
+                if 'checklist_completed' not in columns:
+                    missing.append("checklist_completed BOOLEAN DEFAULT FALSE")
+                if 'insurance_active' not in columns:
+                    missing.append("insurance_active BOOLEAN DEFAULT FALSE")
+                if 'order_val' not in columns:
+                    missing.append("order_val INTEGER DEFAULT 0")
+                if 'is_verified' not in columns:
+                    missing.append("is_verified BOOLEAN DEFAULT FALSE")
+                if 'availability_start' not in columns:
+                    missing.append("availability_start DATE")
+                if 'availability_end' not in columns:
+                    missing.append("availability_end DATE")
                     
                 # Drop NOT NULL constraint if it exists (2026 Strategy: price_month is optional)
                 try:
@@ -183,7 +229,7 @@ def create_app(config_class=Config):
                             # Use text() to safely execute the ALTER TABLE command
                             parts = col_def.split()
                             col_name = parts[0]
-                            col_type = parts[1]
+                            col_type = " ".join(parts[1:])
                             db.session.execute(text(f"ALTER TABLE listings ADD COLUMN {col_name} {col_type}"))
                             db.session.commit()
                             print(f"✅ [DB-REPAIR] Added column: {col_name}")
@@ -191,18 +237,60 @@ def create_app(config_class=Config):
                             db.session.rollback()
                             print(f"⚠️ [DB-REPAIR] Failed to add {col_name}: {e}")
 
+            # Check Ad table
+            if 'ad' in insp.get_table_names():
+                ad_cols = [c['name'] for c in insp.get_columns('ad')]
+                missing_ad = []
+                if 'placement' not in ad_cols:
+                    missing_ad.append("placement VARCHAR(50)")
+                if 'active' not in ad_cols:
+                    missing_ad.append("active BOOLEAN DEFAULT TRUE")
+                if 'impressions' not in ad_cols:
+                    missing_ad.append("impressions INTEGER DEFAULT 0")
+                if 'clicks' not in ad_cols:
+                    missing_ad.append("clicks INTEGER DEFAULT 0")
+                
+                if missing_ad:
+                    print(f"[DB-REPAIR] Adding missing columns to ad: {missing_ad}")
+                    for col_def in missing_ad:
+                        try:
+                            parts = col_def.split()
+                            col_name = parts[0]
+                            col_type = " ".join(parts[1:])
+                            db.session.execute(text(f"ALTER TABLE ad ADD COLUMN {col_name} {col_type}"))
+                            db.session.commit()
+                            print(f"✅ [DB-REPAIR] Added ad column: {col_name}")
+                        except Exception as e:
+                            db.session.rollback()
+                            print(f"⚠️ [DB-REPAIR] Failed to add ad column {col_name}: {e}")
+
             # Check users table
             if 'users' in insp.get_table_names():
+                missing_user = []
                 user_cols = [c['name'] for c in insp.get_columns('users')]
                 if 'saved_aircraft' not in user_cols:
-                    try:
-                        db.session.execute(text("ALTER TABLE users ADD COLUMN saved_aircraft VARCHAR(100)"))
-                        db.session.commit()
-                        print("✅ [DB-REPAIR] Added saved_aircraft to users")
-                    except Exception as e:
-                        db.session.rollback()
-                        print(f"⚠️ [DB-REPAIR] Failed to add saved_aircraft: {e}")
-            
+                    missing_user.append("saved_aircraft VARCHAR(100)")
+                if 'total_revenue' not in user_cols:
+                    missing_user.append("total_revenue FLOAT DEFAULT 0.0")
+                if 'is_premium' not in user_cols:
+                    missing_user.append("is_premium BOOLEAN DEFAULT FALSE")
+                if 'role' not in user_cols:
+                    missing_user.append("role VARCHAR(20) DEFAULT 'renter'")
+                
+                if missing_user:
+                    print(f"[DB-REPAIR] Adding missing columns to users: {missing_user}")
+                    for col_def in missing_user:
+                        try:
+                            parts = col_def.split()
+                            col_name = parts[0]
+                            col_type = " ".join(parts[1:])
+                            db.session.execute(text(f"ALTER TABLE users ADD COLUMN {col_name} {col_type}"))
+                            db.session.commit()
+                            print(f"✅ [DB-REPAIR] Added user column: {col_name}")
+                        except Exception as e:
+                            db.session.rollback()
+                            print(f"⚠️ [DB-REPAIR] Failed to add user column {col_name}: {e}")
+                
             db.create_all()
             print("✅ [DB] Schema check & db.create_all() completed.")
         except Exception as create_err:
