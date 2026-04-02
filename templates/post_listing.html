@@ -346,6 +346,34 @@
                     placeholder="Describe your parking space, amenities, access hours, security features, etc."></textarea>
             </div>
 
+            <!-- Smart Handover & Access (2026 Strategy) -->
+            <div class="bg-blue-50 dark:bg-blue-900/10 p-6 rounded-2xl border border-blue-100 dark:border-blue-800/30">
+                <h3 class="text-xl font-bold text-blue-900 dark:text-platinum-100 mb-4 flex items-center">
+                    <i class="fas fa-key mr-2 text-blue-600"></i>Smart Access Handover
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label for="public_location_description" class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
+                            Public Location Description
+                        </label>
+                        <input type="text" id="public_location_description" name="public_location_description"
+                            class="bg-white dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 rounded-xl focus:ring-2 focus:ring-blue-500 block w-full p-3"
+                            placeholder="e.g. North Row, T-Hangars, first block after FBO">
+                    </div>
+                    <div>
+                        <label for="private_access_instructions" class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
+                            Private Access Instructions (Hidden until Booking)
+                        </label>
+                        <textarea id="private_access_instructions" name="private_access_instructions" rows="3"
+                            class="bg-white dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 rounded-xl focus:ring-2 focus:ring-blue-500 block w-full p-3"
+                            placeholder="e.g. Hangar B-12, Code #1234, pull door hard."></textarea>
+                        <p class="text-[10px] text-blue-600 dark:text-blue-400 mt-2 font-bold uppercase tracking-wider italic">
+                            <i class="fas fa-lock mr-1"></i> These details are encrypted and ONLY revealed to confirmed pilots after payment.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Photos -->
             <div>
                 <label for="photos" class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">

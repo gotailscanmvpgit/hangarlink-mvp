@@ -406,7 +406,7 @@ def post_listing():
     
         # Check listing limit for free tier
         if not check_listing_limit():
-            flash('Free accounts can have 1 active listing. Upgrade to Premium for unlimited listings!', 'warning')
+            flash('Free accounts can have up to 3 active listings. Upgrade to Host Premium for unlimited listings, featured placement, and advanced demand analytics!', 'warning')
             return redirect(url_for('main.pricing'))
         
         if request.method == 'POST':
@@ -591,7 +591,9 @@ def post_listing():
                 floor_loading_pcn=floor_loading_pcn,
                 gpu_power_available=gpu_power_available,
                 insurance_active=request.form.get('insurance_provided') == 'on',
-                shuttle_info=request.form.get('shuttle_info', '').strip() or None
+                shuttle_info=request.form.get('shuttle_info', '').strip() or None,
+                public_location_description=request.form.get('public_location_description', '').strip() or None,
+                private_access_instructions=request.form.get('private_access_instructions', '').strip() or None
             )
             db.session.add(listing)
             db.session.commit()
@@ -625,7 +627,7 @@ def check_listing_limit():
     
     # Check count of active listings
     count = Listing.query.filter_by(owner_id=current_user.id, status='Active').count()
-    return count < 1
+    return count < 3
 
 @bp.route('/post-listing-confirm')
 @login_required
@@ -710,6 +712,8 @@ def edit_listing(id):
         listing.price_month = float(request.form.get('price_month'))
         listing.description = request.form.get('description')
         listing.status = request.form.get('status', 'Active')
+        listing.public_location_description = request.form.get('public_location_description', '').strip() or None
+        listing.private_access_instructions = request.form.get('private_access_instructions', '').strip() or None
 
         # ── Auto-update lat/lon when ICAO changes ────────────────────────────
         from airport_coords import get_coords
@@ -1032,6 +1036,60 @@ def forgot_password():
         flash('If that email is registered, a reset link has been sent. Check your inbox (and spam folder).', 'info')
         return redirect(url_for('main.forgot_password'))
     return render_template('forgot_password.html')
+
+
+def _send_booking_confirmation_email(booking):
+    """Send booking confirmation with secure access details to the renter."""
+    renter = booking.renter
+    listing = booking.listing
+    instructions = listing.private_access_instructions or "Please contact the owner for final access codes."
+    sign_url = url_for('main.sign_lease', token=booking.sign_token_renter, _external=True)
+
+    subject = f"✅ Booking Confirmed: Your Access Key for {listing.airport_icao}"
+    
+    html_body = f"""
+    <div style="font-family:sans-serif;max-width:600px;margin:10px auto;background:#f8fafc;padding:10px;">
+      <div style="background:linear-gradient(135deg,#1e293b,#0f172a);padding:30px;border-radius:20px;color:white;text-align:center;">
+        <div style="background:rgba(59,130,246,0.2);width:50px;height:50px;border-radius:50%;margin:0 auto 15px;line-height:50px;border:1px solid rgba(59,130,246,0.3);">
+            <span style="font-size:24px;">🔑</span>
+        </div>
+        <h1 style="margin:0;font-size:22px;font-weight:900;">YOUR ACCESS KEY</h1>
+        <p style="color:#94a3b8;font-size:12px;margin-top:5px;text-transform:uppercase;letter-spacing:1px;">Verified Smart Handover</p>
+        
+        <div style="background:rgba(255,255,255,0.05);margin:25px 0;padding:25px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);text-align:left;">
+            <p style="color:#64748b;font-size:11px;text-transform:uppercase;font-weight:bold;margin:0 0 8px 0;">Instructions</p>
+            <p style="color:white;font-size:16px;line-height:1.5;margin:0;">{instructions}</p>
+        </div>
+
+        <div style="margin-top:35px;">
+            <a href="{sign_url}" style="background:#3b82f6;color:white;padding:14px 28px;border-radius:10px;text-decoration:none;font-weight:bold;display:inline-block;">
+                Sign Lease Agreement
+            </a>
+        </div>
+        
+        <p style="color:#475569;font-size:11px;margin-top:25px;">
+            HangarLinks Security Protocol: Access details are only revealed to verified pilots.
+        </p>
+      </div>
+    </div>
+    """
+
+    mail_configured = bool(current_app.config.get('MAIL_USERNAME'))
+    if mail_configured and MailMessage:
+        try:
+            sender = current_app.config.get('MAIL_DEFAULT_SENDER', 'no-reply@tryhangarlinks.com')
+            msg = MailMessage(subject=subject,
+                              sender=sender,
+                              recipients=[renter.email],
+                              html=html_body)
+            mail.send(msg)
+            return True
+        except Exception as e:
+            current_app.logger.error(f"[EMAIL] Confirmation failed: {e}")
+            return False
+    else:
+        print(f"\n[CONFIRMATION EMAIL FALLBACK]\nTo: {renter.email}\nInstructions: {instructions}\nLink: {sign_url}\n")
+        return False
 
 
 @bp.route('/reset-password/<token>', methods=['GET', 'POST'])
@@ -1514,8 +1572,8 @@ def booking_success():
         
     db.session.commit()
     
-    # Notify Renter & Owner (Mock)
-    print(f"[EMAIL MOCK] To: {booking.renter.email} -> Your booking at {booking.listing.airport_icao} is CONFIRMED!")
+    # Notify Renter (Real/Secure) & Owner (Mock/Revenue)
+    _send_booking_confirmation_email(booking)
     print(f"[EMAIL MOCK] To: {owner.email} -> New confirmed rental! Revenue added: ${revenue:.2f}")
     
     # WeasyPrint PDF Generation Engine
@@ -1552,8 +1610,11 @@ def booking_success():
         print(f"-->       Your {booking.listing.airport_icao} stay is protected. Policy value: ${booking.insurance_fee:.2f}.")
         print(f"-->       Activate/View complete policy: https://www.avemco.com/hangarlinks/activate?booking={booking.id}\n")
     
-    flash('Booking Escrowed! Check your email to digitally sign the generated lease agreement.', 'success')
-    return redirect(url_for('main.sign_lease', token=booking.sign_token_renter))
+    flash('Booking Confirmed! Your access details are below.', 'success')
+    return render_template('booking_success.html', 
+                          booking=booking, 
+                          listing=booking.listing,
+                          token=booking.sign_token_renter)
 
 @bp.route('/sign-lease/<token>', methods=['GET'])
 @login_required

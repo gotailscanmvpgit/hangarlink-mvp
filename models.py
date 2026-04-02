@@ -151,6 +151,10 @@ class Listing(db.Model):
     # Ground Logistics
     shuttle_info = db.Column(db.String(255), nullable=True)  # e.g. "Free shuttle to terminal"
     
+    # Smart Handover Features (2026 Strategy)
+    public_location_description = db.Column(db.String(255), nullable=True) # e.g. "North Row at 60J"
+    private_access_instructions = db.Column(db.Text, nullable=True) # e.g. "Hangar B-12, Code #1234" (HIDDEN)
+    
     # Relationships
     bookings = db.relationship('Booking', backref='listing', lazy=True)
 
