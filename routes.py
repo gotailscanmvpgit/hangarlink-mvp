@@ -259,16 +259,10 @@ def listings():
             pagination = _run_query()
         except Exception as retry_err:
             import traceback
-            traceback.print_exc()
-            print(f"FATAL: listings retry also failed: {retry_err}")
+            tb = traceback.format_exc()
+            print(f"FATAL: listings retry also failed: {retry_err}\n{tb}")
             flash('Database is temporarily unavailable. Please try again in a moment.', 'error')
-            return render_template('listings.html',
-                                   listings=[], pagination=None,
-                                   airport=airport, radius=radius,
-                                   covered=covered, min_price=min_price,
-                                   max_price=max_price,
-                                   search_limited=search_limited,
-                                   markers=[]), 503
+            return f"<h1>500 Internal Server Error</h1><p>A critical database error occurred while fetching listings.</p><pre>{tb}</pre>", 500
 
     listings_items = pagination.items
     markers = []
