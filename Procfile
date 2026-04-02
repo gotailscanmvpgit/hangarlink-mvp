@@ -1,1 +1,1 @@
-web: flask db upgrade && gunicorn --worker-class eventlet --workers 4 --threads 4 --bind 0.0.0.0:$PORT run:socketio
+web: python -m flask db upgrade && gunicorn --worker-class eventlet --workers 4 --threads 4 --bind 0.0.0.0:$PORT run:socketio
