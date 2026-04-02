@@ -144,15 +144,38 @@ def create_app(config_class=Config):
     app.config.setdefault('RECAPTCHA_PRIVATE_KEY', os.environ.get('RECAPTCHA_PRIVATE_KEY', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe')) # Dummy key
     app.config.setdefault('RECAPTCHA_ENABLED', os.environ.get('RECAPTCHA_ENABLED', 'False') == 'True')
 
-    # All tables are created/updated via migrations or db.create_all() if needed
+    # ── Self-Heal Database Schema (Railway/Postgres Strategy) ──
     with app.app_context():
-        # ── Step 1: Create all tables (safe for both SQLite and PostgreSQL) ──
         try:
+            from sqlalchemy import inspect as sa_inspect, text
+            insp = sa_inspect(db.engine)
+            if 'listings' in insp.get_table_names():
+                columns = [c['name'] for c in insp.get_columns('listings')]
+                
+                # Columns to add if missing
+                missing = []
+                if 'public_location_description' not in columns:
+                    missing.append("public_location_description TEXT")
+                if 'private_access_instructions' not in columns:
+                    missing.append("private_access_instructions TEXT")
+                    
+                if missing:
+                    print(f"[DB-REPAIR] Adding missing columns to listings: {missing}")
+                    for col_def in missing:
+                        try:
+                            # Use text() to safely execute the ALTER TABLE command
+                            col_name = col_def.split()[0]
+                            db.session.execute(text(f"ALTER TABLE listings ADD COLUMN {col_name} TEXT"))
+                            db.session.commit()
+                            print(f"✅ [DB-REPAIR] Added column: {col_name}")
+                        except Exception as e:
+                            db.session.rollback()
+                            print(f"⚠️ [DB-REPAIR] Failed to add {col_name}: {e}")
+            
             db.create_all()
-            print("✅ [DB] db.create_all() completed — all model tables ensured.")
+            print("✅ [DB] Schema check & db.create_all() completed.")
         except Exception as create_err:
-            # Log loudly but DON'T crash — routes self-heal on first request
-            print(f"❌ [DB] db.create_all() FAILED (app will self-heal per-request): {create_err}")
+            print(f"❌ [DB] Self-heal FAILED: {create_err}")
             import traceback
             traceback.print_exc()
 
