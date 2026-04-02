@@ -116,28 +116,32 @@
                     <div class="grid md:grid-cols-2 gap-8">
                         <!-- Price -->
                         <div class="md:col-span-2">
-                            <label for="price_month" class="block text-sm font-bold text-gray-700 dark:text-platinum-200 mb-2 uppercase tracking-wide">
-                                <i class="fas fa-dollar-sign mr-2 text-emerald-500"></i>Monthly Rate (USD) *
+                            <label for="price_night" class="block text-sm font-bold text-gray-700 dark:text-platinum-200 mb-2 uppercase tracking-wide">
+                                <i class="fas fa-moon mr-2 text-emerald-500"></i>Nightly Rate (USD) *
                             </label>
                             <div class="relative">
                                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
-                                <input type="number" id="price_month" name="price_month" required min="0" step="0.01"
+                                <input type="number" id="price_night" name="price_night" required min="0" step="0.01"
                                     class="bg-gray-50 dark:bg-dark-900 border-2 border-gray-100 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-2xl font-black rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 block w-full pl-10 p-5 transition-all"
-                                    placeholder="850.00" oninput="calculateNightly()">
+                                    placeholder="e.g. 45.00">
                             </div>
+                            <p class="text-[10px] text-emerald-500 font-black uppercase mt-2"><i class="fas fa-bolt mr-1"></i> Ready to Book status enabled</p>
                         </div>
 
                         <div>
-                            <label for="price_night" class="block text-xs font-bold text-gray-500 mb-2 uppercase">Daily Rate ($/night)</label>
-                            <input type="number" id="price_night" name="price_night" min="0" step="0.01"
-                                class="w-full p-4 rounded-xl bg-gray-50 dark:bg-dark-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white"
-                                placeholder="Suggested: $28.33">
+                            <label for="price_month" class="block text-xs font-bold text-gray-500 mb-2 uppercase">Monthly Rate ($ - Optional)</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
+                                <input type="number" id="price_month" name="price_month" min="0" step="0.01"
+                                    class="w-full pl-8 p-4 rounded-xl bg-gray-50 dark:bg-dark-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white"
+                                    placeholder="e.g. 850.00" oninput="calculateNightly()">
+                            </div>
                         </div>
 
                         <div>
                             <label for="min_stay_nights" class="block text-xs font-bold text-gray-500 mb-2 uppercase">Min Stay</label>
                             <select id="min_stay_nights" name="min_stay_nights" class="w-full p-4 rounded-xl bg-gray-50 dark:bg-dark-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white appearance-none">
-                                <option value="1">1 Night (Flexible)</option>
+                                <option value="1">1 Night (Emerald Standard)</option>
                                 <option value="3">3 Nights</option>
                                 <option value="7">7 Nights (Weekly)</option>
                                 <option value="30">30 Nights (Monthly Only)</option>
@@ -435,7 +439,14 @@
         const monthly = monthlyInput ? parseFloat(monthlyInput.value) : 0;
         const nightInput = document.getElementById('price_night');
         if (nightInput && monthly > 0) {
-            nightInput.placeholder = "Suggested: $" + (monthly / 30).toFixed(2);
+            // Auto-populate with 1/20 ratio for short-term premium
+            const suggested = (monthly / 20).toFixed(2);
+            nightInput.value = suggested;
+            nightInput.placeholder = "Smart Suggested: $" + suggested;
+            
+            // Visual feedback
+            nightInput.classList.add('border-emerald-500');
+            setTimeout(() => nightInput.classList.remove('border-emerald-500'), 1500);
         }
     }
 </script>

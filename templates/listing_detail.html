@@ -296,24 +296,21 @@
                     </div>
 
                     <!-- Price Card -->
-                    <div
-                        class="w-full sm:w-auto text-left sm:text-right bg-blue-50/50 dark:bg-blue-900/10 p-5 sm:p-0 rounded-xl sm:rounded-none shadow-lg sm:shadow-none border sm:border-none border-blue-100 dark:border-blue-800/50">
-
-                        {% if listing.min_stay_nights <= 7 and listing.price_night %} <div
-                            class="text-3xl sm:text-4xl font-bold text-blue-600 mb-1 sm:mb-0">${{
-                            listing.price_night|int }}</div>
-                    <div class="text-sm font-medium text-gray-600 dark:text-gray-400">per night</div>
-                    <div
-                        class="text-xs text-gray-500 mt-2 sm:mt-1 bg-white/50 sm:bg-transparent dark:bg-dark-900/50 sm:dark:bg-transparent p-2 sm:p-0 rounded-lg sm:rounded-none">
-                        (${{ listing.price_month|int }} / month equivalent)
+                   <div
+                        class="w-full sm:w-auto text-left sm:text-right bg-emerald-500/5 dark:bg-emerald-500/10 p-5 sm:p-0 rounded-xl sm:rounded-none shadow-lg sm:shadow-none border sm:border-none border-emerald-100 dark:border-emerald-800/50">
+                    <div class="text-3xl sm:text-4xl font-black text-emerald-600 mb-1 sm:mb-0">
+                        ${{ "{:,.0f}".format(listing.price_night) }}
                     </div>
-                    {% else %}
-                    <div class="text-3xl sm:text-4xl font-bold text-blue-600 mb-1 sm:mb-0">${{ listing.price_month|int
-                        }}</div>
-                    <div class="text-sm font-medium text-gray-600 dark:text-gray-400">per month</div>
-                    <div
-                        class="text-xs text-gray-500 mt-2 sm:mt-1 bg-white/50 sm:bg-transparent dark:bg-dark-900/50 sm:dark:bg-transparent p-2 sm:p-0 rounded-lg sm:rounded-none">
-                        + 9% platform fee (charged to owner)
+                    <div class="text-xs font-black text-emerald-500 uppercase tracking-widest flex items-center justify-end gap-1.5">
+                        <i class="fas fa-moon text-[10px]"></i> per night
+                    </div>
+                    <div class="text-[11px] text-gray-500 mt-2 sm:mt-1 font-bold uppercase tracking-tight flex items-center justify-end gap-1.5">
+                        <i class="fas fa-calendar-alt"></i> Min: {{ listing.min_stay_nights }}
+                        {% if listing.min_stay_nights == 1 %} night {% else %} nights {% endif %}
+                    </div>
+                    {% if listing.price_month %}
+                    <div class="mt-3 inline-flex items-center px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg text-[10px] font-black uppercase border border-blue-100 dark:border-blue-800">
+                        Monthly rate available: ${{ "{:,.0f}".format(listing.price_month) }}/mo
                     </div>
                     {% endif %}
                 </div>
@@ -935,7 +932,7 @@
                     <!-- Convenience fee was universally removed for renters! (0 platform fees) -->
                     <div class="flex justify-between font-bold text-gray-900 dark:text-white border-t border-gray-200 dark:border-gray-600 pt-2 mt-2">
                         <span>Est. Total</span>
-                        <span id="grand-total-display" class="text-blue-600 dark:text-blue-400 text-lg">—</span>
+                        <span id="grand-total-display" class="text-emerald-600 dark:text-emerald-400 text-lg">—</span>
                     </div>
                     <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-1.5 leading-tight">* Owner receives 90.5% of rental subtotal (9.5% host fee). Renter pays ZERO platform fees. Final total is charged securely at checkout.</p>
                 </div>
@@ -1003,9 +1000,7 @@
                     if (nights <= 0) { totalRow.classList.add('hidden'); return; }
 
                     const nightlyRate = {{ listing.price_night if listing.price_night else 0 }};
-                    const monthlyRate = {{ listing.price_month if listing.price_month else 0 }};
-                    const isShortTerm = nights < 30;
-                    const base  = isShortTerm ? (nightlyRate * nights) : monthlyRate;
+                    const base  = nightlyRate * nights; // Calculation is ALWAYS nightly-based (2026 Strategy)
                     const grand = base; // No renter convenience fees under 2026 monetization!
 
                     totalRow.classList.remove('hidden');

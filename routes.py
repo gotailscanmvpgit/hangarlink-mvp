@@ -153,8 +153,8 @@ def index():
         markers = []
         for l in map_listings:
             if l.lat is not None and l.lon is not None:
-                price_val = int(l.price_night) if l.price_night else (int(l.price_month) if l.price_month else 0)
-                price_unit = "/night" if l.price_night else "/mo"
+                price_val = int(l.price_night) if l.price_night else 0
+                price_unit = "/night"
                 markers.append({
                     'id': l.id,
                     'lat': l.lat,
@@ -547,14 +547,17 @@ def post_listing():
                         f"[AIRPORT-COORDS] invalid manual coords for '{icao_upper}'"
                     )
 
-            # Handle Airbnb-specific inputs
-            price_month = float(request.form.get('price_month') or 0)
-            
+            # Mandatory Nightly Rate (2026 Strategy)
             raw_night_price = request.form.get('price_night')
-            if raw_night_price and raw_night_price.strip():
-                price_night = float(raw_night_price)
-            else:
-                price_night = round(price_month / 30, 2) if price_month > 0 else 0.0
+            if not raw_night_price or not raw_night_price.strip():
+                flash("Nightly Rate is mandatory for all listings.", "danger")
+                return render_template('post_listing.html')
+            
+            price_night = float(raw_night_price)
+            
+            # Optional Monthly Rate
+            raw_month_price = request.form.get('price_month')
+            price_month = float(raw_month_price) if raw_month_price and raw_month_price.strip() else None
                 
             min_stay = int(request.form.get('min_stay_nights') or 1)
 
