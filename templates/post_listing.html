@@ -3,723 +3,450 @@
 {% block content %}
 <div class="max-w-4xl mx-auto px-6 lg:px-8 py-12">
     <!-- Founding Host Banner for Post Listing Page -->
-    <div class="bg-gradient-to-r from-emerald-900 to-green-900 border border-emerald-500/30 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between shadow-2xl relative overflow-hidden mb-10 w-full hover:-translate-y-1 transition-transform duration-300">
-        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(16,185,129,0.15),transparent_50%)]"></div>
-        <div class="relative z-10 flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
-            <div class="w-16 h-16 bg-emerald-500/20 border border-emerald-400/40 rounded-full flex flex-shrink-0 items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-                <i class="fas fa-gem text-emerald-400 text-2xl"></i>
+    <!-- Multi-Step Progress Bar (2026 Strategy) -->
+    <div class="max-w-4xl mx-auto px-6 mb-10">
+        <div class="relative flex justify-between items-center">
+            <!-- Connector Line -->
+            <div class="absolute top-1/2 left-0 w-full h-0.5 bg-gray-200 dark:bg-dark-700 -translate-y-1/2 z-0"></div>
+            <div id="progress-line" class="absolute top-1/2 left-0 h-0.5 bg-emerald-500 -translate-y-1/2 z-0 transition-all duration-500" style="width: 25%;"></div>
+            
+            <!-- Steps -->
+            {% for step in ['Location', 'Pricing', 'Security', 'Finish'] %}
+            <div class="relative z-10 flex flex-col items-center">
+                <div id="step-dot-{{ loop.index }}" class="w-10 h-10 rounded-full flex items-center justify-center border-4 transition-all duration-300 {{ 'bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/20' if loop.index == 1 else 'bg-white dark:bg-dark-800 border-gray-200 dark:border-dark-700 text-gray-400' }}">
+                    {% if loop.index == 1 %}<i class="fas fa-map-marker-alt"></i>
+                    {% elif loop.index == 2 %}<i class="fas fa-dollar-sign"></i>
+                    {% elif loop.index == 3 %}<i class="fas fa-lock"></i>
+                    {% else %}<i class="fas fa-check"></i>{% endif %}
+                </div>
+                <span class="text-[10px] font-black uppercase tracking-widest mt-2 {{ 'text-emerald-500' if loop.index == 1 else 'text-gray-400' }}">{{ step }}</span>
             </div>
-            <div>
-                <div class="inline-block text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300 bg-emerald-900/50 px-2 py-1 rounded mb-2 border border-emerald-500/30">First 100 Hosts</div>
-                <h3 class="text-2xl font-bold text-white mb-1">Be a Founding Host</h3>
-                <p class="text-emerald-50 text-base">Post your first hangar listing today and get <strong class="text-emerald-300">3 months of Hangar Host Premium for free</strong> (normally $44.97 value).</p>
-                <p class="text-emerald-200/70 text-sm mt-1">Offer ends soon.</p>
-            </div>
+            {% endfor %}
         </div>
     </div>
 
-    <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8">
-        <h1 class="text-4xl font-bold text-gray-900 dark:text-platinum-100 mb-2">List Your Parking Space</h1>
-        <p class="text-gray-600 dark:text-platinum-300 mb-8">Fill out the details below to create your listing</p>
+    <div class="bg-white dark:bg-dark-800 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-700 p-8 md:p-12 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -mr-32 -mt-32"></div>
+        
+        <div class="relative z-10">
+            <h1 class="text-3xl md:text-4xl font-black text-gray-900 dark:text-platinum-100 mb-2">Founding Host <span class="text-emerald-500">Fast-Track</span></h1>
+            <p class="text-gray-500 dark:text-gray-400 mb-8 font-medium">Post your space in under 2 minutes. Secure your 3-month Premium bonus.</p>
 
-        <form method="POST" enctype="multipart/form-data" class="space-y-6">
-            <!-- Airport Identifier -->
-            <div>
-                <label for="airport_icao" class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
-                    <i class="fas fa-plane-departure mr-2 text-blue-600"></i>Airport Identifier (ICAO, FAA LID, Airpark Name, or Custom) *
-                </label>
-                <input type="text" id="airport_icao" name="airport_icao" required maxlength="20"
-                    list="airport-suggestions"
-                    class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-4"
-                    placeholder="e.g. CYHM, KJFK, 60J, 5FD5, Smith Airpark…"
-                    value="{{ airport or '' }}"
-                    oninput="onAirportInput(this.value)">
-
-                <!-- Datalist of known identifiers -->
-                <datalist id="airport-suggestions">
-                    <!-- Canada -->
-                    <option value="CYTZ">CYTZ — Billy Bishop, Toronto Island</option>
-                    <option value="CYHM">CYHM — Hamilton John C. Munro, ON</option>
-                    <option value="CYYZ">CYYZ — Toronto Pearson International</option>
-                    <option value="CYOW">CYOW — Ottawa Macdonald-Cartier</option>
-                    <option value="CYVR">CYVR — Vancouver International</option>
-                    <option value="CYYC">CYYC — Calgary International</option>
-                    <option value="CYEG">CYEG — Edmonton International</option>
-                    <option value="CYKF">CYKF — Waterloo Region, ON</option>
-                    <option value="CYKZ">CYKZ — Toronto Buttonville, ON</option>
-                    <option value="CYOO">CYOO — Oshawa Airport, ON</option>
-                    <option value="CYSN">CYSN — Niagara District, ON</option>
-                    <option value="CYBF">CYBF — Collingwood / Blue Mountain, ON</option>
-                    <option value="CYHS">CYHS — Muskoka Airport, ON</option>
-                    <!-- USA Florida -->
-                    <option value="KFMY">KFMY — Page Field, Fort Myers FL</option>
-                    <option value="KPBI">KPBI — Palm Beach International FL</option>
-                    <option value="KFXE">KFXE — Fort Lauderdale Executive FL</option>
-                    <option value="KLAL">KLAL — Lakeland Linder (Sun 'n Fun) FL</option>
-                    <option value="KSPG">KSPG — Albert Whitted, St Petersburg FL</option>
-                    <option value="KVNC">KVNC — Venice Airport FL</option>
-                    <option value="KSEF">KSEF — Sebring Regional FL</option>
-                    <option value="KDAB">KDAB — Daytona Beach FL</option>
-                    <option value="KSFB">KSFB — Orlando Sanford FL</option>
-                    <option value="KEYW">KEYW — Key West International FL</option>
-                    <option value="KMIA">KMIA — Miami International FL</option>
-                    <!-- FAA LIDs / private airparks -->
-                    <option value="60J">60J — Riverbend Airpark, FL (private)</option>
-                    <option value="5FD5">5FD5 — Aero Acres Airpark, Okeechobee FL</option>
-                    <option value="39FD">39FD — Ancient Oaks Airstrip, Ocala FL</option>
-                    <option value="X14">X14 — Yulee Airport, Nassau Co. FL</option>
-                    <option value="2NY">2NY — Private strip, Catskills NY</option>
-                    <option value="CA-0516">CA-0516 — Private strip, Fraser Valley BC</option>
-                    <!-- Popular US GA -->
-                    <option value="KOSH">KOSH — Oshkosh Wittman (EAA AirVenture) WI</option>
-                    <option value="KJFK">KJFK — New York JFK</option>
-                    <option value="KLAX">KLAX — Los Angeles International</option>
-                    <option value="KDEN">KDEN — Denver International</option>
-                    <option value="KSEA">KSEA — Seattle-Tacoma International</option>
-                    <option value="KBOS">KBOS — Boston Logan</option>
-                    <option value="KTPA">KTPA — Tampa International FL</option>
-                </datalist>
-
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                    <i class="fas fa-info-circle mr-1 text-blue-400"></i>
-                    Examples: <strong>CYHM</strong>, <strong>KJFK</strong>, <strong>60J</strong> (private), <strong>2NY</strong>, <em>Smith Airpark</em>, or any known code.
-                    Private airparks, grass strips, and backcountry strips are all welcome!
-                </p>
-
-                <!-- Fallback lat/lon — shown when identifier not in database -->
-                <div id="manual-coords-section" class="hidden mt-4 rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/15 p-4">
-                    <div class="flex items-start gap-3 mb-3">
-                        <i class="fas fa-map-marker-alt text-amber-500 mt-0.5 flex-shrink-0"></i>
-                        <div>
-                            <div class="font-semibold text-amber-800 dark:text-amber-300 text-sm">Identifier not in our database</div>
-                            <p class="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
-                                No worries — enter the approximate coordinates below so your listing shows on the map correctly.
-                                You can find them on
-                                <a href="https://www.airnav.com/" target="_blank" class="underline font-bold">AirNav</a> or
-                                <a href="https://maps.google.com" target="_blank" class="underline font-bold">Google Maps</a>.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-semibold text-amber-800 dark:text-amber-300 mb-1">Latitude</label>
-                            <input type="number" step="0.0001" id="manual_lat" name="manual_lat"
-                                class="bg-white dark:bg-dark-900 border border-amber-300 dark:border-amber-600 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-amber-400 block w-full p-2.5 text-sm"
-                                placeholder="e.g. 43.1736">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-amber-800 dark:text-amber-300 mb-1">Longitude</label>
-                            <input type="number" step="0.0001" id="manual_lon" name="manual_lon"
-                                class="bg-white dark:bg-dark-900 border border-amber-300 dark:border-amber-600 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-amber-400 block w-full p-2.5 text-sm"
-                                placeholder="e.g. -79.9350">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <script>
-            // Known identifiers that won't need manual coords
-            const KNOWN_IDS = new Set([
-                'CYTZ','CYHM','CYYZ','CYOW','CYVR','CYYC','CYEG','CYKF','CYKZ','CYOO',
-                'CYSN','CYBF','CYHS','KFMY','KPBI','KFXE','KLAL','KSPG','KVNC','KSEF',
-                'KDAB','KSFB','KEYW','KMIA','KTPA','60J','5FD5','39FD','X14','2NY',
-                'KOSH','KJFK','KLAX','KDEN','KSEA','KBOS','KATL','KORD','KLAS','KDFW',
-                'KMCO','KFLL','KIAD','KDCA','KSLC','KPDX','KSAN','KSTL','KCLE','KPIT',
-                'PANC','PHNL','CA-0516','KANE','7NY4','3NY4'
-            ]);
-            function onAirportInput(val) {
-                const normalized = val.trim().toUpperCase().replace(/\s+/g,' ');
-                const section = document.getElementById('manual-coords-section');
-                // Show manual coords only if identifier looks code-like but unknown
-                const looksLikeCode = /^[A-Z0-9\-]{2,10}$/.test(normalized);
-                if (normalized.length >= 2 && looksLikeCode && !KNOWN_IDS.has(normalized)) {
-                    section.classList.remove('hidden');
-                } else {
-                    section.classList.add('hidden');
-                }
-            }
-            </script>
-
-            <!-- Size -->
-            <div
-                class="bg-gray-50 dark:bg-dark-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-inner">
-                <label for="size_sqft" class="block text-sm font-semibold text-gray-900 dark:text-platinum-100 mb-2">
-                    <i class="fas fa-ruler-combined mr-2 text-blue-600"></i>Available Space (sq ft) *
-                </label>
-                <input type="number" id="size_sqft" name="size_sqft" required min="100" step="1"
-                    class="bg-white dark:bg-dark-900 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-4 mb-4"
-                    placeholder="e.g. 800">
-
-                <!-- Inline Hangar Calculator -->
-                <div
-                    class="bg-blue-50/50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-800/30">
-                    <h4
-                        class="text-xs font-bold text-gray-600 dark:text-gray-400 mb-3 uppercase tracking-wider flex items-center">
-                        <i class="fas fa-calculator mr-2 text-blue-500"></i> Space Calculator
-                    </h4>
-                    <div class="flex flex-wrap items-center gap-3">
-                        <div class="flex-1 min-w-[120px]">
-                            <label
-                                class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase block mb-1">Total
-                                Hangar SqFt</label>
-                            <input type="number" id="calc_total"
-                                class="w-full p-2 text-sm rounded bg-white dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
-                                placeholder="2500" oninput="runSpaceCalc()">
-                        </div>
-                        <div class="text-gray-400 font-bold mt-4">-</div>
-                        <div class="flex-1 min-w-[120px]">
-                            <label
-                                class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase block mb-1">Rented/Used
-                                SqFt</label>
-                            <input type="number" id="calc_used"
-                                class="w-full p-2 text-sm rounded bg-white dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
-                                placeholder="1700" oninput="runSpaceCalc()">
-                        </div>
-                        <div class="text-gray-400 font-bold mt-4">=</div>
-                        <div class="flex-shrink-0 mt-4 text-center min-w-[80px]">
-                            <div class="text-xs text-gray-500">Available</div>
-                            <div class="text-lg font-black text-blue-600 dark:text-blue-400" id="calc_result">0 sqft
-                            </div>
-                        </div>
-                    </div>
-                    <script>
-                        function runSpaceCalc() {
-                            let t = parseFloat(document.getElementById('calc_total').value) || 0;
-                            let u = parseFloat(document.getElementById('calc_used').value) || 0;
-                            let r = Math.max(0, t - u);
-                            document.getElementById('calc_result').innerText = r + ' sqft';
-                            if (r > 0) document.getElementById('size_sqft').value = r;
-                        }
-                    </script>
-                </div>
-            </div>
-
-            <!-- Covered -->
-            <div>
-                <label class="flex items-center cursor-pointer">
-                    <input type="checkbox" name="covered"
-                        class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                    <span class="ml-3 text-sm font-semibold text-gray-700 dark:text-platinum-200">
-                        <i class="fas fa-warehouse mr-2 text-blue-600"></i>Covered / Enclosed Hangar
-                    </span>
-                </label>
-            </div>
-
-            <!-- Price -->
-            <div>
-                <label for="price_month" class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
-                    <i class="fas fa-dollar-sign mr-2 text-blue-600"></i>Monthly Price (USD) *
-                </label>
-                <input type="number" id="price_month" name="price_month" required min="0" step="0.01"
-                    class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-4"
-                    placeholder="850.00" oninput="calculateNightly()">
-
-                <div
-                    class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 border-t border-gray-200 dark:border-gray-700 pt-6">
-                    <div>
-                        <label for="price_night"
-                            class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
-                            <i class="fas fa-moon mr-2 text-blue-600"></i>Daily Rate ($/night)
-                        </label>
-                        <input type="number" id="price_night" name="price_night" min="0" step="0.01"
-                            class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-3"
-                            placeholder="e.g. 35.00">
-                        <p class="text-xs text-gray-500 mt-1">Leave empty to auto-calculate (Monthly ÷ 30)</p>
-                    </div>
-                    <div>
-                        <label for="min_stay_nights"
-                            class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
-                            <i class="fas fa-calendar-check mr-2 text-blue-600"></i>Minimum Stay (Nights)
-                        </label>
-                        <select id="min_stay_nights" name="min_stay_nights"
-                            class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-3 appearance-none cursor-pointer">
-                            <option value="1">Flexible (1 Night)</option>
-                            <option value="1">1 Night</option>
-                            <option value="2">2 Nights</option>
-                            <option value="3">3 Nights</option>
-                        </select>
-                    </div>
-                </div>
-
-                <script>
-                    const eventsData = {{ events | tojson | safe }};
-
-                    function calculateNightly() {
-                        const monthlyInput = document.getElementById('price_month');
-                        const nightlyInput = document.getElementById('price_night');
-                        let nightlyVal = parseFloat(nightlyInput.value);
-
-                        if (monthlyInput.value && !nightlyInput.value) {
-                            const val = parseFloat(monthlyInput.value);
-                            if (!isNaN(val) && val > 0) {
-                                nightlyVal = parseFloat((val / 30).toFixed(2));
-                                nightlyInput.placeholder = "Suggested: " + nightlyVal;
-                            }
-                        }
-                        checkDynamicPricing(nightlyVal);
-                    }
-
-                    function checkDynamicPricing(nightlyVal) {
-                        const alertBox = document.getElementById('dynamic-pricing-alert');
-                        const alertTxt = document.getElementById('dynamic-pricing-text');
-                        const icao = document.getElementById('airport_icao').value.toUpperCase();
-
-                        if (nightlyVal > 0) {
-                            let matchedEvent = null;
-                            let surgeVal = 0;
-
-                            if (eventsData) {
-                                for (const [eventName, data] of Object.entries(eventsData)) {
-                                    if (data.airports.includes(icao)) {
-                                        matchedEvent = eventName;
-                                        surgeVal = data.surge;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            if (matchedEvent) {
-                                let suggested = Math.round(nightlyVal * (1 + surgeVal / 100));
-                                alertBox.style.display = 'block';
-                                alertTxt.innerHTML = `<strong>${matchedEvent} Surge Alert</strong>: During event dates, consider increasing to <strong>$${suggested}/night</strong> (+${surgeVal}%) for optimal revenue.`;
-                            } else {
-                                let suggested = Math.round(nightlyVal * 0.85);
-                                if (suggested < 20) suggested = 20;
-                                alertBox.style.display = 'block';
-                                alertTxt.innerHTML = `<strong>AI Strategy</strong>: Set <strong>$${suggested}/night</strong> to hit projected <strong>85% occupancy</strong> volume this quarter.`;
-                            }
-                        } else {
-                            if (alertBox) alertBox.style.display = 'none';
-                        }
-                    }
-                </script>
-
-                <div id="dynamic-pricing-alert" style="display: none;"
-                    class="mt-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4 border border-purple-200 dark:border-purple-800 animate-fade-in">
-                    <h4 class="text-sm font-bold text-purple-800 dark:text-purple-300 mb-1 flex items-center">
-                        <i class="fas fa-robot mr-2"></i>AI Pricing Engine
-                    </h4>
-                    <p id="dynamic-pricing-text" class="text-xs text-purple-700 dark:text-purple-200"></p>
-                </div>
-
-                {% if price_intel %}
-                <div
-                    class="mt-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800 animate-fade-in">
-                    <h4 class="text-sm font-bold text-blue-800 dark:text-blue-300 mb-2 flex items-center">
-                        <i class="fas fa-chart-line mr-2"></i>Market Intelligence for {{ airport }}
-                    </h4>
-                    <div class="grid grid-cols-3 gap-4 text-center">
-                        <div class="bg-white dark:bg-dark-800 rounded-lg p-2 shadow-sm">
-                            <div class="text-xs text-gray-500 dark:text-gray-400 uppercase">Lowest</div>
-                            <div class="font-bold text-gray-900 dark:text-white">${{ price_intel.min|int }}</div>
-                        </div>
-                        <div
-                            class="bg-white dark:bg-dark-800 rounded-lg p-2 shadow-sm border border-blue-200 dark:border-blue-700">
-                            <div class="text-xs text-blue-600 dark:text-blue-400 uppercase font-bold">Average</div>
-                            <div class="font-bold text-blue-700 dark:text-blue-300">${{ price_intel.avg|int }}</div>
-                        </div>
-                        <div class="bg-white dark:bg-dark-800 rounded-lg p-2 shadow-sm">
-                            <div class="text-xs text-gray-500 dark:text-gray-400 uppercase">Highest</div>
-                            <div class="font-bold text-gray-900 dark:text-white">${{ price_intel.max|int }}</div>
-                        </div>
-                    </div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
-                        Based on {{ price_intel.count }} active listing{{ 's' if price_intel.count != 1 }}.
-                    </p>
-                </div>
-                {% elif airport %}
-                <div class="mt-2 text-sm text-gray-500 dark:text-gray-400 italic">
-                    <i class="fas fa-info-circle mr-1"></i> No prior listing data available for {{ airport }}. Be
-                    the
-                    first!
-                </div>
-                {% endif %}
-            </div>
-
-            <!-- Description -->
-            <div>
-                <label for="description" class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
-                    <i class="fas fa-align-left mr-2 text-blue-600"></i>Description
-                </label>
-                <textarea id="description" name="description" rows="5"
-                    class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-4"
-                    placeholder="Describe your parking space, amenities, access hours, security features, etc."></textarea>
-            </div>
-
-            <!-- Smart Handover & Access (2026 Strategy) -->
-            <div class="bg-blue-50 dark:bg-blue-900/10 p-6 rounded-2xl border border-blue-100 dark:border-blue-800/30">
-                <h3 class="text-xl font-bold text-blue-900 dark:text-platinum-100 mb-4 flex items-center">
-                    <i class="fas fa-key mr-2 text-blue-600"></i>Smart Access Handover
-                </h3>
-                <div class="space-y-4">
-                    <div>
-                        <label for="public_location_description" class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
-                            Public Location Description
-                        </label>
-                        <input type="text" id="public_location_description" name="public_location_description"
-                            class="bg-white dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 rounded-xl focus:ring-2 focus:ring-blue-500 block w-full p-3"
-                            placeholder="e.g. North Row, T-Hangars, first block after FBO">
-                    </div>
-                    <div>
-                        <label for="private_access_instructions" class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
-                            Private Access Instructions (Hidden until Booking)
-                        </label>
-                        <textarea id="private_access_instructions" name="private_access_instructions" rows="3"
-                            class="bg-white dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 rounded-xl focus:ring-2 focus:ring-blue-500 block w-full p-3"
-                            placeholder="e.g. Hangar B-12, Code #1234, pull door hard."></textarea>
-                        <p class="text-[10px] text-blue-600 dark:text-blue-400 mt-2 font-bold uppercase tracking-wider italic">
-                            <i class="fas fa-lock mr-1"></i> These details are encrypted and ONLY revealed to confirmed pilots after payment.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Photos -->
-            <div>
-                <label for="photos" class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
-                    <i class="fas fa-camera mr-2 text-blue-600"></i>Photos
-                </label>
-                <input type="file" id="photos" name="photos" multiple accept="image/*"
-                    class="block w-full text-sm text-gray-900 dark:text-platinum-100 border border-gray-300 dark:border-gray-700 rounded-xl cursor-pointer bg-gray-50 dark:bg-dark-900 focus:outline-none p-3">
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    <span class="font-bold text-gray-700 dark:text-gray-300">Tip:</span> Hold <kbd
-                        class="bg-gray-200 dark:bg-gray-700 px-1 rounded">Ctrl</kbd> (Windows) or <kbd
-                        class="bg-gray-200 dark:bg-gray-700 px-1 rounded">Cmd</kbd> (Mac) to select multiple photos.
-                </p>
-                <p class="text-xs text-gray-400 mt-1">Upload up to 5 photos (PNG, JPG, JPEG, GIF, WEBP)</p>
-            </div>
-
-            <!-- Virtual Tour (Feature 2) -->
-            <div>
-                <label for="virtual_tour_url"
-                    class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
-                    <i class="fas fa-vr-cardboard mr-2 text-blue-600"></i>360° Virtual Tour URL (Optional)
-                </label>
-                <input type="url" id="virtual_tour_url" name="virtual_tour_url"
-                    class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-4 transition-all"
-                    placeholder="https://matterport.com/show/?m=...">
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Paste a link to your Matterport, YouTube
-                    360,
-                    or Vimeo tour to get the "Interactive" badge.</p>
-            </div>
-
-            <!-- Ramp Cam (Premium Feature) -->
-            <div class="mt-6">
-                <label for="ramp_cam_url" class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
-                    <i class="fas fa-video mr-2 text-red-500"></i>Live Ramp Cam Link (Premium/Locked)
-                </label>
-                <input type="url" id="ramp_cam_url" name="ramp_cam_url"
-                    class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-4 transition-all"
-                    placeholder="https://ring.com/share/...">
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 font-bold text-green-600 dark:text-green-500"><i
-                        class="fas fa-lock mr-1"></i>Kept secure. Only revealed to tenants after deposit/booking.</p>
-            </div>
-
-            <!-- Hangar Features/Amenities -->
-            <div class="space-y-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                <h3 class="text-xl font-bold text-gray-900 dark:text-platinum-100 flex items-center">
-                    <i class="fas fa-tools mr-2 text-blue-600"></i>Practical Features & Amenities
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="door_type"
-                            class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
-                            <i class="fas fa-door-open mr-2 text-gray-500"></i>Door Operation
-                        </label>
-                        <select id="door_type" name="door_type"
-                            class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-3 appearance-none cursor-pointer">
-                            <option value="">Select Door Operation...</option>
-                            <option value="Manual Sliding">Manual Sliding</option>
-                            <option value="Electric">Electric</option>
-                            <option value="Hydraulic">Hydraulic</option>
-                            <option value="Bi-Fold (Electric)">Bi-Fold (Electric)</option>
-                            <option value="Other">Other</option>
-                        </select>
+            <form id="listing-form" method="POST" enctype="multipart/form-data" class="space-y-12">
+                
+                <!-- STEP 1: ESSENTIAL INFO -->
+                <div id="form-step-1" class="space-y-8 animate-fade-in">
+                    <div class="border-l-4 border-emerald-500 pl-6">
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Essential Information</h2>
+                        <p class="text-sm text-gray-500">Where and how big is your space?</p>
                     </div>
 
-                    <!-- Corporate Jet Safety Text Inputs -->
-                    <div>
-                        <label for="tail_height_clearance"
-                            class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
-                            <i class="fas fa-arrows-alt-v mr-2 text-gray-400"></i>Tail Height Clearance (feet)
-                        </label>
-                        <input type="number" step="0.1" id="tail_height_clearance" name="tail_height_clearance"
-                            class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-3 transition-all"
-                            placeholder="e.g. 28">
-                    </div>
-
-                    <div>
-                        <label for="floor_loading_pcn"
-                            class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">
-                            <i class="fas fa-weight-hanging mr-2 text-gray-400"></i>Floor Loading Specs (PCN)
-                        </label>
-                        <input type="text" id="floor_loading_pcn" name="floor_loading_pcn"
-                            class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full p-3 transition-all"
-                            placeholder="e.g. PCN for 100,000 lb jet">
-                    </div>
-                </div>
-
-                <h4 class="text-md font-bold text-gray-900 dark:text-platinum-100 mt-6 mb-4 flex items-center">
-                    <i class="fas fa-shield-alt mr-2 text-green-500"></i>Peace of Mind & Protection
-                </h4>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                    <label
-                        class="flex items-start space-x-3 cursor-pointer group bg-green-50 dark:bg-green-900/10 p-4 rounded-xl border border-green-200 dark:border-green-800/30 hover:border-green-500 transition-all shadow-sm">
-                        <input type="checkbox" name="insurance_provided"
-                            class="mt-1 w-5 h-5 text-green-600 rounded border-gray-300 focus:ring-green-500">
-                        <div>
-                            <span class="block font-bold text-gray-900 dark:text-platinum-100"><i
-                                    class="fas fa-file-contract text-green-500 mr-2"></i>Short-Term Insurance
-                                Provided</span>
-                            <span class="block text-xs text-green-700 dark:text-green-500 mt-1">Host carries
-                                policy</span>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <!-- Airport ID -->
+                        <div class="md:col-span-2">
+                            <label for="airport_icao" class="block text-sm font-bold text-gray-700 dark:text-platinum-200 mb-2 uppercase tracking-wide">
+                                <i class="fas fa-plane-departure mr-2 text-emerald-500"></i>Airport Identifier *
+                            </label>
+                            <input type="text" id="airport_icao" name="airport_icao" required maxlength="20"
+                                list="airport-suggestions"
+                                class="bg-gray-50 dark:bg-dark-900 border-2 border-gray-100 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-lg rounded-2xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 block w-full p-5 transition-all"
+                                placeholder="e.g. 60J, CYHM, KFMY, Smith Airpark…"
+                                value="{{ airport or '' }}">
+                            
+                            <datalist id="airport-suggestions">
+                                <option value="60J">60J — Riverbend Airpark, FL (Perfect for testing!)</option>
+                                <option value="CYHM">CYHM — Hamilton John C. Munro, ON</option>
+                                <option value="KFMY">KFMY — Page Field, FL</option>
+                                <option value="KOSH">KOSH — Wittman Regional, WI</option>
+                            </datalist>
                         </div>
-                    </label>
-                </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <label
-                        class="flex items-start space-x-3 cursor-pointer group bg-white dark:bg-dark-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-all shadow-sm">
-                        <input type="checkbox" name="access_24_7"
-                            class="mt-1 w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
-                        <div>
-                            <span class="block font-bold text-gray-900 dark:text-platinum-100"><i
-                                    class="fas fa-key text-blue-500 mr-2"></i>24-Hour Access</span>
-                            <span class="block text-xs text-gray-500 dark:text-gray-400 mt-1">Key code/access
-                                provided</span>
-                        </div>
-                    </label>
-
-                    <label
-                        class="flex items-start space-x-3 cursor-pointer group bg-white dark:bg-dark-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-all shadow-sm">
-                        <input type="checkbox" name="is_heated"
-                            class="mt-1 w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
-                        <div>
-                            <span class="block font-bold text-gray-900 dark:text-platinum-100"><i
-                                    class="fas fa-thermometer-half text-red-500 mr-2"></i>Heated</span>
-                            <span class="block text-xs text-gray-500 dark:text-gray-400 mt-1">Temperature
-                                maintained</span>
-                        </div>
-                    </label>
-
-                    <label
-                        class="flex items-start space-x-3 cursor-pointer group bg-white dark:bg-dark-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-all shadow-sm">
-                        <input type="checkbox" name="battery_tender"
-                            class="mt-1 w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
-                        <div>
-                            <span class="block font-bold text-gray-900 dark:text-platinum-100"><i
-                                    class="fas fa-car-battery text-green-500 mr-2"></i>Battery Tender</span>
-                        </div>
-                    </label>
-
-                    <label
-                        class="flex items-start space-x-3 cursor-pointer group bg-white dark:bg-dark-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-all shadow-sm">
-                        <input type="checkbox" name="engine_heater"
-                            class="mt-1 w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
-                        <div>
-                            <span class="block font-bold text-gray-900 dark:text-platinum-100"><i
-                                    class="fas fa-fire-alt text-orange-500 mr-2"></i>Engine Heater Plug</span>
-                        </div>
-                    </label>
-
-                    <!-- Pilot requested safety additions -->
-                    <label
-                        class="flex items-start space-x-3 cursor-pointer group bg-white dark:bg-dark-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-all shadow-sm">
-                        <input type="checkbox" name="snow_removal"
-                            class="mt-1 w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
-                        <div>
-                            <span class="block font-bold text-gray-900 dark:text-platinum-100"><i
-                                    class="fas fa-snowflake text-blue-300 mr-2"></i>Snow Removal Available</span>
-                            <span class="block text-xs text-gray-500 dark:text-gray-400 mt-1">"Winter-ready"</span>
-                        </div>
-                    </label>
-
-                    <label
-                        class="flex items-start space-x-3 cursor-pointer group bg-white dark:bg-dark-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-all shadow-sm">
-                        <input type="checkbox" name="hurricane_tiedowns"
-                            class="mt-1 w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
-                        <div>
-                            <span class="block font-bold text-gray-900 dark:text-platinum-100"><i
-                                    class="fas fa-wind text-gray-500 mr-2"></i>Hurricane Tie-Downs</span>
-                            <span class="block text-xs text-gray-500 dark:text-gray-400 mt-1">Straps or Anchors
-                                provided</span>
-                        </div>
-                    </label>
-
-                    <!-- Corporate Jet Safety Checks -->
-                    <label
-                        class="flex items-start space-x-3 cursor-pointer group bg-amber-50 dark:bg-amber-900/10 p-4 rounded-xl border border-amber-200 dark:border-amber-800/30 hover:border-amber-500 transition-all shadow-sm">
-                        <input type="checkbox" name="nfpa_409_compliant"
-                            class="mt-1 w-5 h-5 text-amber-600 rounded border-gray-300 focus:ring-amber-500">
-                        <div>
-                            <span class="block font-bold text-gray-900 dark:text-platinum-100"><i
-                                    class="fas fa-fire-extinguisher text-amber-500 mr-2"></i>NFPA 409 Compliant</span>
-                            <span class="block text-xs text-amber-700 dark:text-amber-500 mt-1">Group I foam
-                                suppression</span>
-                        </div>
-                    </label>
-
-                    <label
-                        class="flex items-start space-x-3 cursor-pointer group bg-white dark:bg-dark-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-all shadow-sm">
-                        <input type="checkbox" name="gpu_power_available"
-                            class="mt-1 w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
-                        <div>
-                            <span class="block font-bold text-gray-900 dark:text-platinum-100"><i
-                                    class="fas fa-plug text-blue-500 mr-2"></i>GPU Power Available</span>
-                            <span class="block text-xs text-gray-500 dark:text-gray-400 mt-1">400 Hz / 28V
-                                capable</span>
-                        </div>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Availability & Health Score Section -->
-            <div class="space-y-8 pt-8 border-t border-gray-200 dark:border-gray-700">
-
-                <!-- Availability Dates (New Feature) -->
-                <div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-platinum-100 flex items-center mb-6">
-                        <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Availability
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label
-                                class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">Available
-                                From</label>
-                            <input type="date" name="availability_start"
-                                class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 rounded-xl p-3 focus:ring-blue-500 block w-full text-gray-900 dark:text-platinum-100">
-                        </div>
-                        <div>
-                            <label
-                                class="block text-sm font-semibold text-gray-700 dark:text-platinum-200 mb-2">Available
-                                To (Optional)</label>
-                            <input type="date" name="availability_end"
-                                class="bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-gray-700 rounded-xl p-3 focus:ring-blue-500 block w-full text-gray-900 dark:text-platinum-100">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Hangar Health Score (Updated Feature) -->
-                <div
-                    class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-dark-800 dark:to-dark-900 rounded-2xl p-8 border border-blue-100 dark:border-gray-700 shadow-sm relative overflow-hidden">
-                    <div class="absolute top-0 right-0 p-4 opacity-10">
-                        <i class="fas fa-shield-alt text-9xl text-blue-900 dark:text-platinum-100"></i>
-                    </div>
-
-                    <div class="relative z-10">
-                        <h3 class="text-xl font-bold text-blue-900 dark:text-platinum-100 mb-2 flex items-center">
-                            <i class="fas fa-heartbeat text-red-500 mr-2"></i>Hangar Health Score
-                        </h3>
-                        <p class="text-sm text-blue-800 dark:text-platinum-300 mb-6 max-w-2xl">
-                            Build trust instantly! Listings with a high Health Score get <span class="font-bold">3x
-                                more
-                                views</span> and a distinctive Trust Badge.
-                        </p>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <!-- Verification Checklist -->
-                            <div
-                                class="bg-white dark:bg-dark-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
-                                <h4
-                                    class="font-bold text-gray-900 dark:text-platinum-100 mb-3 text-sm uppercase tracking-wide">
-                                    Step 1: Check-in (+30 pts)
-                                </h4>
-                                <label class="flex items-start space-x-3 cursor-pointer group">
-                                    <input type="checkbox" name="checklist_verified"
-                                        class="mt-1 w-5 h-5 text-green-500 rounded border-gray-300 focus:ring-green-500 transition-all">
-                                    <div class="w-full">
-                                        <span
-                                            class="block text-sm font-medium text-gray-700 dark:text-platinum-200 group-hover:text-blue-600 transition-colors">
-                                            I confirm this space is clean, dry, pest-free, and secure.
-                                        </span>
-                                        <div class="mt-2">
-                                            <label
-                                                class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
-                                                Add Verification Photos (Optional)
-                                            </label>
-                                            <input type="file" name="health_photos" multiple accept="image/*"
-                                                class="block w-full text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300">
-                                        </div>
-                                    </div>
-                                </label>
-                            </div>
-
-                            <!-- Photo Requirement -->
-                            <div
-                                class="bg-white dark:bg-dark-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm flex items-center space-x-4">
-                                <div
-                                    class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 flex-shrink-0">
-                                    <i class="fas fa-camera"></i>
-                                </div>
+                        <!-- Hangar Calculator (New) -->
+                        <div class="md:col-span-2 bg-emerald-500/5 p-6 rounded-2xl border border-emerald-500/20">
+                            <h4 class="text-xs font-black text-emerald-600 dark:text-emerald-400 mb-4 uppercase tracking-[0.2em] flex items-center">
+                                <i class="fas fa-calculator mr-2"></i> Space Specs
+                            </h4>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 items-end">
                                 <div>
-                                    <span class="block text-sm font-medium text-gray-700 dark:text-platinum-200">
-                                        Upload 3+ Photos (+30 pts)
-                                    </span>
-                                    <span class="block text-xs text-gray-500 mt-1">
-                                        Tip: Floor, ceiling, entrance.
-                                    </span>
+                                    <label class="text-[10px] font-bold uppercase text-gray-500 mb-1 block">Door Width (ft)</label>
+                                    <input type="number" id="calc_width" class="w-full p-3 rounded-xl bg-white dark:bg-dark-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="40" oninput="runSpaceCalc()">
+                                </div>
+                                <div class="hidden sm:block text-center text-gray-300 font-bold mb-3">×</div>
+                                <div>
+                                    <label class="text-[10px] font-bold uppercase text-gray-500 mb-1 block">Hangar Depth (ft)</label>
+                                    <input type="number" id="calc_depth" class="w-full p-3 rounded-xl bg-white dark:bg-dark-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="33" oninput="runSpaceCalc()">
+                                </div>
+                                <div class="bg-white dark:bg-dark-900 rounded-xl p-3 border border-emerald-500/30 text-center">
+                                    <div class="text-[9px] font-bold text-gray-400 uppercase">Calculated Area</div>
+                                    <div id="calc_display" class="text-xl font-black text-emerald-500">0</div>
+                                    <input type="hidden" id="size_sqft" name="size_sqft" value="0">
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Owner Guarantee -->
-                        <div
-                            class="bg-white/50 dark:bg-dark-800/50 rounded-xl p-4 border border-dashed border-gray-300 dark:border-gray-600 hover:border-green-500 dark:hover:border-green-500 transition-all cursor-pointer">
-                            <label class="flex items-center space-x-3 cursor-pointer w-full h-full">
-                                <input type="checkbox" name="condition_verified"
-                                    class="w-5 h-5 text-green-500 rounded border-gray-300 focus:ring-green-500">
-                                <div class="flex-1">
-                                    <span
-                                        class="block font-bold text-gray-900 dark:text-platinum-100 flex items-center">
-                                        <i class="fas fa-certificate text-yellow-500 mr-2"></i>Condition Guarantee
-                                        (+20
-                                        pts)
-                                    </span>
-                                    <span class="block text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                        I personally guarantee the condition. (Adds "Verified" badge)
-                                    </span>
+                        <div class="md:col-span-2">
+                             <label for="photos" class="block text-sm font-bold text-gray-700 dark:text-platinum-200 mb-2 uppercase tracking-wide">
+                                <i class="fas fa-camera mr-2 text-emerald-500"></i>Hangar Photos
+                            </label>
+                            <label class="relative group block cursor-pointer">
+                                <input type="file" name="photos" multiple accept="image/*" class="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer">
+                                <div class="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-3xl p-12 text-center group-hover:border-emerald-500 transition-all bg-gray-50/50 dark:bg-dark-900/50">
+                                    <i class="fas fa-cloud-upload-alt text-5xl text-gray-300 group-hover:text-emerald-500 mb-4 transform group-hover:-translate-y-1 transition-all"></i>
+                                    <p class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest">Upload Best Shots</p>
+                                    <p class="text-[10px] text-gray-400 mt-2 uppercase font-bold">Max 5 Photos • PNG, JPG, WEBP</p>
                                 </div>
                             </label>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- FAA/Legal Compliance Check -->
-            <div
-                class="p-6 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/30 rounded-2xl">
-                <h3 class="text-lg font-bold text-amber-900 dark:text-amber-400 mb-4 flex items-center">
-                    <i class="fas fa-shield-alt mr-2"></i> Safety & Compliance
-                </h3>
-                <div class="space-y-4">
-                    <label class="flex items-start cursor-pointer group">
-                        <input type="checkbox" required name="compliance_fbo"
-                            class="mt-1 w-5 h-5 text-amber-600 rounded border-gray-300 focus:ring-amber-500">
-                        <span class="ml-3 text-sm text-gray-700 dark:text-platinum-300 leading-snug">
-                            I verify that listing this space does not violate my lease with the Airport Sponsor
-                            (FBO) or
-                            local airport authority.
-                        </span>
-                    </label>
-                    <label class="flex items-start cursor-pointer group">
-                        <input type="checkbox" required name="compliance_liability"
-                            class="mt-1 w-5 h-5 text-amber-600 rounded border-gray-300 focus:ring-amber-500">
-                        <span class="ml-3 text-sm text-gray-700 dark:text-platinum-300 leading-snug font-bold">
-                            I acknowledge HangarLink is a coordination tool ONLY. I assume full liability for all
-                            disputes or incidents.
-                        </span>
-                    </label>
+                    <div class="flex justify-end pt-6">
+                        <button type="button" onclick="goToStep(2)" class="px-10 py-5 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-emerald-500/20 hover:bg-emerald-500 hover:-translate-y-1 transition-all flex items-center gap-3">
+                            Confirm Location <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Submit Button -->
-            <div class="pt-4">
-                <button type="submit"
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl text-lg shadow-lg hover:shadow-2xl transition-all hover-lift">
-                    <i class="fas fa-check mr-2"></i>Create Listing
-                </button>
-            </div>
-        </form>
+                <!-- STEP 2: PRICING -->
+                <div id="form-step-2" class="hidden space-y-8 animate-fade-in">
+                    <div class="border-l-4 border-emerald-500 pl-6">
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Pricing & Details</h2>
+                        <p class="text-sm text-gray-500">Set your rates and describe your space.</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <!-- Price -->
+                        <div class="md:col-span-2">
+                            <label for="price_month" class="block text-sm font-bold text-gray-700 dark:text-platinum-200 mb-2 uppercase tracking-wide">
+                                <i class="fas fa-dollar-sign mr-2 text-emerald-500"></i>Monthly Rate (USD) *
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
+                                <input type="number" id="price_month" name="price_month" required min="0" step="0.01"
+                                    class="bg-gray-50 dark:bg-dark-900 border-2 border-gray-100 dark:border-gray-700 text-gray-900 dark:text-platinum-100 text-2xl font-black rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 block w-full pl-10 p-5 transition-all"
+                                    placeholder="850.00" oninput="calculateNightly()">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="price_night" class="block text-xs font-bold text-gray-500 mb-2 uppercase">Daily Rate ($/night)</label>
+                            <input type="number" id="price_night" name="price_night" min="0" step="0.01"
+                                class="w-full p-4 rounded-xl bg-gray-50 dark:bg-dark-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white"
+                                placeholder="Suggested: $28.33">
+                        </div>
+
+                        <div>
+                            <label for="min_stay_nights" class="block text-xs font-bold text-gray-500 mb-2 uppercase">Min Stay</label>
+                            <select id="min_stay_nights" name="min_stay_nights" class="w-full p-4 rounded-xl bg-gray-50 dark:bg-dark-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white appearance-none">
+                                <option value="1">1 Night (Flexible)</option>
+                                <option value="3">3 Nights</option>
+                                <option value="7">7 Nights (Weekly)</option>
+                                <option value="30">30 Nights (Monthly Only)</option>
+                            </select>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="md:col-span-2">
+                             <label for="description" class="block text-sm font-bold text-gray-700 dark:text-platinum-200 mb-2 uppercase tracking-wide">
+                                <i class="fas fa-align-left mr-2 text-emerald-500"></i>Description
+                            </label>
+                            <textarea id="description" name="description" rows="4"
+                                class="bg-gray-50 dark:bg-dark-900 border-2 border-gray-100 dark:border-gray-700 text-gray-900 dark:text-platinum-100 rounded-2xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 block w-full p-5 transition-all"
+                                placeholder="Describe your hangar, floor type, amenities, etc."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between pt-6">
+                        <button type="button" onclick="goToStep(1)" class="px-6 py-4 text-gray-400 font-bold uppercase tracking-widest text-xs hover:text-gray-600 transition-all">
+                            <i class="fas fa-arrow-left mr-2"></i> Previous
+                        </button>
+                        <button type="button" onclick="goToStep(3)" class="px-8 py-4 bg-gray-900 text-white rounded-xl font-black uppercase tracking-widest text-xs hover:bg-emerald-600 transition-all flex items-center gap-2">
+                            Next: Security <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 3: SECURITY & ACCESS -->
+                <div id="form-step-3" class="hidden space-y-8 animate-fade-in">
+                    <div class="border-l-4 border-emerald-500 pl-6">
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Smart Security</h2>
+                        <p class="text-sm text-gray-500">Protect your hangar with Smart Handover.</p>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="bg-emerald-500/5 p-6 rounded-2xl border border-emerald-500/20">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                                    <i class="fas fa-user-shield"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-900 dark:text-white">Smart Handover Activation</h3>
+                                    <p class="text-xs text-gray-500">Sensitive info is ONLY revealed after payment.</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="public_location_description" class="block text-xs font-bold text-gray-500 mb-2 uppercase">Public Location (Visible to all)</label>
+                                    <input type="text" id="public_location_description" name="public_location_description"
+                                        class="w-full p-4 rounded-xl bg-white dark:bg-dark-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white"
+                                        placeholder="e.g. Row B, North-East side of the field">
+                                </div>
+                                <div>
+                                    <label for="private_access_instructions" class="block text-xs font-bold text-gray-500 mb-2 uppercase">Access Codes (Hidden until booking)</label>
+                                    <textarea id="private_access_instructions" name="private_access_instructions" rows="2"
+                                        class="w-full p-4 rounded-xl bg-white dark:bg-dark-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white"
+                                        placeholder="e.g. Side door code #1234. Please pull door hard."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Amenities (Toggles) -->
+                        <div class="grid grid-cols-2 gap-4">
+                            {% for id, icon, label in [
+                                ('access_24_7', 'key', '24/7 Access'),
+                                ('is_heated', 'thermometer-half', 'Heated'),
+                                ('battery_tender', 'car-battery', 'Battery Tender'),
+                                ('engine_heater', 'fire-alt', 'Engine Plug')
+                            ] %}
+                            <label class="flex items-center gap-3 p-4 rounded-xl border border-gray-100 dark:border-gray-700 hover:bg-emerald-500/5 cursor-pointer transition-all">
+                                <input type="checkbox" name="{{ id }}" class="w-5 h-5 text-emerald-500 rounded border-gray-300 focus:ring-emerald-500">
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-bold text-gray-900 dark:text-white"><i class="fas fa-{{ icon }} mr-1 opacity-50"></i> {{ label }}</span>
+                                </div>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between pt-6">
+                        <button type="button" onclick="goToStep(2)" class="px-6 py-4 text-gray-400 font-bold uppercase tracking-widest text-xs hover:text-gray-600 transition-all">
+                            <i class="fas fa-arrow-left mr-2"></i> Previous
+                        </button>
+                        <button type="button" onclick="goToStep(4)" class="px-8 py-4 bg-gray-900 text-white rounded-xl font-black uppercase tracking-widest text-xs hover:bg-emerald-600 transition-all flex items-center gap-2">
+                            Next: Finish <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 4: ADVANCED & FINISH -->
+                <div id="form-step-4" class="hidden space-y-8 animate-fade-in">
+                    <div class="border-l-4 border-emerald-500 pl-6">
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Final Review</h2>
+                        <p class="text-sm text-gray-500">Add technical specs and confirm safety.</p>
+                    </div>
+
+                    <!-- Photos -->
+                    <div class="space-y-4">
+                        <label for="photos" class="block text-sm font-bold text-gray-700 dark:text-platinum-200 mb-2 uppercase tracking-wide">
+                            <i class="fas fa-camera mr-2 text-emerald-500"></i>Upload Photos *
+                        </label>
+                        <input type="file" id="photos" name="photos" multiple accept="image/*"
+                            class="block w-full text-sm text-gray-900 dark:text-platinum-100 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl cursor-pointer bg-gray-50 dark:bg-dark-900 focus:outline-none p-8 transition-all hover:border-emerald-500">
+                        <p class="text-[10px] text-gray-400 uppercase font-black">Hold Ctrl/Cmd to select multiple. Up to 5 photos.</p>
+                    </div>
+
+                    <!-- Advanced Specs (Collapsed by Default) -->
+                    <div class="border border-gray-100 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
+                        <button type="button" onclick="toggleAdvanced()" class="w-full p-5 flex items-center justify-between bg-gray-50 dark:bg-dark-900 hover:bg-gray-100 transition-all">
+                            <span class="text-sm font-bold text-gray-700 dark:text-white uppercase tracking-widest"><i class="fas fa-microchip mr-2 text-emerald-500"></i> Advanced Hangar Specs (Optional)</span>
+                            <i id="advanced-chevron" class="fas fa-chevron-down text-gray-400"></i>
+                        </button>
+                        <div id="advanced-section" class="hidden p-6 space-y-6 bg-white dark:bg-dark-800 border-t border-gray-100 dark:border-gray-700">
+                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="tail_height_clearance" class="block text-xs font-bold text-gray-500 mb-2 uppercase">Tail Height Clearance (ft)</label>
+                                    <input type="number" step="0.1" id="tail_height_clearance" name="tail_height_clearance"
+                                        class="w-full p-4 rounded-xl bg-gray-50 dark:bg-dark-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white"
+                                        placeholder="e.g. 28">
+                                </div>
+                                <div>
+                                    <label for="floor_loading_pcn" class="block text-xs font-bold text-gray-500 mb-2 uppercase">Floor Loading (PCN)</label>
+                                    <input type="text" id="floor_loading_pcn" name="floor_loading_pcn"
+                                        class="w-full p-4 rounded-xl bg-gray-50 dark:bg-dark-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white"
+                                        placeholder="e.g. PCN for 100k lb">
+                                </div>
+                                <label class="flex items-center gap-3 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
+                                    <input type="checkbox" name="nfpa_409_compliant" class="w-5 h-5 text-emerald-500 rounded border-gray-300">
+                                    <span class="text-xs font-bold text-gray-700 dark:text-white">NFPA 409 Compliant</span>
+                                </label>
+                                <label class="flex items-center gap-3 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
+                                    <input type="checkbox" name="gpu_power_available" class="w-5 h-5 text-emerald-500 rounded border-gray-300">
+                                    <span class="text-xs font-bold text-gray-700 dark:text-white">GPU Power (28V/400Hz)</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Health Score (Streamlined) -->
+                    <div class="bg-emerald-500/5 p-6 rounded-2xl border border-emerald-500/20">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="font-bold text-gray-900 dark:text-white"><i class="fas fa-heartbeat text-emerald-500 mr-2"></i> Hangar Trust Multiplier</h3>
+                            <div id="health-badge" class="px-3 py-1 bg-gray-200 dark:bg-dark-900 text-[10px] font-black uppercase text-gray-500 rounded-full border border-gray-300">Pending</div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <label class="flex items-center gap-4 p-5 bg-white dark:bg-dark-900 rounded-2xl border-2 border-transparent hover:border-emerald-500 cursor-pointer shadow-sm transition-all group">
+                                <input type="checkbox" name="checklist_verified" class="hidden peer" onchange="updateHealth()">
+                                <div class="w-8 h-8 rounded-full border-2 border-gray-200 peer-checked:bg-emerald-500 peer-checked:border-emerald-500 flex items-center justify-center transition-all">
+                                    <i class="fas fa-check text-white scale-0 peer-checked:scale-100 transition-transform"></i>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-bold text-gray-900 dark:text-white">Clean & Secure Check</span>
+                                    <span class="text-[10px] text-gray-500">I confirm the space is dry and pest-free.</span>
+                                </div>
+                            </label>
+
+                            <label class="flex items-center gap-4 p-5 bg-white dark:bg-dark-900 rounded-2xl border-2 border-transparent hover:border-emerald-500 cursor-pointer shadow-sm transition-all group">
+                                <input type="checkbox" name="condition_verified" class="hidden peer" onchange="updateHealth()">
+                                <div class="w-8 h-8 rounded-full border-2 border-gray-200 peer-checked:bg-emerald-500 peer-checked:border-emerald-500 flex items-center justify-center transition-all">
+                                    <i class="fas fa-shield-alt text-white scale-0 peer-checked:scale-100 transition-transform"></i>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-bold text-gray-900 dark:text-white">Condition Guarantee</span>
+                                    <span class="text-[10px] text-gray-500">Enable the "Verified" badge on search.</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Safety & Compliance -->
+                    <div class="space-y-4 pt-4">
+                        <label class="flex items-start gap-3 cursor-pointer group">
+                            <input type="checkbox" required name="compliance_fbo" class="mt-1 w-5 h-5 text-emerald-500 rounded border-gray-300 focus:ring-emerald-500">
+                            <span class="text-xs text-gray-500 dark:text-platinum-300 leading-snug">
+                                I verify this listing does not violate my lease with the Airport Sponsor (FBO).
+                            </span>
+                        </label>
+                        <label class="flex items-start gap-3 cursor-pointer group">
+                            <input type="checkbox" required name="compliance_liability" class="mt-1 w-5 h-5 text-emerald-500 rounded border-gray-300 focus:ring-emerald-500">
+                            <span class="text-xs text-gray-500 dark:text-platinum-300 leading-snug">
+                                I acknowledge HangarLinks is a coordination tool and I assume full liability.
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="flex justify-between pt-6">
+                        <button type="button" onclick="goToStep(3)" class="px-6 py-4 text-gray-400 font-bold uppercase tracking-widest text-xs hover:text-gray-600 transition-all">
+                            <i class="fas fa-arrow-left mr-2"></i> Previous
+                        </button>
+                        <button type="submit" class="px-10 py-5 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest text-lg shadow-xl shadow-emerald-500/30 hover:bg-emerald-500 hover:-translate-y-1 transition-all flex items-center gap-3">
+                            <i class="fas fa-check-circle"></i> Create Listing
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
+
+<script>
+    let currentStep = 1;
+
+    function goToStep(step) {
+        if (step > currentStep) {
+            const currentDiv = document.getElementById(`form-step-${currentStep}`);
+            if (currentDiv) {
+                const requireds = currentDiv.querySelectorAll('[required]');
+                let allValid = true;
+                requireds.forEach(input => {
+                    if (!input.value) {
+                        allValid = false;
+                        input.classList.add('border-red-500');
+                    } else {
+                        input.classList.remove('border-red-500');
+                    }
+                });
+                if (!allValid) {
+                    alert("Please fill in all required fields.");
+                    return;
+                }
+            }
+        }
+
+        for (let i = 1; i <= 4; i++) {
+            const stepDiv = document.getElementById(`form-step-${i}`);
+            if (stepDiv) stepDiv.classList.add('hidden');
+            const dot = document.getElementById(`step-dot-${i}`);
+            if (dot) {
+                dot.classList.remove('bg-emerald-500', 'border-emerald-500', 'text-white', 'shadow-lg', 'shadow-emerald-500/20');
+                dot.classList.add('bg-white', 'dark:bg-dark-800', 'border-gray-200', 'dark:border-dark-700', 'text-gray-400');
+            }
+        }
+
+        const targetDiv = document.getElementById(`form-step-${step}`);
+        if (targetDiv) targetDiv.classList.remove('hidden');
+        
+        const progLine = document.getElementById('progress-line');
+        if (progLine) progLine.style.width = `${((step-1)/3)*100}%`;
+        
+        for (let i = 1; i <= step; i++) {
+            const dot = document.getElementById(`step-dot-${i}`);
+            if (dot) {
+                dot.classList.add('bg-emerald-500', 'border-emerald-500', 'text-white');
+                dot.classList.remove('text-gray-400');
+            }
+        }
+
+        currentStep = step;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function runSpaceCalc() {
+        const w = parseFloat(document.getElementById('calc_width').value) || 0;
+        const d = parseFloat(document.getElementById('calc_depth').value) || 0;
+        const total = Math.round(w * d);
+        const display = document.getElementById('calc_display');
+        if (display) display.innerText = total.toLocaleString();
+        const sizeInput = document.getElementById('size_sqft');
+        if (sizeInput) sizeInput.value = total;
+    }
+
+    function toggleAdvanced() {
+        const section = document.getElementById('advanced-section');
+        const chevron = document.getElementById('advanced-chevron');
+        if (section) section.classList.toggle('hidden');
+        if (chevron) chevron.classList.toggle('rotate-180');
+    }
+
+    function updateHealth() {
+        const check1 = document.querySelector('input[name="checklist_verified"]');
+        const check2 = document.querySelector('input[name="condition_verified"]');
+        const badge = document.getElementById('health-badge');
+        
+        if (!badge) return;
+
+        const c1 = check1 ? check1.checked : false;
+        const c2 = check2 ? check2.checked : false;
+        
+        if (c1 && c2) {
+            badge.innerText = "Verified Elite";
+            badge.className = "px-3 py-1 bg-emerald-500 text-white text-[10px] font-black uppercase rounded-full shadow-lg shadow-emerald-500/20";
+        } else if (c1 || c2) {
+            badge.innerText = "Good";
+            badge.className = "px-3 py-1 bg-blue-500 text-white text-[10px] font-black uppercase rounded-full";
+        } else {
+            badge.innerText = "Pending";
+            badge.className = "px-3 py-1 bg-gray-200 dark:bg-dark-900 text-gray-500 text-[10px] font-black uppercase rounded-full border border-gray-300";
+        }
+    }
+
+    function calculateNightly() {
+        const monthlyInput = document.getElementById('price_month');
+        const monthly = monthlyInput ? parseFloat(monthlyInput.value) : 0;
+        const nightInput = document.getElementById('price_night');
+        if (nightInput && monthly > 0) {
+            nightInput.placeholder = "Suggested: $" + (monthly / 30).toFixed(2);
+        }
+    }
+</script>
+
+<style>
+    @keyframes fade-in {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+        animation: fade-in 0.4s ease-out forwards;
+    }
+</style>
 {% endblock %}
