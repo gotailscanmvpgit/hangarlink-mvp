@@ -604,10 +604,9 @@
                 <div
                     class="relative h-72 bg-gray-50 dark:bg-dark-800/50 rounded-2xl flex items-center justify-center overflow-hidden p-6 border-2 border-dashed border-gray-200 dark:border-gray-700/50 group transition-all">
 
-                    <!-- Visual Title -->
                     <div
                         class="absolute top-3 left-1/2 -translate-x-1/2 text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] whitespace-nowrap">
-                        Scale Visualization</div>
+                        Your Plane vs. This Hangar</div>
 
                     <!-- Hangar Representation -->
                     <div id="hangar-box"
@@ -632,8 +631,8 @@
                     </div>
 
                     <div id="placeholder-text" class="text-xs text-gray-400 text-center z-20 font-medium">
-                        <i class="fas fa-hand-pointer block text-2xl mb-2 opacity-50 animate-bounce"></i>
-                        Select an aircraft to<br>calculate fitment
+                        <i class="fas fa-plane-arrival block text-2xl mb-2 opacity-50 animate-bounce"></i>
+                        Select your aircraft to<br>verify instant match
                     </div>
                 </div>
             </div>
@@ -702,15 +701,36 @@
 
             // Update status
             status.classList.remove('hidden');
+            const hDiff = {{ (listing.tail_height_clearance or 99)|float }} - H;
+            
             if (area > hangarArea) {
                 status.className = 'mt-8 p-4 rounded-2xl text-center text-sm font-bold bg-red-50 text-red-700 border-red-100 dark:bg-red-900/10 dark:text-red-400 dark:border-red-900/50';
                 status.innerHTML = '<i class="fas fa-times-circle mr-2 text-xl align-middle"></i> OVER CAPACITY: Footprint exceeds available square footage.';
+            } else if (hDiff <= 0) {
+                 status.className = 'mt-8 p-4 rounded-2xl text-center text-sm font-bold bg-red-50 text-red-700 border-red-100 dark:bg-red-900/10 dark:text-red-400 dark:border-red-900/50';
+                 status.innerHTML = '<i class="fas fa-exclamation-triangle mr-2 text-xl align-middle text-red-600"></i> TAIL CLEARANCE FAILURE: This hangar\'s ' + {{ (listing.tail_height_clearance or 0)|float }} + 'ft height is too low for your ' + H + 'ft tail.';
+            } else if (hDiff < 1) {
+                 status.className = 'mt-8 p-4 rounded-2xl text-center text-sm font-bold bg-red-50 text-red-700 border-red-100 dark:bg-red-900/10 dark:text-red-400 dark:border-red-900/50 border-red-500 animate-pulse';
+                 status.innerHTML = '<i class="fas fa-exclamation-circle mr-2 text-xl align-middle text-red-600"></i> CRITICAL HEIGHT CLEARANCE: Only ' + Math.round(hDiff*12) + ' inches of margin. Check tires/struts.';
             } else if (area > hangarArea * 0.85) {
                 status.className = 'mt-8 p-4 rounded-2xl text-center text-sm font-bold bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/10 dark:text-amber-400 dark:border-amber-900/50';
                 status.innerHTML = '<i class="fas fa-exclamation-triangle mr-2 text-xl align-middle"></i> TIGHT TOLERANCE: Fits with minimal margin. Exercise caution.';
             } else {
                 status.className = 'mt-8 p-4 rounded-2xl text-center text-sm font-bold bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/10 dark:text-emerald-400 dark:border-emerald-900/50';
-                status.innerHTML = '<i class="fas fa-check-circle mr-2 text-xl align-middle"></i> GUARANTEED FIT: footprint fits comfortably in this space.';
+                status.innerHTML = '<i class="fas fa-check-circle mr-2 text-xl align-middle text-emerald-500"></i> MATCH FOUND: HangarLinks has verified this {{ "{:,.0f}".format(listing.size_sqft) }} sq ft space fits your ' + selected.text.trim() + '.';
+            }
+            
+            // Sync with booking selector if exists
+            const bookingSelect = document.getElementById('booking_aircraft');
+            if (bookingSelect) {
+                bookingSelect.value = selected.value;
+                validateBookingFit();
+            }
+            
+            // Update SkyWatch Link
+            const skywatchLink = document.getElementById('skywatch-partner-link');
+            if (skywatchLink) {
+                skywatchLink.href = "https://skywatch.ai/hangarlinks/quote?aircraft=" + encodeURIComponent(selected.value.trim()) + "&airport={{ listing.airport_icao }}";
             }
                 });
         </script>
@@ -849,7 +869,8 @@
                         {% for category, aircrafts in aircraft_sizes.items() %}
                         <optgroup label="{{ category }}">
                             {% for name, specs in aircrafts.items() %}
-                            <option value="{{ name }}" data-sqft="{{ specs.length * specs.wingspan }}">
+                            <option value="{{ name }}" data-sqft="{{ specs.length * specs.wingspan }}"
+                                {% if current_user.is_authenticated and current_user.saved_aircraft == name %}selected{% endif %}>
                                 {{ name }}
                             </option>
                             {% endfor %}
@@ -887,9 +908,13 @@
                                 <i class="fas fa-check-circle text-green-500 flex-shrink-0 text-base"></i>
                                 <span class="text-gray-800 dark:text-gray-100 font-bold text-sm tracking-tight">Insurance interest noted!</span>
                             </div>
-                            <div class="text-gray-500 dark:text-gray-400 text-xs pl-6 leading-relaxed">
+                            <div class="text-gray-500 dark:text-gray-400 text-xs pl-6 leading-relaxed mb-3">
                                 Upon completing your booking, you will be given a direct, instant link to calculate your protection.
                             </div>
+                            <a id="skywatch-partner-link" href="https://skywatch.ai/hangarlinks/quote?airport={{ listing.airport_icao }}" target="_blank"
+                                class="inline-flex items-center text-blue-600 dark:text-blue-400 font-bold text-xs hover:underline">
+                                Preview SkyWatch Rate <i class="fas fa-external-link-alt ml-1.5"></i>
+                            </a>
                         </div>
                     </div>
 
@@ -1093,10 +1118,23 @@
                     }
                 }
 
-                // Auto-run fitment if pre-selected
+                // Auto-run fitment if pre-selected or saved in profile
                 document.addEventListener('DOMContentLoaded', () => {
+                    const profileAircraft = "{{ current_user.saved_aircraft if current_user.is_authenticated else '' }}";
                     const selector = document.getElementById('aircraft-selector');
-                    if (selector && selector.value) {
+                    const bookingSelect = document.getElementById('booking_aircraft');
+                    
+                    if (profileAircraft && selector) {
+                        // Find and select in the fitment tool first
+                        for (let opt of selector.options) {
+                            if (opt.value === profileAircraft) {
+                                selector.value = profileAircraft;
+                                const event = new Event('change');
+                                selector.dispatchEvent(event);
+                                break;
+                            }
+                        }
+                    } else if (selector && selector.value) {
                          const event = new Event('change');
                          selector.dispatchEvent(event);
                     }

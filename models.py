@@ -69,6 +69,9 @@ class User(UserMixin, db.Model):
     
     # Financials
     total_revenue = db.Column(db.Float, default=0.0)
+    
+    # 2026 Profile Features
+    saved_aircraft = db.Column(db.String(100), nullable=True) # e.g. "Cirrus SR22" or "Cessna 182"
 
     
     def __repr__(self):
