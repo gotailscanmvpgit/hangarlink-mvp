@@ -5,7 +5,7 @@
 
 {% block content %}
 <!-- Cinematic Hero Section: Center-Optimized GA Visual (AI Focal Point) -->
-<section class="hero relative bg-scroll md:bg-fixed bg-cover bg-center bg-no-repeat min-h-[80vh] flex items-center justify-center overflow-hidden" 
+<section class="hero relative bg-scroll md:bg-fixed bg-cover bg-[80%_center] md:bg-center bg-no-repeat min-h-[45vh] md:min-h-[80vh] flex items-center justify-center overflow-hidden" 
          style="background-image: url('https://res.cloudinary.com/dibfjy69j/image/upload/c_fill,g_auto,w_1920,q_auto,f_auto/v1775067325/homecirrusblue_y7qzsl.png');">
     
     <!-- Readability Overlay: Optimal Contrast -->
@@ -28,7 +28,7 @@
         {% if current_user.is_authenticated %}
         <!-- Authenticated: Personalized Welcome -->
         <h1
-            class="text-4xl sm:text-5xl lg:text-7xl font-extrabold text-white mb-6 leading-[1.1] tracking-tight animate-fade-in-up">
+            class="text-3xl sm:text-5xl lg:text-7xl font-extrabold text-white mb-6 leading-[1.1] tracking-tight animate-fade-in-up">
             Welcome back,<br>
             <span class="bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent">{{
                 current_user.username }}</span>
@@ -54,7 +54,7 @@
         </div>
         {% endif %}
 
-        <p class="text-lg sm:text-xl text-white/70 mb-10 max-w-2xl mx-auto font-light leading-relaxed animate-fade-in-up"
+        <p class="hidden sm:block text-lg sm:text-xl text-white/70 mb-10 max-w-2xl mx-auto font-light leading-relaxed animate-fade-in-up"
             style="animation-delay: 0.1s;">
             Your aviation hub — manage spaces, discover parking, and connect with the pilot community.
         </p>
@@ -87,11 +87,11 @@
 
         {% else %}
         <!-- Guest: Aspirational Emotional Hook -->
-        <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-6 leading-[1.05] tracking-tight animate-fade-in-up flex flex-col drop-shadow-2xl">
+        <h1 class="text-3xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-6 leading-[1.05] tracking-tight animate-fade-in-up flex flex-col drop-shadow-2xl">
             <span class="text-white">Stop Parking</span>
             <span class="bg-gradient-to-r from-blue-400 via-blue-300 to-indigo-400 bg-clip-text text-transparent drop-shadow-lg">on the Ramp.</span>
         </h1>
-        <p class="text-xl sm:text-2xl text-blue-50/90 mb-12 max-w-3xl mx-auto font-light leading-relaxed animate-fade-in-up drop-shadow" style="animation-delay: 0.1s;">
+        <p class="hidden sm:block text-xl sm:text-2xl text-blue-50/90 mb-12 max-w-3xl mx-auto font-light leading-relaxed animate-fade-in-up drop-shadow" style="animation-delay: 0.1s;">
             Instant 1–7 night secure hangar parking at airports & airparks across the region.<br class="hidden md:block">
             <span class="font-semibold text-white">No surprise ramp fees. No weather damage.</span><br class="hidden md:block">
             Total peace of mind, every time you fly.
