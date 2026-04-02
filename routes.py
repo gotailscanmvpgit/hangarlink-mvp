@@ -264,10 +264,8 @@ def listings():
             flash('Database is temporarily unavailable. Please try again in a moment.', 'error')
             return f"<h1>500 Internal Server Error</h1><p>A critical database error occurred while fetching listings.</p><pre>{tb}</pre>", 500
 
-    print(f"DEBUG: listings count fetched: {len(pagination.items)}")
     listings_items = pagination.items
     markers = []
-    print("DEBUG: Processing markers...")
     for l in listings_items:
         if l.lat is not None and l.lon is not None:
             try:
@@ -283,11 +281,9 @@ def listings():
                     'price_unit': price_unit,
                     'is_premium': bool(l.is_premium_listing or (l.owner.is_premium if l.owner else False))
                 })
-            except Exception as e:
-                print(f"ERROR: marker building failed for listing {l.id}: {e}")
+            except Exception:
                 pass
 
-    print(f"DEBUG: /listings returning {len(listings_items)} results and {len(markers)} markers")
     return render_template('listings.html',
                            listings=listings_items,
                            pagination=pagination,

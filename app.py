@@ -373,17 +373,14 @@ def create_app(config_class=Config):
 
     @app.errorhandler(500)
     def internal_error(error):
-        import traceback
-        tb = traceback.format_exc()
         try:
             db.session.rollback()
         except Exception:
             pass
         try:
-            # For 2026 Launch Debugging: show traceback on 500
-            return f"<h1>500 Internal Server Error</h1><pre>{tb}</pre>", 500
+            return render_template('500.html'), 500
         except Exception:
-            return f"<h2>500 — Internal Server Error</h2><pre>{tb}</pre><a href='/'>Home</a>", 500
+            return '<h2>500 — Internal Server Error</h2><a href="/">Home</a>', 500
 
     return app
 
