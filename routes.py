@@ -102,6 +102,8 @@ def google_authorize():
     email = user_info.get('email')
     username = user_info.get('name') or email.split('@')[0]
     profile_pic = user_info.get('picture')
+    first_name = user_info.get('given_name')
+    last_name = user_info.get('family_name')
     
     user = User.query.filter_by(email=email).first()
     if not user:
@@ -109,6 +111,8 @@ def google_authorize():
         user = User(
             email=email,
             username=username,
+            first_name=first_name,
+            last_name=last_name,
             profile_pic=profile_pic,
             role='renter',
             is_verified=True # Google verified
@@ -119,9 +123,19 @@ def google_authorize():
         db.session.commit()
         flash(f"Welcome to HangarLinks, {username}!", "success")
     else:
-        # Sync profile pic if missing
+        # Sync profile details if missing
+        changed = False
         if not user.profile_pic and profile_pic:
             user.profile_pic = profile_pic
+            changed = True
+        if not user.first_name and first_name:
+            user.first_name = first_name
+            changed = True
+        if not user.last_name and last_name:
+            user.last_name = last_name
+            changed = True
+            
+        if changed:
             db.session.commit()
     
     login_user(user)

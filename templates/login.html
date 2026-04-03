@@ -6,108 +6,88 @@
     <div class="w-full max-w-md">
 
         <!-- Card -->
-        <div class="rounded-2xl overflow-hidden shadow-2xl border border-white/10"
+        <div class="rounded-3xl overflow-hidden shadow-2xl border border-white/10 mb-6"
             style="background: rgba(13,17,23,0.95); backdrop-filter: blur(20px);">
 
             <!-- Header -->
-            <div class="px-8 pt-8 pb-6 text-center border-b border-white/8"
-                style="background: linear-gradient(135deg, rgba(26,86,219,0.2), rgba(14,159,110,0.1));">
-                <div class="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center"
-                    style="background: linear-gradient(135deg,#1a56db,#0e9f6e);">
-                    <i class="fas fa-plane text-white text-xl"></i>
-                </div>
-                <h1 class="text-2xl font-extrabold text-white mb-1">Welcome Back</h1>
-                <p class="text-slate-400 text-sm">Sign in to your HangarLinks account</p>
-            </div>
-
-            <!-- Flash messages -->
-            <div class="px-8 pt-4">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                {% for category, message in messages %}
-                <div class="mb-3 px-4 py-3 rounded-xl text-sm font-medium
-                    {% if category == 'success' %}bg-green-500/15 border border-green-500/30 text-green-300
-                    {% elif category == 'info' %}bg-blue-500/15 border border-blue-500/30 text-blue-300
-                    {% elif category == 'warning' %}bg-amber-500/15 border border-amber-500/30 text-amber-300
-                    {% else %}bg-red-500/15 border border-red-500/30 text-red-300{% endif %}">
-                    {{ message }}
-                </div>
-                {% endfor %}
-                {% endif %}
-                {% endwith %}
+            <div class="px-8 pt-10 pb-6 text-center border-b border-white/8"
+                style="background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(16,185,129,0.05));">
+                <h1 class="text-3xl font-black text-white mb-2 tracking-tight">Welcome Back</h1>
+                <p class="text-slate-400 text-sm font-medium">Clear for arrival. Sign in below.</p>
             </div>
 
             <!-- Social Login -->
-            <div class="px-8 pt-6 space-y-3">
+            <div class="px-8 pt-8 space-y-4">
                 <a href="{{ url_for('main.google_login') }}" 
-                   class="flex items-center justify-center w-full px-4 py-3.5 rounded-xl bg-white text-gray-900 text-sm font-bold border border-gray-100 hover:bg-gray-50 transition-all shadow-sm active:scale-[0.98]">
-                    <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-5 h-5 mr-3" alt="Google">
+                   class="flex items-center justify-center w-full min-h-[52px] rounded-2xl bg-white text-gray-900 text-base font-black hover:bg-gray-50 transition-all shadow-lg active:scale-[0.98] group">
+                    <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6 h-6 mr-3" alt="Google">
                     Continue with Google
-                </a>
-                <a href="{{ url_for('main.apple_login') }}" 
-                   class="flex items-center justify-center w-full px-4 py-3.5 rounded-xl bg-black text-white text-sm font-bold hover:bg-gray-900 transition-all shadow-sm active:scale-[0.98]">
-                    <i class="fab fa-apple text-xl mr-3"></i>
-                    Continue with Apple
                 </a>
                 
                 <div class="flex items-center gap-4 py-2">
                     <div class="flex-grow h-px bg-white/10"></div>
-                    <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">or sign in with email</span>
+                    <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest px-2">or use email</span>
                     <div class="flex-grow h-px bg-white/10"></div>
                 </div>
             </div>
 
             <!-- Form -->
-            <form method="POST" class="px-8 pb-8 pt-4 space-y-5">
-
+            <form method="POST" class="px-8 pb-8 pt-2 space-y-5">
                 <!-- Email -->
                 <div>
-                    <label for="email" class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
-                        <i class="fas fa-envelope mr-1.5 text-blue-400"></i>Email Address
+                    <label for="login-email" class="block text-xs font-black text-emerald-500 mb-2 uppercase tracking-widest">
+                        Email Address
                     </label>
                     <input type="email" id="login-email" name="email" required
-                        class="block w-full rounded-xl px-4 py-3.5 text-white text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
-                        style="background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); color: #FAFAFA;"
-                        placeholder="pilot@example.com" onfocus="this.style.borderColor='rgba(96,165,250,0.6)'"
-                        onblur="this.style.borderColor='rgba(255,255,255,0.15)'">
+                        class="block w-full rounded-2xl px-5 py-4 text-white text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+                        style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #FAFAFA;"
+                        placeholder="pilot@example.com">
                 </div>
 
                 <!-- Password -->
                 <div>
                     <div class="flex items-center justify-between mb-2">
-                        <label for="password" class="block text-xs font-bold text-slate-400 uppercase tracking-wider">
-                            <i class="fas fa-lock mr-1.5 text-blue-400"></i>Password
+                        <label for="login-password" class="block text-xs font-black text-emerald-500 uppercase tracking-widest">
+                            Password
                         </label>
                         <a href="{{ url_for('main.forgot_password') }}"
-                            class="text-xs text-blue-400 hover:text-blue-300 transition-colors font-medium">
-                            Forgot password?
+                            class="text-[11px] text-slate-500 hover:text-emerald-400 transition-colors font-bold uppercase tracking-tight">
+                            Forgot?
                         </a>
                     </div>
                     <input type="password" id="login-password" name="password" required
-                        class="block w-full rounded-xl px-4 py-3.5 text-white text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
-                        style="background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); color: #FAFAFA;"
-                        placeholder="••••••••" onfocus="this.style.borderColor='rgba(96,165,250,0.6)'"
-                        onblur="this.style.borderColor='rgba(255,255,255,0.15)'">
+                        class="block w-full rounded-2xl px-5 py-4 text-white text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+                        style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #FAFAFA;"
+                        placeholder="••••••••">
                 </div>
 
                 <!-- Submit -->
                 <button type="submit"
-                    class="w-full font-bold py-4 rounded-xl text-white text-sm transition-all hover:-translate-y-0.5 active:translate-y-0 mt-2"
-                    style="background: linear-gradient(135deg,#1a56db,#0e9f6e); box-shadow: 0 8px 24px rgba(26,86,219,0.3);">
-                    <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+                    class="w-full font-black py-4 rounded-2xl text-white text-base transition-all hover:scale-[1.02] active:scale-[0.98] mt-2 shadow-xl shadow-emerald-500/10"
+                    style="background: linear-gradient(135deg,#10b981,#059669);">
+                    Sign In
                 </button>
             </form>
 
             <!-- Footer -->
-            <div class="px-8 pb-8 text-center border-t border-white/8 pt-5">
-                <p class="text-slate-500 text-sm">
-                    Don't have an account?
+            <div class="px-8 pb-8 text-center border-t border-white/8 pt-6">
+                <p class="text-slate-500 text-sm font-medium">
+                    New to HangarLinks?
                     <a href="{{ url_for('main.register') }}"
-                        class="text-blue-400 hover:text-blue-300 font-semibold transition-colors ml-1">
+                        class="text-emerald-400 hover:text-emerald-300 font-black transition-colors ml-1">
                         Sign up free
                     </a>
                 </p>
             </div>
+        </div>
+
+        <!-- Secondary CTA: Owner -->
+        <div class="text-center animate-fade-in-up" style="animation-delay: 0.2s;">
+            <a href="{{ url_for('main.post_listing') }}" class="inline-flex items-center text-sm font-bold text-platinum-400 hover:text-white transition-all group">
+                <span class="w-8 h-px bg-white/10 mr-4 group-hover:w-12 transition-all"></span>
+                Rent out your hangar? <span class="text-emerald-400 ml-2">List Your Space</span>
+                <span class="w-8 h-px bg-white/10 ml-4 group-hover:w-12 transition-all"></span>
+            </a>
         </div>
     </div>
 </div>

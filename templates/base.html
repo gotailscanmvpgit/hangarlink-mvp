@@ -29,6 +29,14 @@
 
     {% block map_logic %}{% endblock %}
     {% block extra_head %}{% endblock %}
+
+    <!-- Google One-Tap (2026 Strategy) -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <div id="g_id_onload"
+         data-client_id="{{ config.GOOGLE_CLIENT_ID or '' }}"
+         data-login_uri="{{ url_for('main.google_authorize', _external=True) }}"
+         data-auto_prompt="true">
+    </div>
 </head>
 
 <body class="bg-platinum-100 dark:bg-dark-900 text-gray-900 dark:text-platinum-100 antialiased">
