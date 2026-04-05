@@ -86,16 +86,10 @@
         </div>
 
         {% else %}
-        <!-- Guest: Aspirational Emotional Hook -->
-        <h1 class="text-3xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-6 leading-[1.05] tracking-tight animate-fade-in-up flex flex-col drop-shadow-2xl pt-4">
-            <span class="text-white">Stop Parking</span>
-            <span class="bg-gradient-to-r from-blue-400 via-blue-300 to-indigo-400 bg-clip-text text-transparent drop-shadow-lg">on the Ramp.</span>
-        </h1>
-        <p class="hidden sm:block text-xl sm:text-2xl text-blue-50/90 mb-12 max-w-3xl mx-auto font-light leading-relaxed animate-fade-in-up drop-shadow" style="animation-delay: 0.1s;">
-            Instant 1–7 night secure hangar parking at airports & airparks across the region.<br class="hidden md:block">
-            <span class="font-semibold text-white">No surprise ramp fees. No weather damage.</span><br class="hidden md:block">
-            Total peace of mind, every time you fly.
-        </p>
+        <!-- Guest: Minimized Branding -->
+        <div class="mb-12">
+            <h1 class="text-xs font-black text-emerald-400 uppercase tracking-[0.5em] mb-4 opacity-80">HangarLinks Marketplace</h1>
+        </div>
         {% endif %}
 
         <!-- Redesigned Mission-Based Search (Minimal & Premium) -->
@@ -174,104 +168,6 @@
                 </div>
             </form>
         </div>
-          </div>
-                            
-                            <!-- Desktop Search Menu (Integrated Trigger) -->
-                            <div class="hidden lg:block">
-                                <button type="button" onclick="toggleMissionMenu()" 
-                                    id="mega-menu-trigger"
-                                    class="w-full p-8 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-between group hover:bg-white/10 transition-all duration-500 overflow-hidden relative">
-                                    <div class="flex items-center gap-6">
-                                        <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20 group-hover:scale-110 transition-transform">
-                                            <i class="fas fa-map-marked-alt text-2xl"></i>
-                                        </div>
-                                        <div class="text-left">
-                                            <div id="active-mission-label-desktop" class="text-2xl font-black text-white tracking-tighter">Choose Your Wing Mission</div>
-                                            <div class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Explore optimized corridors & hubs</div>
-                                        </div>
-                                    </div>
-                                    <i class="fas fa-chevron-down text-white/20 group-hover:translate-y-1 transition-transform"></i>
-                                </button>
-
-                                <!-- Desktop Mega-Menu (Expanding) -->
-                                <div id="mission-mega-menu" class="hidden absolute top-[110%] left-0 right-0 z-[100] bg-[#1A1F2B] border border-white/10 rounded-[2.5rem] p-8 shadow-[0_40px_100px_rgba(0,0,0,0.8)] animate-fade-in-up">
-                                    <div class="grid grid-cols-4 gap-6">
-                                        {% for id, icon, title, desc, price, img in [
-                                            ('snowbird', '❄️', 'Snowbird Route', 'ON to FL Corridor', '$65/nt', 'snowbird.png'),
-                                            ('sunbelt', '🐂', 'Sunbelt Link', 'TX to FL Southern', '$85/nt', 'sunbelt.png'),
-                                            ('trans_canada', '🏔️', 'Trans-Canada', 'Halifax to Van', '$92/nt', 'trans_canada.png'),
-                                            ('oshkosh', '🛩️', "Sun 'n Fun '26", 'Lakeland Pilgrimage', '$120/nt', 'oshkosh.png')
-                                        ] %}
-                                        <button type="button" onclick="setMission('{{ id }}', this)" 
-                                            class="mission-card-pro group relative h-72 rounded-[2rem] border border-white/5 bg-white/5 overflow-hidden transition-all hover:scale-[1.03] active:scale-[0.98]">
-                                            <img src="{{ url_for('static', filename='images/' + img) }}" class="absolute inset-0 w-full h-full object-cover opacity-20 filter grayscale hover:grayscale-0 transition-all duration-700">
-                                            <div class="absolute inset-0 bg-gradient-to-t from-[#1A1F2B] via-[#1A1F2B]/60 to-transparent"></div>
-                                            <div class="relative z-10 p-6 flex flex-col justify-between h-full text-left">
-                                                <div class="flex items-center justify-between">
-                                                    <span class="text-3xl">{{ icon }}</span>
-                                                    <div class="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center group-[.active]:bg-emerald-500 group-[.active]:border-emerald-500 transition-all">
-                                                        <i class="fas fa-check text-xs text-navy-900 font-black opacity-0 group-[.active]:opacity-100"></i>
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <div class="text-white font-black text-lg tracking-tight mb-1">{{ title }}</div>
-                                                    <div class="text-[10px] text-white/40 font-black uppercase tracking-widest mb-3">{{ desc }}</div>
-                                                    <div class="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-full">
-                                                        <span class="text-emerald-400 text-[10px] font-black uppercase tracking-widest">Avg. Price: {{ price }}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </button>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Tablet Fallback (Ribbon) -->
-                            <div class="hidden sm:flex lg:hidden gap-4 overflow-x-auto pb-4 no-scrollbar">
-                                <!-- Reusing previous ribbon logic for mid-size screens if needed, otherwise hide -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Duration Chips -->
-                    <div class="md:col-span-6 lg:col-span-3">
-                        <label class="block text-xs font-black mb-3 text-left uppercase tracking-[0.2em] text-white/60">
-                            <i class="fas fa-calendar-day mr-2 text-blue-400"></i>Stay Length
-                        </label>
-                        <div class="flex gap-2 flex-wrap">
-                            <input type="hidden" name="duration" id="duration-input" value="{{ duration or '7' }}">
-                            <button type="button" onclick="setDuration('1', this)" class="duration-chip flex-1 rounded-xl text-sm font-bold {{ 'active' if duration=='1' }}">1 Night</button>
-                            <button type="button" onclick="setDuration('3', this)" class="duration-chip flex-1 rounded-xl text-sm font-bold {{ 'active' if duration=='3' }}">2-3</button>
-                            <button type="button" onclick="setDuration('7', this)" class="duration-chip flex-1 rounded-xl text-sm font-bold {{ 'active' if duration=='7' or not duration }}">4-7</button>
-                        </div>
-                    </div>
-
-                    <!-- Radius Chips -->
-                    <div class="md:col-span-6 lg:col-span-3">
-                        <label class="block text-xs font-black mb-3 text-left uppercase tracking-[0.2em] text-white/60">
-                            <i class="fas fa-bullseye mr-2 text-blue-400"></i>Radius (km)
-                        </label>
-                        <div class="flex gap-2">
-                            <input type="hidden" name="radius" id="radius-input" value="{{ radius or '250' }}">
-                            <button type="button" onclick="setRadius('100', this)" class="radius-chip flex-1 rounded-xl text-sm font-bold {{ 'active' if radius=='100' }}">100</button>
-                            <button type="button" onclick="setRadius('250', this)" class="radius-chip flex-1 rounded-xl text-sm font-bold {{ 'active' if radius=='250' or not radius }}">250</button>
-                            <button type="button" onclick="setRadius('500', this)" class="radius-chip flex-1 rounded-xl text-sm font-bold {{ 'active' if radius=='500' }}">500</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Submit Button -->
-                <button type="submit" id="search-submit-btn"
-                    class="w-full font-black py-5 px-8 rounded-2xl text-xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.98] flex items-center justify-center gap-3"
-                    style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; box-shadow: 0 10px 40px -10px rgba(37,99,235,0.5);">
-                    <i class="fas fa-search" id="search-icon"></i>
-                    <span id="search-text">Search Mission Route</span>
-                </button>
-            </form>
-
-            <!-- Mission Map (Hidden by default) -->
-            <div id="mission-map-container" class="mt-8 hidden rounded-3xl overflow-hidden border border-emerald-500/30 shadow-2xl animate-fade-in-up">
                 <div id="map" style="height: 400px; width: 100%;"></div>
             </div>
 
