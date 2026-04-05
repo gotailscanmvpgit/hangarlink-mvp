@@ -113,14 +113,24 @@
                             
                             <input type="hidden" name="mission" id="mission-input" value="">
 
-                            <!-- Mobile Floating Discovery Pill -->
-                            <div class="mobile-trigger" onclick="openMissionDrawer()">
-                                <div class="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center text-navy-900 shadow-[0_15px_30px_rgba(16,185,129,0.4)] border-2 border-white/20">
-                                    <i class="fas fa-compass text-xl"></i>
-                                </div>
-                                <div class="bg-[#1A1F2B] border border-white/10 rounded-full px-6 py-3 text-white font-black text-sm whitespace-nowrap shadow-2xl">
-                                    Browse Missions
-                                </div>
+                            <!-- Mobile Integrated Discovery (Replaces floating pill) -->
+                            <div class="lg:hidden mb-10">
+                                <button type="button" onclick="openMissionDrawer()" 
+                                    class="w-full p-6 rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-between group active:scale-[0.98] transition-all shadow-xl shadow-black/20"
+                                    style="background: rgba(255,255,255,0.02);">
+                                    <div class="flex items-center gap-5">
+                                        <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 border border-emerald-500/30">
+                                            <i class="fas fa-route text-2xl"></i>
+                                        </div>
+                                        <div class="text-left">
+                                            <div class="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">Active Route</div>
+                                            <div id="active-mission-label-mobile" class="text-white font-black text-lg tracking-tight">Select Mission Corridor</div>
+                                        </div>
+                                    </div>
+                                    <div class="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 text-white/20 border border-white/10">
+                                        <i class="fas fa-chevron-right text-sm"></i>
+                                    </div>
+                                </button>
                             </div>
                             
                             <!-- Desktop Mega-Menu Trigger -->
@@ -321,35 +331,8 @@
     }
 
     /* Adaptive Mission Layout Logic */
-    /* Adaptive Mission Layout Logic - FIX FOR OVERLAYS */
+    /* Adaptive Mission Layout Logic - INTEGRATED MOBILE SELECTOR */
     .mission-ribbon { display: none; }
-    .mobile-trigger { 
-        display: flex; 
-        position: fixed; 
-        bottom: 30px; 
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 90; /* Lower than drawer */
-        align-items: center;
-        gap: 12px;
-        cursor: pointer;
-        padding: 4px;
-        background: rgba(26, 31, 43, 0.98); 
-        backdrop-filter: blur(16px);
-        border-radius: 100px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-        animation: triggerFloat 3s ease-in-out infinite;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    /* Hide trigger when drawer is active */
-    #mission-drawer.visible ~ .mobile-trigger,
-    body.drawer-open .mobile-trigger {
-        opacity: 0;
-        pointer-events: none;
-        transform: translate(-50%, 50px);
-    }
     
     #mission-drawer {
         z-index: 1000 !important; /* Maximum Priority */
