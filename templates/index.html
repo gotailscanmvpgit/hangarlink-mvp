@@ -367,9 +367,20 @@
     }
 
     #mission-drawer #drawer-backdrop {
-        background: rgba(0,0,0,0.9) !important;
-        backdrop-filter: blur(8px);
+        background: rgba(0,0,0,0.92) !important;
+        backdrop-filter: blur(12px);
         z-index: 1000;
+    }
+
+    .btn-apply-mission {
+        background-color: #10b981 !important;
+        color: #000a18 !important;
+        transform: translateZ(0); /* High-perf rendering */
+        box-shadow: 0 15px 35px -5px rgba(16,185,129,0.5) !important;
+    }
+    .btn-apply-mission:active {
+        transform: scale(0.96) !important;
+        background-color: #059669 !important;
     }
 
     @keyframes triggerFloat {
@@ -1255,7 +1266,7 @@
             <button type="button" onclick="closeMissionDrawer()" class="flex-1 py-5 bg-white/5 border border-white/10 text-white font-black rounded-2xl active:scale-[0.98] transition-all">
                 Close
             </button>
-            <button type="button" onclick="closeMissionDrawer()" class="flex-[2] py-5 bg-emerald-500 text-navy-900 font-black rounded-2xl shadow-xl shadow-emerald-500/30 active:scale-[0.98] transition-all">
+            <button type="button" onclick="closeMissionDrawer()" class="flex-[2] py-5 btn-apply-mission text-navy-900 font-black rounded-2xl active:scale-[0.98] transition-all">
                 Apply Mission
             </button>
         </div>
