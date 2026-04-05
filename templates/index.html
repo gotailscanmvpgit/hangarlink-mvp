@@ -113,7 +113,31 @@
                             
                             <input type="hidden" name="mission" id="mission-input" value="">
 
-                            <!-- Mobile Integrated Discovery (Replaces floating pill) -->
+                            <!-- DESKTOP MISSION RIBBON (Reference: User Snippet) -->
+                            <div class="hidden lg:flex justify-center gap-4 mb-8">
+                                <div class="mission-card-ribbon px-6 py-3 rounded-2xl bg-[#1A1F2B] border border-white/5 text-white/60 font-bold cursor-pointer hover:border-emerald-500/50 hover:text-white transition-all flex items-center gap-3 group" 
+                                     onclick="setMission('snowbird')" id="ribbon-snowbird">
+                                    <span class="text-xl group-hover:scale-125 transition-transform">❄️</span>
+                                    <span>Snowbird Route</span>
+                                </div>
+                                <div class="mission-card-ribbon px-6 py-3 rounded-2xl bg-[#1A1F2B] border border-white/5 text-white/60 font-bold cursor-pointer hover:border-emerald-500/50 hover:text-white transition-all flex items-center gap-3 group" 
+                                     onclick="setMission('sunbelt')" id="ribbon-sunbelt">
+                                    <span class="text-xl group-hover:scale-125 transition-transform">🐂</span>
+                                    <span>Sunbelt Link</span>
+                                </div>
+                                <div class="mission-card-ribbon px-6 py-3 rounded-2xl bg-[#1A1F2B] border border-white/5 text-white/60 font-bold cursor-pointer hover:border-emerald-500/50 hover:text-white transition-all flex items-center gap-3 group" 
+                                     onclick="setMission('snf')" id="ribbon-snf">
+                                    <span class="text-xl group-hover:scale-125 transition-transform">☀️</span>
+                                    <span>Sun 'n Fun '26</span>
+                                </div>
+                                <div class="mission-card-ribbon px-6 py-3 rounded-2xl bg-[#1A1F2B] border border-white/5 text-white/60 font-bold cursor-pointer hover:border-emerald-500/50 hover:text-white transition-all flex items-center gap-3 group" 
+                                     onclick="setMission('oshkosh')" id="ribbon-oshkosh">
+                                    <span class="text-xl group-hover:scale-125 transition-transform">🛫</span>
+                                    <span>Oshkosh '26</span>
+                                </div>
+                            </div>
+
+                            <!-- Mobile Integrated Discovery (Integrated, Non-Floating) -->
                             <div class="lg:hidden mb-10">
                                 <button type="button" onclick="openMissionDrawer()" 
                                     class="w-full p-6 rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-between group active:scale-[0.98] transition-all shadow-xl shadow-black/20"
@@ -133,7 +157,7 @@
                                 </button>
                             </div>
                             
-                            <!-- Desktop Mega-Menu Trigger -->
+                            <!-- Desktop Search Menu (Integrated Trigger) -->
                             <div class="hidden lg:block">
                                 <button type="button" onclick="toggleMissionMenu()" 
                                     id="mega-menu-trigger"
@@ -247,14 +271,21 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    .mission-tile.active {
+    .mission-card-ribbon.active {
+        border-color: #10b981 !important;
+        background: rgba(16, 185, 129, 0.1) !important;
+        color: white !important;
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+    }
+
+    .mission-card-pro.active {
         border-color: #10b981 !important;
         background: rgba(16,185,129,0.12) !important;
         transform: scale(1.05);
         z-index: 10;
         box-shadow: 0 0 40px rgba(16,185,129,0.2);
     }
-    .mission-tile.active img {
+    .mission-card-pro.active img {
         opacity: 0.5 !important;
         filter: grayscale(0%) !important;
     }
