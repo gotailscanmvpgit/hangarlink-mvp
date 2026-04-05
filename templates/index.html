@@ -98,64 +98,83 @@
         </p>
         {% endif %}
 
-        <!-- Premium Search Bar -->
-        <div id="search-bar" class="max-w-4xl mx-auto animate-fade-in-up" style="animation-delay: 0.2s;">
+        <!-- Redesigned Mission-Based Search (Minimal & Premium) -->
+        <div id="search-bar" class="max-w-5xl mx-auto animate-fade-in-up" style="animation-delay: 0.2s;">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">Where are you flying?</h2>
+            </div>
+            
             <form action="{{ url_for('main.listings') }}" method="GET" id="homepage-search-form"
-                class="rounded-3xl p-6 sm:p-10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] border border-white/20 transition-all duration-500 overflow-hidden"
-                style="background: rgba(0,21,48,0.8); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);">
+                class="rounded-[3rem] p-8 sm:p-12 shadow-[0_48px_80px_-16px_rgba(0,0,0,0.6)] border border-white/20 transition-all duration-500 overflow-hidden"
+                style="background: rgba(10,18,30,0.9); backdrop-filter: blur(32px); -webkit-backdrop-filter: blur(32px);">
                 
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 mb-8">
-                        <!-- Cross-Platform Mission Discovery -->
-                        <div class="md:col-span-12 lg:col-span-12 relative" id="mission-discovery-container">
-                            <label class="block text-[10px] font-black mb-5 text-left uppercase tracking-[0.3em] text-white/40">
-                                <i class="fas fa-route mr-1 text-emerald-400"></i>Mission-Based Search Engine
-                            </label>
-                            
-                            <input type="hidden" name="mission" id="mission-input" value="">
+                <input type="hidden" name="mission" id="mission-input" value="">
+                
+                <div class="relative group mb-10">
+                    <input type="text" id="airport" name="airport"
+                        class="block w-full rounded-2xl p-6 sm:p-8 text-xl sm:text-2xl font-bold focus:outline-none focus:ring-4 focus:ring-emerald-500/30 transition-all uppercase placeholder:normal-case placeholder:text-white/20"
+                        style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: #FAFAFA;"
+                        placeholder="Snowbird Corridor, Oshkosh, Sun ’n Fun, CYHM, 60J, Toronto to Florida, or any airport name" maxlength="100">
+                    <div class="absolute inset-y-0 right-6 flex items-center pointer-events-none group-focus-within:text-emerald-400 text-white/10 transition-colors">
+                        <i class="fas fa-search text-2xl"></i>
+                    </div>
+                </div>
 
-                            <!-- DESKTOP MISSION RIBBON (Reference: User Snippet) -->
-                            <div class="hidden lg:flex justify-center gap-4 mb-8">
-                                <div class="mission-card-ribbon px-6 py-3 rounded-2xl bg-[#1A1F2B] border border-white/5 text-white/60 font-bold cursor-pointer hover:border-emerald-500/50 hover:text-white transition-all flex items-center gap-3 group" 
-                                     onclick="setMission('snowbird')" id="ribbon-snowbird">
-                                    <span class="text-xl group-hover:scale-125 transition-transform">❄️</span>
-                                    <span>Snowbird Route</span>
-                                </div>
-                                <div class="mission-card-ribbon px-6 py-3 rounded-2xl bg-[#1A1F2B] border border-white/5 text-white/60 font-bold cursor-pointer hover:border-emerald-500/50 hover:text-white transition-all flex items-center gap-3 group" 
-                                     onclick="setMission('sunbelt')" id="ribbon-sunbelt">
-                                    <span class="text-xl group-hover:scale-125 transition-transform">🐂</span>
-                                    <span>Sunbelt Link</span>
-                                </div>
-                                <div class="mission-card-ribbon px-6 py-3 rounded-2xl bg-[#1A1F2B] border border-white/5 text-white/60 font-bold cursor-pointer hover:border-emerald-500/50 hover:text-white transition-all flex items-center gap-3 group" 
-                                     onclick="setMission('snf')" id="ribbon-snf">
-                                    <span class="text-xl group-hover:scale-125 transition-transform">☀️</span>
-                                    <span>Sun 'n Fun '26</span>
-                                </div>
-                                <div class="mission-card-ribbon px-6 py-3 rounded-2xl bg-[#1A1F2B] border border-white/5 text-white/60 font-bold cursor-pointer hover:border-emerald-500/50 hover:text-white transition-all flex items-center gap-3 group" 
-                                     onclick="setMission('oshkosh')" id="ribbon-oshkosh">
-                                    <span class="text-xl group-hover:scale-125 transition-transform">🛫</span>
-                                    <span>Oshkosh '26</span>
-                                </div>
-                            </div>
+                <!-- Popular Missions Selection Chips -->
+                <div class="mb-10 text-left">
+                    <div class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Popular Missions
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <div onclick="setMission('snowbird')" class="mission-chip px-5 py-3 rounded-full bg-white/5 border border-white/10 text-white/70 font-black text-xs cursor-pointer hover:bg-emerald-500/10 hover:border-emerald-500/50 hover:text-white transition-all flex items-center gap-2 group" id="chip-snowbird">
+                            <span class="group-hover:rotate-12 transition-transform">❄️</span> Snowbird Corridor (ON → FL)
+                        </div>
+                        <div onclick="setMission('oshkosh')" class="mission-chip px-5 py-3 rounded-full bg-white/5 border border-white/10 text-white/70 font-black text-xs cursor-pointer hover:bg-emerald-500/10 hover:border-emerald-500/50 hover:text-white transition-all flex items-center gap-2 group" id="chip-oshkosh">
+                            <span class="group-hover:scale-125 transition-transform">🛫</span> Oshkosh AirVenture
+                        </div>
+                        <div onclick="setMission('snf')" class="mission-chip px-5 py-3 rounded-full bg-white/5 border border-white/10 text-white/70 font-black text-xs cursor-pointer hover:bg-emerald-500/10 hover:border-emerald-500/50 hover:text-white transition-all flex items-center gap-2 group" id="chip-snf">
+                            <span class="group-hover:scale-125 transition-transform">☀️</span> Sun ’n Fun / Lakeland
+                        </div>
+                        <div onclick="openMissionDrawer()" class="px-5 py-3 rounded-full bg-white/5 border border-white/5 text-white/40 font-black text-xs cursor-pointer hover:bg-white/10 hover:text-white transition-all flex items-center gap-2 group">
+                            <span>✨</span> Other Routes...
+                        </div>
+                    </div>
+                </div>
 
-                            <!-- Mobile Integrated Discovery (Integrated, Non-Floating) -->
-                            <div class="lg:hidden mb-10">
-                                <button type="button" onclick="openMissionDrawer()" 
-                                    class="w-full p-6 rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-between group active:scale-[0.98] transition-all shadow-xl shadow-black/20"
-                                    style="background: rgba(255,255,255,0.02);">
-                                    <div class="flex items-center gap-5">
-                                        <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 border border-emerald-500/30">
-                                            <i class="fas fa-route text-2xl"></i>
-                                        </div>
-                                        <div class="text-left">
-                                            <div class="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">Active Route</div>
-                                            <div id="active-mission-label-mobile" class="text-white font-black text-lg tracking-tight">Select Mission Corridor</div>
-                                        </div>
-                                    </div>
-                                    <div class="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 text-white/20 border border-white/10">
-                                        <i class="fas fa-chevron-right text-sm"></i>
-                                    </div>
-                                </button>
+                <div class="flex flex-col lg:flex-row gap-6 items-center justify-between border-t border-white/5 pt-8">
+                    <!-- Secondary Controls: Duration & Radius -->
+                    <div class="flex flex-wrap items-center gap-6">
+                        <div class="flex flex-col">
+                            <label class="text-[9px] font-black uppercase tracking-widest text-white/30 mb-2">Focus Period</label>
+                            <div class="flex gap-1 h-10 bg-white/5 p-1 rounded-xl">
+                                <input type="hidden" name="duration" id="duration-input" value="7">
+                                <button type="button" onclick="setDuration('1', this)" class="px-4 rounded-lg text-[10px] font-black transition-all text-white/40 hover:text-white">NIGHTLY</button>
+                                <button type="button" onclick="setDuration('7', this)" class="px-4 rounded-lg text-[10px] font-black transition-all bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 active-toggle">SHORT-TERM</button>
                             </div>
+                        </div>
+
+                        <div class="flex flex-col">
+                            <label class="text-[9px] font-black uppercase tracking-widest text-white/30 mb-2">Explore Radius</label>
+                            <div class="flex gap-1 h-10 bg-white/5 p-1 rounded-xl">
+                                <input type="hidden" name="radius" id="radius-input" value="250">
+                                <button type="button" onclick="setRadius('100', this)" class="px-4 rounded-lg text-[10px] font-black transition-all text-white/40 hover:text-white">100KM</button>
+                                <button type="button" onclick="setRadius('250', this)" class="px-4 rounded-lg text-[10px] font-black transition-all bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 active-toggle">250KM</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CTA -->
+                    <button type="submit" id="homepage-search-btn"
+                        class="w-full lg:w-auto font-black py-5 px-12 rounded-2xl text-lg transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] flex items-center justify-center gap-3 group"
+                        style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; box-shadow: 0 15px 40px -10px rgba(16,185,129,0.5);">
+                        <span id="homepage-search-text">Find Parking Along My Route</span>
+                        <i class="fas fa-arrow-right group-hover:translate-x-2 transition-transform"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+          </div>
                             
                             <!-- Desktop Search Menu (Integrated Trigger) -->
                             <div class="hidden lg:block">
@@ -412,25 +431,10 @@
     function setMission(val, el) {
         if (event) event.preventDefault();
         document.getElementById('mission-input').value = val;
-        
         // Haptic Feedback for Pilot Experience
         if ("vibrate" in navigator) {
             navigator.vibrate(12);
         }
-        
-        // Update Desktop Pro Cards
-        document.querySelectorAll('.mission-card-pro').forEach(c => {
-            c.classList.remove('active');
-            if (c.getAttribute('onclick').includes(`'${val}'`)) c.classList.add('active');
-        });
-
-        const titles = {
-            'snowbird': 'Snowbird Route',
-            'sunbelt': 'Sunbelt Link',
-            'trans_canada': 'Trans-Canada',
-            'oshkosh': "Sun 'n Fun '26"
-        };
-        
         const desktopLabel = document.getElementById('active-mission-label-desktop');
         if (desktopLabel) desktopLabel.textContent = titles[val] || 'Wing Mission';
 
