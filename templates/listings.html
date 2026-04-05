@@ -11,22 +11,18 @@
 <script>
     function toggleListingsMap() {
         const container = document.getElementById('listings-map-container');
-        const text = document.getElementById('map-toggle-text');
+        const textElements = document.querySelectorAll('.map-toggle-text-sync');
         const isHidden = container.classList.contains('hidden');
 
         if (isHidden) {
             container.classList.remove('hidden');
-            text.textContent = 'Hide Map';
-            // Trigger map resize since it was hidden
+            textElements.forEach(el => el.textContent = 'Hide Map');
             if (window.google && window.google.maps) {
-                // initMap is called automatically if map div exists, 
-                // but we might need to re-init if it wasn't present.
-                // Our base.html initMap checks for #map.
                 initMap();
             }
         } else {
             container.classList.add('hidden');
-            text.textContent = 'Show Map';
+            textElements.forEach(el => el.textContent = 'Show Map');
         }
     }
 </script>
@@ -40,6 +36,30 @@
     <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10 text-center">
         <h1 class="text-3xl lg:text-4xl font-extrabold text-white mb-8 tracking-tight">Find Aircraft Parking</h1>
         
+        <!-- Mission Ribbon Integration -->
+        <div class="hidden lg:flex justify-center gap-4 mb-10 overflow-x-auto no-scrollbar">
+            <div class="mission-card-ribbon px-6 py-3 rounded-2xl bg-[#001530]/50 border border-white/5 text-white/60 font-bold cursor-pointer hover:border-blue-500/50 hover:text-white transition-all flex items-center gap-3 group whitespace-nowrap {{ 'active' if request.args.get('mission') == 'snowbird' }}" 
+                 onclick="window.location.href='/listings?mission=snowbird'">
+                <span class="text-xl group-hover:scale-125 transition-transform">❄️</span>
+                <span>Snowbird Route</span>
+            </div>
+            <div class="mission-card-ribbon px-6 py-3 rounded-2xl bg-[#001530]/50 border border-white/5 text-white/60 font-bold cursor-pointer hover:border-blue-500/50 hover:text-white transition-all flex items-center gap-3 group whitespace-nowrap {{ 'active' if request.args.get('mission') == 'sunbelt' }}" 
+                 onclick="window.location.href='/listings?mission=sunbelt'">
+                <span class="text-xl group-hover:scale-125 transition-transform">🐂</span>
+                <span>Sunbelt Link</span>
+            </div>
+            <div class="mission-card-ribbon px-6 py-3 rounded-2xl bg-[#001530]/50 border border-white/5 text-white/60 font-bold cursor-pointer hover:border-blue-500/50 hover:text-white transition-all flex items-center gap-3 group whitespace-nowrap {{ 'active' if request.args.get('mission') == 'snf' }}" 
+                 onclick="window.location.href='/listings?mission=snf'">
+                <span class="text-xl group-hover:scale-125 transition-transform">☀️</span>
+                <span>Sun 'n Fun '26</span>
+            </div>
+            <div class="mission-card-ribbon px-6 py-3 rounded-2xl bg-[#001530]/50 border border-white/5 text-white/60 font-bold cursor-pointer hover:border-blue-500/50 hover:text-white transition-all flex items-center gap-3 group whitespace-nowrap {{ 'active' if request.args.get('mission') == 'oshkosh' }}" 
+                 onclick="window.location.href='/listings?mission=oshkosh'">
+                <span class="text-xl group-hover:scale-125 transition-transform">🛫</span>
+                <span>Oshkosh '26</span>
+            </div>
+        </div>
+
         <div id="unified-search-bar" class="max-w-4xl mx-auto">
             <form action="{{ url_for('main.listings') }}" method="GET" id="listings-search-form"
                 class="rounded-3xl p-6 sm:p-8 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] border border-white/20 transition-all duration-500 overflow-hidden"
@@ -193,7 +213,7 @@
                     <button type="button" onclick="toggleListingsMap()" 
                         class="w-full sm:w-auto px-8 py-4 rounded-2xl font-black text-white bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md transition-all flex items-center justify-center gap-2">
                         <i class="fas fa-map-marked-alt text-blue-400"></i>
-                        <span id="map-toggle-text">Show Map</span>
+                        <span class="map-toggle-text-sync">Show Map</span>
                     </button>
                 </div>
             </form>
@@ -305,10 +325,10 @@
         </p>
 
         <!-- Map Toggle -->
-        <button id="map-toggle" onclick="toggleListingsMap()"
+        <button id="map-toggle-secondary" onclick="toggleListingsMap()"
             class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-dark-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow hover:shadow-md transition-all text-sm font-bold text-blue-600 dark:text-blue-400">
             <i class="fas fa-map-marked-alt"></i>
-            <span id="map-toggle-text">Show Map</span>
+            <span class="map-toggle-text-sync">Show Map</span>
         </button>
     </div>
 
