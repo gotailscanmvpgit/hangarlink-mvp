@@ -105,27 +105,53 @@
                 style="background: rgba(0,21,48,0.8); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);">
                 
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-8 mb-8">
-                    <!-- Location / Route -->
-                    <div class="md:col-span-12 lg:col-span-6">
-                        <label for="airport" class="block text-xs font-black mb-3 text-left uppercase tracking-[0.2em] text-white/60">
-                            <i class="fas fa-plane-departure mr-2 text-blue-400"></i>Where are you flying?
+                    <!-- Mission Ribbon (Replaces Location Input) -->
+                    <div class="md:col-span-12 lg:col-span-12">
+                        <label class="block text-xs font-black mb-3 text-left uppercase tracking-[0.2em] text-white/60">
+                            <i class="fas fa-route mr-2 text-emerald-400"></i>Select Your Mission
                         </label>
-                        <div class="relative group">
-                            <input type="text" id="airport" name="airport"
-                                class="block w-full rounded-2xl p-5 text-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all uppercase placeholder:normal-case placeholder:text-white/20"
-                                style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #FAFAFA;"
-                                placeholder="Enter Airport (CYHM, 60J), City, or Airpark Name..." maxlength="100" required
-                                value="{{ airport or '' }}"
-                                oninput="checkRouteSearch(this.value)">
-                            <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none group-focus-within:text-blue-400 text-white/20">
-                                <i class="fas fa-search text-xl transition-colors"></i>
-                            </div>
-                        </div>
+                        <div class="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
+                            <input type="hidden" name="mission" id="mission-input" value="">
+                            
+                            <!-- Snowbird Route -->
+                            <button type="button" onclick="setMission('snowbird', this)" 
+                                class="mission-tile flex-shrink-0 group relative w-44 h-24 rounded-2xl border border-white/10 bg-white/5 overflow-hidden transition-all hover:scale-[1.02]">
+                                <div class="absolute inset-0 bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors"></div>
+                                <div class="relative z-10 p-4 flex flex-col justify-between h-full text-left">
+                                    <span class="text-2xl">❄️</span>
+                                    <span class="text-white font-bold text-sm tracking-tight">Snowbird Route</span>
+                                </div>
+                            </button>
 
-                        <!-- Search Helper Tip -->
-                        <div class="mt-4 flex items-center gap-2 text-xs font-medium text-white/40">
-                             <span class="px-1.5 py-0.5 rounded-md bg-blue-500/10 text-blue-400 uppercase tracking-widest font-black text-[9px] border border-blue-500/20">Tip</span>
-                             <span>Try <strong class="text-white/60">'60J'</strong> for Riverbend Airpark or <strong class="text-white/60">'CYHM'</strong> for Hamilton.</span>
+                            <!-- Sun 'n Fun '26 -->
+                            <button type="button" onclick="setMission('sun_n_fun', this)" 
+                                class="mission-tile flex-shrink-0 group relative w-44 h-24 rounded-2xl border border-white/10 bg-white/5 overflow-hidden transition-all hover:scale-[1.02]">
+                                <div class="absolute inset-0 bg-orange-500/10 group-hover:bg-orange-500/20 transition-colors"></div>
+                                <div class="relative z-10 p-4 flex flex-col justify-between h-full text-left">
+                                    <span class="text-2xl">☀️</span>
+                                    <span class="text-white font-bold text-sm tracking-tight">Sun 'n Fun '26</span>
+                                </div>
+                            </button>
+
+                            <!-- Sunbelt Link -->
+                            <button type="button" onclick="setMission('sunbelt', this)" 
+                                class="mission-tile flex-shrink-0 group relative w-44 h-24 rounded-2xl border border-white/10 bg-white/5 overflow-hidden transition-all hover:scale-[1.02]">
+                                <div class="absolute inset-0 bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-colors"></div>
+                                <div class="relative z-10 p-4 flex flex-col justify-between h-full text-left">
+                                    <span class="text-2xl">🐂</span>
+                                    <span class="text-white font-bold text-sm tracking-tight">Sunbelt Link</span>
+                                </div>
+                            </button>
+
+                            <!-- Trans-Canada -->
+                            <button type="button" onclick="setMission('trans_canada', this)" 
+                                class="mission-tile flex-shrink-0 group relative w-44 h-24 rounded-2xl border border-white/10 bg-white/5 overflow-hidden transition-all hover:scale-[1.02]">
+                                <div class="absolute inset-0 bg-teal-500/10 group-hover:bg-teal-500/20 transition-colors"></div>
+                                <div class="relative z-10 p-4 flex flex-col justify-between h-full text-left">
+                                    <span class="text-2xl">🏔️</span>
+                                    <span class="text-white font-bold text-sm tracking-tight">Trans-Canada</span>
+                                </div>
+                            </button>
                         </div>
                     </div>
 
@@ -161,9 +187,14 @@
                     class="w-full font-black py-5 px-8 rounded-2xl text-xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.98] flex items-center justify-center gap-3"
                     style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; box-shadow: 0 10px 40px -10px rgba(37,99,235,0.5);">
                     <i class="fas fa-search" id="search-icon"></i>
-                    <span id="search-text">Search Available Parking</span>
+                    <span id="search-text">Search Mission Route</span>
                 </button>
             </form>
+
+            <!-- Mission Map (Hidden by default) -->
+            <div id="mission-map-container" class="mt-8 hidden rounded-3xl overflow-hidden border border-emerald-500/30 shadow-2xl animate-fade-in-up">
+                <div id="map" style="height: 400px; width: 100%;"></div>
+            </div>
 
             <!-- Search Results Container -->
             <div id="search-results-container" class="mt-8 hidden animate-fade-in-up"></div>
@@ -177,6 +208,16 @@
 </section>
 
 <style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .mission-tile.active {
+        border-color: #10b981 !important;
+        background: rgba(16,185,129,0.15) !important;
+        box-shadow: 0 0 20px rgba(16,185,129,0.2);
+        transform: scale(1.05);
+    }
+
     .duration-chip, .radius-chip {
         transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
         border: 1px solid rgba(255,255,255,0.15) !important;
@@ -203,6 +244,20 @@
 </style>
 
 <script>
+    function setMission(val, el) {
+        if (event) event.preventDefault();
+        document.getElementById('mission-input').value = val;
+        document.querySelectorAll('.mission-tile').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        
+        // Indicate filtering active
+        const form = document.getElementById('homepage-search-form');
+        form.style.borderColor = '#10b981';
+        form.classList.add('ring-2', 'ring-emerald-500/20');
+        
+        document.getElementById('search-text').textContent = `Search ${el.querySelector('.font-bold').textContent}`;
+    }
+
     function setDuration(val, el) {
         if (event) event.preventDefault();
         document.getElementById('duration-input').value = val;
@@ -217,15 +272,6 @@
         el.classList.add('active');
     }
 
-    function checkRouteSearch(val) {
-        const box = document.getElementById('stopover-suggestions');
-        if (val.toLowerCase().includes(' to ')) {
-            box.classList.remove('hidden');
-        } else {
-            box.classList.add('hidden');
-        }
-    }
-
     document.getElementById('homepage-search-form').addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -233,7 +279,7 @@
         const icon = document.getElementById('search-icon');
         const text = document.getElementById('search-text');
         const resultsContainer = document.getElementById('search-results-container');
-        const airport = document.getElementById('airport').value;
+        const mission = document.getElementById('mission-input').value;
         const duration = document.getElementById('duration-input').value;
         const radius = document.getElementById('radius-input').value;
         
@@ -241,10 +287,10 @@
         btn.disabled = true;
         btn.classList.add('opacity-80', 'cursor-not-allowed');
         icon.className = 'fas fa-spinner fa-spin';
-        text.textContent = 'Searching for parking...';
+        text.textContent = 'Mapping Mission...';
         
         // AJAX Fetch
-        fetch(`/api/search?airport=${encodeURIComponent(airport)}&duration=${duration}&radius=${radius}`)
+        fetch(`/api/search?mission=${mission}&duration=${duration}&radius=${radius}`)
             .then(res => res.json())
             .then(data => {
                 btn.disabled = false;
@@ -261,8 +307,8 @@
                             <div class="mb-6 w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto border border-amber-500/20">
                                 <i class="fas fa-exclamation-triangle text-amber-500 text-3xl"></i>
                             </div>
-                            <h3 class="text-2xl font-bold text-white mb-3">No Hangar Found at ${airport.toUpperCase()}</h3>
-                            <p class="text-blue-100/70 mb-8 max-w-md mx-auto">Transient spots are in high demand here. Be the first to list and gain Founding Host status!</p>
+                            <h3 class="text-2xl font-bold text-white mb-3">No Hangar Found for this Mission</h3>
+                            <p class="text-blue-100/70 mb-8 max-w-md mx-auto">Transient spots are in high demand on this route. Be the first to list and gain Founding Host status!</p>
                             <a href="/post-listing" class="inline-flex items-center justify-center bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-4 px-10 rounded-2xl shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all transform hover:-translate-y-1">
                                 <i class="fas fa-gem mr-3"></i> List This Space
                             </a>
@@ -270,18 +316,19 @@
                     `;
                 } else {
                     let cardsHtml = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">`;
-                    data.listings.forEach(listing => {
+                    data.listings.forEach((listing, idx) => {
                         cardsHtml += `
                             <a href="${listing.url}" class="block group">
-                                <div class="bg-white dark:bg-dark-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-200 dark:border-gray-700">
+                                <div class="bg-white dark:bg-dark-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-200 dark:border-gray-700 relative">
+                                    ${idx < 3 ? '<div class="absolute top-3 inset-x-3 z-20"><span class="bg-emerald-500 text-white text-[9px] font-black px-2 py-1 rounded-md shadow-lg flex items-center justify-center gap-1"><i class="fas fa-medal"></i> RECOMMENDED STOPOVER</span></div>' : ''}
                                     <div class="relative h-48 overflow-hidden">
                                         <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style="background-image: url('${listing.photo_url || '/static/img/placeholder.jpg'}')"></div>
-                                        <div class="absolute top-3 left-3 z-10">
+                                        <div class="absolute top-3 left-3 z-10 ${idx < 3 ? 'mt-7' : ''}">
                                             <span class="inline-flex items-center bg-green-500 text-white text-[10px] uppercase font-black px-2.5 py-1 rounded-full shadow-lg">
                                                 <span class="w-1.5 h-1.5 bg-white rounded-full mr-1.5 animate-pulse"></span>Available
                                             </span>
                                         </div>
-                                        ${listing.is_premium ? `<div class="absolute top-3 right-3 z-10"><span class="inline-flex items-center bg-amber-100/90 backdrop-blur text-amber-700 text-[10px] font-black px-2 py-1 rounded-full shadow"><i class="fas fa-star mr-1"></i>PREMIUM</span></div>` : ''}
+                                        ${listing.is_premium ? `<div class="absolute top-3 right-3 z-10 ${idx < 3 ? 'mt-7' : ''}"><span class="inline-flex items-center bg-amber-100/90 backdrop-blur text-amber-700 text-[10px] font-black px-2 py-1 rounded-full shadow"><i class="fas fa-star mr-1"></i>PREMIUM</span></div>` : ''}
                                     </div>
                                     <div class="p-5 text-left">
                                         <div class="flex items-center justify-between mb-2">
@@ -297,6 +344,11 @@
                     });
                     cardsHtml += `</div>`;
                     resultsContainer.innerHTML = cardsHtml;
+                    
+                    // Trigger Route Visual Pathing
+                    if (mission) {
+                        showMissionRoute(mission, data.listings);
+                    }
                 }
                 
                 // Smooth scroll to results
@@ -310,6 +362,96 @@
                 text.textContent = 'Search Available Parking';
             });
     });
+    function showMissionRoute(mission, listings) {
+        const container = document.getElementById('mission-map-container');
+        container.classList.remove('hidden');
+        
+        // Route Coordinates Mapping (Simplified for demo)
+        const missionRoutes = {
+            'snowbird': [
+                {lat: 43.6777, lng: -79.6248}, // Toronto
+                {lat: 40.6413, lng: -73.7781}, // NYC
+                {lat: 38.9445, lng: -77.4558}, // DC
+                {lat: 35.2140, lng: -80.9431}, // Charlotte
+                {lat: 32.0835, lng: -81.0998}, // Savannah
+                {lat: 28.5455, lng: -81.3329}, // Orlando
+                {lat: 25.7959, lng: -80.2870}  // Miami
+            ],
+            'sun_n_fun': [
+                {lat: 27.9889, lng: -82.0185}, // Lakeland
+                {lat: 28.1025, lng: -80.6453}, // Melbourne
+                {lat: 28.5455, lng: -81.3329}  // Orlando
+            ],
+            'sunbelt': [
+                {lat: 29.6459, lng: -95.2789}, // Houston
+                {lat: 29.9844, lng: -90.2564}, // New Orleans
+                {lat: 30.4124, lng: -87.1866}, // Pensacola
+                {lat: 28.5455, lng: -81.3329}  // Orlando
+            ],
+            'trans_canada': [
+                {lat: 49.1961, lng: -123.1815}, // Vancouver
+                {lat: 51.1215, lng: -114.0076}, // Calgary
+                {lat: 52.1297, lng: -106.6710}, // Saskatoon
+                {lat: 49.9100, lng: -97.2399},  // Winnipeg
+                {lat: 43.6777, lng: -79.6248},  // Toronto
+                {lat: 45.4706, lng: -73.7408}   // Montreal
+            ]
+        };
+
+        const path = missionRoutes[mission] || [];
+        if (path.length === 0) return;
+
+        // Initialize/Update Google Map
+        if (typeof google === 'undefined') return;
+        
+        const map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 4,
+            center: path[Math.floor(path.length/2)],
+            mapTypeId: "roadmap",
+            styles: document.documentElement.classList.contains('dark') ? [
+                { elementType: "geometry", stylers: [{ color: "#000a18" }] },
+                { elementType: "labels.text.stroke", stylers: [{ color: "#000a18" }] },
+                { elementType: "labels.text.fill", stylers: [{ color: "#1e3a8a" }] },
+                { featureType: "water", elementType: "geometry", stylers: [{ color: "#001229" }] },
+                { featureType: "road", elementType: "geometry", stylers: [{ color: "#001f3f" }] }
+            ] : []
+        });
+
+        // Draw Polyline
+        const routePath = new google.maps.Polyline({
+            path: path,
+            geodesic: true,
+            strokeColor: "#10b981",
+            strokeOpacity: 0.8,
+            strokeWeight: 4,
+        });
+        routePath.setMap(map);
+
+        // Add Markers for Listings
+        const bounds = new google.maps.LatLngBounds();
+        path.forEach(p => bounds.extend(p));
+        
+        listings.forEach(l => {
+            if (l.lat && l.lon) {
+                const pos = {lat: l.lat, lng: l.lon};
+                new google.maps.Marker({
+                    position: pos,
+                    map: map,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 8,
+                        fillColor: "#3b82f6",
+                        fillOpacity: 1,
+                        strokeColor: "#ffffff",
+                        strokeWeight: 2,
+                    }
+                });
+                bounds.extend(pos);
+            }
+        });
+        
+        map.fitBounds(bounds);
+    }
 </script>
 
 <!-- Founding Host Banner -->

@@ -233,6 +233,10 @@ def create_app(config_class=Config):
                     missing.append("availability_start DATE")
                 if 'availability_end' not in columns:
                     missing.append("availability_end DATE")
+                if 'state' not in columns:
+                    missing.append("state VARCHAR(50)")
+                if 'corridor_ids' not in columns:
+                    missing.append("corridor_ids TEXT")
                     
                 # Drop NOT NULL constraint if it exists (2026 Strategy: price_month is optional)
                 try:

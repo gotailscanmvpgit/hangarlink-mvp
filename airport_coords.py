@@ -20,7 +20,7 @@ import logging
 import os
 import time
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Dict
 
 logger = logging.getLogger(__name__)
 
@@ -256,35 +256,41 @@ KNOWN_AIRPORTS: dict[str, str] = {
 }
 
 # ── In-memory cache ───────────────────────────────────────────────────────────
-_COORDS_CACHE: dict[str, tuple[float, float]] = {}
+# _COORDS_CACHE storage format: {ICAO: (lat, lon, iso_region)}
+_COORDS_CACHE: dict[str, tuple[float, float, str]] = {}
 _CACHE_LOADED = False
 
 CSV_URL = "https://davidmegginson.github.io/ourairports-data/airports.csv"
 CSV_LOCAL_PATH = Path(__file__).parent / "static" / "data" / "airports.csv"
 
 
-def _load_csv_stream(stream: io.TextIOBase) -> dict[str, tuple[float, float]]:
-    """Parse airports.csv and return {ICAO: (lat, lon)} dict."""
-    result: dict[str, tuple[float, float]] = {}
+def _load_csv_stream(stream: io.TextIOBase) -> dict[str, tuple[float, float, str]]:
+    """Parse airports.csv and return {ICAO: (lat, lon, iso_region)} dict."""
+    result: dict[str, tuple[float, float, str]] = {}
     reader = csv.DictReader(stream)
     for row in reader:
         # 'ident' is the primary key (FAA local code for US, ICAO for international)
         # 'icao_code' is the 4-letter ICAO code — prefer it when present
         icao = (row.get("icao_code") or "").strip().upper()
         ident = (row.get("ident") or "").strip().upper()
+        iso_region = (row.get("iso_region") or "").strip().upper()
+        
+        # Clean iso_region (e.g. US-FL -> FL, CA-ON -> ON)
+        state = iso_region.split("-")[-1] if "-" in iso_region else iso_region
+        
         try:
             lat = float(row["latitude_deg"])
             lon = float(row["longitude_deg"])
         except (ValueError, KeyError):
             continue
         if icao:
-            result[icao] = (lat, lon)
+            result[icao] = (lat, lon, state)
         if ident and ident not in result:
-            result[ident] = (lat, lon)
+            result[ident] = (lat, lon, state)
     return result
 
 
-def _load_from_file(path: Path) -> Optional[dict[str, tuple[float, float]]]:
+def _load_from_file(path: Path) -> Optional[dict[str, tuple[float, float, str]]]:
     """Try to load from local CSV file."""
     try:
         with open(path, newline="", encoding="utf-8") as f:
@@ -296,7 +302,7 @@ def _load_from_file(path: Path) -> Optional[dict[str, tuple[float, float]]]:
         return None
 
 
-def _load_from_url(url: str) -> Optional[dict[str, tuple[float, float]]]:
+def _load_from_url(url: str) -> Optional[dict[str, tuple[float, float, str]]]:
     """Try to download CSV from OurAirports CDN."""
     import urllib.request
     try:
@@ -333,33 +339,38 @@ def load_airport_coords() -> None:
     if data is None:
         data = _load_from_url(CSV_URL)
 
-    # 3. Always merge in hardcoded fallbacks (highest priority — known-good values)
+    # 3. Merge in hardcoded fallbacks (state is unknown 'US' or 'CA' for hardcoded)
     if data is None:
         logger.warning("[AIRPORT-COORDS] using hardcoded fallback for ~300 airports only")
         data = {}
 
-    data.update(HARDCODED_COORDS)  # hardcoded values override CSV (more reliable)
+    for k, v in HARDCODED_COORDS.items():
+        if k not in data:
+            # Guess country code from initial letter if state unknown
+            country = "US" if k.startswith("K") else ("CA" if k.startswith("C") else "ZZ")
+            data[k] = (v[0], v[1], country)
+            
     _COORDS_CACHE = data
     _CACHE_LOADED = True
     logger.warning(f"[AIRPORT-COORDS] ready — {len(_COORDS_CACHE):,} airports indexed")
 
 
-def get_coords(icao: str) -> Tuple[float, float, bool]:
+def get_coords(icao: str) -> Tuple[float, float, str, bool]:
     """
-    Look up (lat, lon) for an ICAO code.
+    Look up (lat, lon, state) for an ICAO code.
 
     Returns:
-        (lat, lon, found) — if not found, returns Toronto default and found=False.
+        (lat, lon, state, found) — if not found, returns Toronto default and found=False.
 
     Example:
-        lat, lon, found = get_coords('KJFK')  # → (40.6398, -73.7789, True)
-        lat, lon, found = get_coords('ZZZZ')  # → (43.6532, -79.3832, False)
+        lat, lon, state, found = get_coords('KJFK')  # → (40.6398, -73.7789, 'NY', True)
+        lat, lon, state, found = get_coords('ZZZZ')  # → (43.6532, -79.3832, 'ON', False)
     """
     if not _CACHE_LOADED:
         load_airport_coords()
 
     key = (icao or "").strip().upper()
-    coords = _COORDS_CACHE.get(key)
-    if coords:
-        return coords[0], coords[1], True
-    return DEFAULT_LAT, DEFAULT_LON, False
+    data = _COORDS_CACHE.get(key)
+    if data:
+        return data[0], data[1], data[2], True
+    return DEFAULT_LAT, DEFAULT_LON, "ON", False

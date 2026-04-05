@@ -160,6 +160,10 @@ class Listing(db.Model):
     public_location_description = db.Column(db.String(255), nullable=True) # e.g. "North Row at 60J"
     private_access_instructions = db.Column(db.Text, nullable=True) # e.g. "Hangar B-12, Code #1234" (HIDDEN)
     
+    # Mission-Based Discovery (2026)
+    state = db.Column(db.String(20), nullable=True) # e.g. "FL", "ON"
+    corridor_ids = db.Column(db.String(255), nullable=True) # e.g. "snowbird,sun_n_fun"
+    
     # Relationships
     bookings = db.relationship('Booking', backref='listing', lazy=True)
 
