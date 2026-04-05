@@ -105,58 +105,78 @@
                 style="background: rgba(0,21,48,0.8); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);">
                 
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-8 mb-8">
-                    <!-- Unified Mission Discovery Platform -->
-                    <div class="md:col-span-12 lg:col-span-12">
-                        <!-- Mission Selection Section -->
-                        <div class="md:col-span-12 lg:col-span-12 relative">
+                        <!-- Cross-Platform Mission Discovery -->
+                        <div class="md:col-span-12 lg:col-span-12 relative" id="mission-discovery-container">
                             <label class="block text-[10px] font-black mb-5 text-left uppercase tracking-[0.3em] text-white/40">
-                                <i class="fas fa-route mr-1 text-emerald-400"></i>Flight Corridor Discovery
+                                <i class="fas fa-route mr-1 text-emerald-400"></i>Mission-Based Search Engine
                             </label>
                             
-                            <!-- Mobile Floating Trigger -->
+                            <input type="hidden" name="mission" id="mission-input" value="">
+
+                            <!-- Mobile Floating Discovery Pill -->
                             <div class="mobile-trigger" onclick="openMissionDrawer()">
-                                <div class="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center text-navy-900 shadow-[0_10px_30px_rgba(16,185,129,0.5)] border-2 border-white/20">
+                                <div class="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center text-navy-900 shadow-[0_15px_30px_rgba(16,185,129,0.4)] border-2 border-white/20">
                                     <i class="fas fa-compass text-xl"></i>
                                 </div>
-                                <div class="bg-[#001530] border border-white/10 rounded-full px-6 py-3 text-white font-black text-sm whitespace-nowrap shadow-2xl">
-                                    Select Mission
+                                <div class="bg-[#1A1F2B] border border-white/10 rounded-full px-6 py-3 text-white font-black text-sm whitespace-nowrap shadow-2xl">
+                                    Browse Missions
                                 </div>
                             </div>
                             
-                            <!-- Desktop Adaptive Ribbon -->
-                            <div class="mission-ribbon gap-4 overflow-x-auto pb-4 no-scrollbar">
-                                <input type="hidden" name="mission" id="mission-input" value="">
-                                
-                                {% for id, icon, title, desc, img in [
-                                    ('snowbird', '❄️', 'Snowbird Route', 'Ontario to Florida', 'snowbird.png'),
-                                    ('sunbelt', '🐂', 'Sunbelt Link', 'Texas to Florida', 'sunbelt.png'),
-                                    ('oshkosh', '🛩️', 'Oshkosh (AirVenture)', 'The Great Pilgrimage', 'oshkosh.png'),
-                                    ('trans_canada', '🏔️', 'Trans-Canada', 'Halifax to Vancouver', 'trans_canada.png')
-                                ] %}
-                                <div class="group relative flex-shrink-0">
-                                    <!-- Tooltip Overlay -->
-                                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 px-3 py-2 bg-navy-900 border border-white/20 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-[60] w-48 shadow-2xl">
-                                        <div class="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1">Route Preview</div>
-                                        <img src="{{ url_for('static', filename='images/' + img) }}" class="w-full h-20 object-cover rounded-lg mb-2" alt="Preview">
-                                        <div class="text-[10px] text-white/60 font-medium leading-tight">{{ desc }}</div>
-                                        <div class="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-navy-900"></div>
+                            <!-- Desktop Mega-Menu Trigger -->
+                            <div class="hidden lg:block">
+                                <button type="button" onclick="toggleMissionMenu()" 
+                                    id="mega-menu-trigger"
+                                    class="w-full p-8 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-between group hover:bg-white/10 transition-all duration-500 overflow-hidden relative">
+                                    <div class="flex items-center gap-6">
+                                        <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20 group-hover:scale-110 transition-transform">
+                                            <i class="fas fa-map-marked-alt text-2xl"></i>
+                                        </div>
+                                        <div class="text-left">
+                                            <div id="active-mission-label-desktop" class="text-2xl font-black text-white tracking-tighter">Choose Your Wing Mission</div>
+                                            <div class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Explore optimized corridors & hubs</div>
+                                        </div>
                                     </div>
+                                    <i class="fas fa-chevron-down text-white/20 group-hover:translate-y-1 transition-transform"></i>
+                                </button>
 
-                                    <button type="button" onclick="setMission('{{ id }}', this)" 
-                                        class="mission-tile w-56 h-32 rounded-2xl border border-white/10 bg-white/5 overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98] flex flex-col justify-between p-5 text-left group">
-                                        <div class="flex items-center justify-between">
-                                            <span class="text-2xl transform group-hover:scale-110 transition-transform">{{ icon }}</span>
-                                            <div class="w-6 h-6 rounded-full border border-white/10 flex items-center justify-center group-[.active]:bg-emerald-500 group-[.active]:border-emerald-500 transition-all">
-                                                <i class="fas fa-check text-[10px] text-navy-900 font-black opacity-0 group-[.active]:opacity-100"></i>
+                                <!-- Desktop Mega-Menu (Expanding) -->
+                                <div id="mission-mega-menu" class="hidden absolute top-[110%] left-0 right-0 z-[100] bg-[#1A1F2B] border border-white/10 rounded-[2.5rem] p-8 shadow-[0_40px_100px_rgba(0,0,0,0.8)] animate-fade-in-up">
+                                    <div class="grid grid-cols-4 gap-6">
+                                        {% for id, icon, title, desc, price, img in [
+                                            ('snowbird', '❄️', 'Snowbird Route', 'ON to FL Corridor', '$65/nt', 'snowbird.png'),
+                                            ('sunbelt', '🐂', 'Sunbelt Link', 'TX to FL Southern', '$85/nt', 'sunbelt.png'),
+                                            ('trans_canada', '🏔️', 'Trans-Canada', 'Halifax to Van', '$92/nt', 'trans_canada.png'),
+                                            ('oshkosh', '🛩️', "Sun 'n Fun '26", 'Lakeland Pilgrimage', '$120/nt', 'oshkosh.png')
+                                        ] %}
+                                        <button type="button" onclick="setMission('{{ id }}', this)" 
+                                            class="mission-card-pro group relative h-72 rounded-[2rem] border border-white/5 bg-white/5 overflow-hidden transition-all hover:scale-[1.03] active:scale-[0.98]">
+                                            <img src="{{ url_for('static', filename='images/' + img) }}" class="absolute inset-0 w-full h-full object-cover opacity-20 filter grayscale hover:grayscale-0 transition-all duration-700">
+                                            <div class="absolute inset-0 bg-gradient-to-t from-[#1A1F2B] via-[#1A1F2B]/60 to-transparent"></div>
+                                            <div class="relative z-10 p-6 flex flex-col justify-between h-full text-left">
+                                                <div class="flex items-center justify-between">
+                                                    <span class="text-3xl">{{ icon }}</span>
+                                                    <div class="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center group-[.active]:bg-emerald-500 group-[.active]:border-emerald-500 transition-all">
+                                                        <i class="fas fa-check text-xs text-navy-900 font-black opacity-0 group-[.active]:opacity-100"></i>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="text-white font-black text-lg tracking-tight mb-1">{{ title }}</div>
+                                                    <div class="text-[10px] text-white/40 font-black uppercase tracking-widest mb-3">{{ desc }}</div>
+                                                    <div class="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-full">
+                                                        <span class="text-emerald-400 text-[10px] font-black uppercase tracking-widest">Avg. Price: {{ price }}</span>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div>
-                                            <div class="text-white font-black text-sm tracking-tight mb-0.5" style="font-family: 'Inter', sans-serif;">{{ title }}</div>
-                                            <div class="text-[9px] text-white/30 font-black uppercase tracking-widest">{{ desc }}</div>
-                                        </div>
-                                    </button>
+                                        </button>
+                                        {% endfor %}
+                                    </div>
                                 </div>
-                                {% endfor %}
+                            </div>
+
+                            <!-- Tablet Fallback (Ribbon) -->
+                            <div class="hidden sm:flex lg:hidden gap-4 overflow-x-auto pb-4 no-scrollbar">
+                                <!-- Reusing previous ribbon logic for mid-size screens if needed, otherwise hide -->
                             </div>
                         </div>
                     </div>
@@ -305,7 +325,7 @@
     .mobile-trigger { 
         display: flex; 
         position: fixed; 
-        bottom: 25px; 
+        bottom: 30px; 
         left: 50%;
         transform: translateX(-50%);
         z-index: 100;
@@ -313,13 +333,21 @@
         gap: 12px;
         cursor: pointer;
         padding: 4px;
-        background: rgba(0, 21, 48, 0.9);
-        backdrop-filter: blur(12px);
+        background: rgba(26, 31, 43, 0.95); /* Slate Gray */
+        backdrop-filter: blur(16px);
         border-radius: 100px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         animation: triggerFloat 3s ease-in-out infinite;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    #mission-drawer #drawer-sheet {
+        background: #1A1F2B !important; /* Theme: Slate Gray */
+    }
+    
+    #mission-drawer .bg-\[\#001838\]\/40 {
+        background-color: rgba(26, 31, 43, 0.4) !important;
     }
     .mobile-trigger:active { transform: translateX(-50%) scale(0.95); }
 
@@ -339,25 +367,30 @@
         if (event) event.preventDefault();
         document.getElementById('mission-input').value = val;
         
-        // Update Desktop UI
-        document.querySelectorAll('.mission-tile').forEach(c => c.classList.remove('active'));
-        if (el && el.classList.contains('mission-tile')) {
-            el.classList.add('active');
-        } else {
-            // Find the desktop tile by ID if called from mobile
-            const desktopTile = Array.from(document.querySelectorAll('.mission-tile')).find(t => t.getAttribute('onclick').includes(`'${val}'`));
-            if (desktopTile) desktopTile.classList.add('active');
+        // Haptic Feedback for Pilot Experience
+        if ("vibrate" in navigator) {
+            navigator.vibrate(12);
         }
+        
+        // Update Desktop Pro Cards
+        document.querySelectorAll('.mission-card-pro').forEach(c => {
+            c.classList.remove('active');
+            if (c.getAttribute('onclick').includes(`'${val}'`)) c.classList.add('active');
+        });
+
+        const titles = {
+            'snowbird': 'Snowbird Route',
+            'sunbelt': 'Sunbelt Link',
+            'trans_canada': 'Trans-Canada',
+            'oshkosh': "Sun 'n Fun '26"
+        };
+        
+        const desktopLabel = document.getElementById('active-mission-label-desktop');
+        if (desktopLabel) desktopLabel.textContent = titles[val] || 'Wing Mission';
 
         // Update Mobile UI
         const mobileLabel = document.getElementById('active-mission-label-mobile');
-        const titles = {
-            'snowbird': 'Snowbird Route',
-            'sun_n_fun': "Sun 'n Fun '26",
-            'sunbelt': 'Sunbelt Link',
-            'trans_canada': 'Trans-Canada'
-        };
-        if (mobileLabel) mobileLabel.textContent = titles[val] || 'Select Corridor';
+        if (mobileLabel) mobileLabel.textContent = titles[val] || 'Select Mission...';
         
         document.querySelectorAll('.mission-card-mobile').forEach(c => {
             if (c.getAttribute('onclick').includes(`'${val}'`)) c.classList.add('active');
@@ -372,8 +405,19 @@
         const titleText = titles[val] || 'Route';
         document.getElementById('search-text').textContent = `Search ${titleText}`;
         
-        // Auto-close drawer if on mobile
+        // Auto-close menu/drawer
+        const menu = document.getElementById('mission-mega-menu');
+        if (menu) {
+            menu.classList.remove('visible');
+            menu.classList.add('hidden');
+        }
         setTimeout(closeMissionDrawer, 300);
+    }
+
+    function toggleMissionMenu() {
+        const menu = document.getElementById('mission-mega-menu');
+        menu.classList.toggle('visible');
+        menu.classList.toggle('hidden');
     }
 
     function openMissionDrawer() {
@@ -1163,8 +1207,8 @@
                 {% for id, icon, title, desc, img in [
                     ('snowbird', '❄️', 'Snowbird', 'ON to FL', 'snowbird.png'),
                     ('sunbelt', '🐂', 'Sunbelt', 'TX to FL', 'sunbelt.png'),
-                    ('oshkosh', '🛩️', 'Oshkosh', 'WI Arrival', 'oshkosh.png'),
-                    ('trans_canada', '🏔️', 'Trans-Canada', 'All Provinces', 'trans_canada.png')
+                    ('trans_canada', '🏔️', 'Trans-Canada', 'All Provinces', 'trans_canada.png'),
+                    ('oshkosh', '🛩️', "Sun 'n Fun", 'Pilgrimage', 'oshkosh.png')
                 ] %}
                 <button type="button" onclick="setMission('{{ id }}', this)" 
                     class="mission-card-mobile group flex flex-col active:scale-[0.94] p-6 rounded-3xl bg-white/5 border border-white/10 transition-all h-36 justify-between text-left">
