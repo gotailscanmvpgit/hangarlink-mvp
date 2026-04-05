@@ -72,6 +72,29 @@
                             <i class="fas fa-plane-departure mr-2 text-blue-400"></i>Where are you flying?
                         </label>
                         <div class="relative group">
+                            <input type="hidden" name="mission" id="mission-input" value="{{ request.args.get('mission') or '' }}">
+
+                            <!-- Mobile Mission Trigger (Integrated) -->
+                            <div class="lg:hidden mb-6">
+                                <button type="button" onclick="openMissionDrawer()" 
+                                    class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between active:scale-[0.98] transition-all"
+                                    style="background: rgba(255,255,255,0.03);">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 border border-emerald-500/30">
+                                            <i class="fas fa-route"></i>
+                                        </div>
+                                        <div class="text-left">
+                                            <div class="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Current Mission</div>
+                                            <div id="active-mission-label-mobile" class="text-white font-bold text-sm">
+                                                {% set m = request.args.get('mission') %}
+                                                {{ 'Snowbird Route' if m == 'snowbird' else 'Sunbelt Link' if m == 'sunbelt' else 'Sun \'n Fun' if m == 'snf' else 'Oshkosh' if m == 'oshkosh' else 'Select Mission Corridor' }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-chevron-right text-white/20 text-xs"></i>
+                                </button>
+                            </div>
+
                             <input type="text" id="airport" name="airport"
                                 class="block w-full rounded-2xl p-4 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all uppercase placeholder:normal-case placeholder:text-white/20"
                                 style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #FAFAFA;"
@@ -310,7 +333,70 @@
             });
         }
     });
+
+    // Mission Selection Logic for Listings Page
+    function openMissionDrawer() {
+        const drawer = document.getElementById('mission-drawer');
+        const overlay = document.getElementById('drawer-overlay');
+        if(drawer && overlay) {
+            drawer.classList.remove('translate-y-full');
+            overlay.classList.remove('hidden');
+        }
+    }
+
+    function closeMissionDrawer() {
+        const drawer = document.getElementById('mission-drawer');
+        const overlay = document.getElementById('drawer-overlay');
+        if(drawer && overlay) {
+            drawer.classList.add('translate-y-full');
+            overlay.classList.add('hidden');
+        }
+    }
+
+    function setMission(missionId) {
+        // Redirect to apply mission on listings page
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set('mission', missionId);
+        // Clear specific airport if mission is selected for broader results
+        // currentUrl.searchParams.delete('airport'); 
+        window.location.href = currentUrl.toString();
+    }
 </script>
+
+<!-- Shared Mobile Drawer (Replicated from Index) -->
+<div id="drawer-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] hidden" onclick="closeMissionDrawer()"></div>
+<div id="mission-drawer" class="fixed bottom-0 left-0 right-0 bg-[#0B1521] border-t border-white/10 rounded-t-[2.5rem] z-[1000] p-8 pb-12 transition-transform duration-500 translate-y-full">
+    <div class="w-12 h-1.5 bg-white/10 rounded-full mx-auto mb-8"></div>
+    <h3 class="text-2xl font-black text-white mb-2">Choose Your Mission</h3>
+    <p class="text-white/40 text-sm mb-8 italic">Find hangar space along popular flight corridors.</p>
+    
+    <div class="grid grid-cols-2 gap-4">
+        <div onclick="setMission('snowbird')" class="mission-card-pro p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-emerald-500/50 transition-all cursor-pointer group active:scale-95">
+            <div class="text-3xl mb-3 group-hover:scale-110 transition-transform">❄️</div>
+            <div class="text-white font-bold text-sm">Snowbird</div>
+            <div class="text-[10px] text-white/30 uppercase font-black">ON → FL</div>
+        </div>
+        <div onclick="setMission('sunbelt')" class="mission-card-pro p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-emerald-500/50 transition-all cursor-pointer group active:scale-95">
+            <div class="text-3xl mb-3 group-hover:scale-110 transition-transform">🐂</div>
+            <div class="text-white font-bold text-sm">Sunbelt</div>
+            <div class="text-[10px] text-white/30 uppercase font-black">GA → AZ</div>
+        </div>
+        <div onclick="setMission('snf')" class="mission-card-pro p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-emerald-500/50 transition-all cursor-pointer group active:scale-95">
+            <div class="text-3xl mb-3 group-hover:scale-110 transition-transform">☀️</div>
+            <div class="text-white font-bold text-sm">Sun 'n Fun</div>
+            <div class="text-[10px] text-white/30 uppercase font-black">Florida</div>
+        </div>
+        <div onclick="setMission('oshkosh')" class="mission-card-pro p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-emerald-500/50 transition-all cursor-pointer group active:scale-95">
+            <div class="text-3xl mb-3 group-hover:scale-110 transition-transform">🛫</div>
+            <div class="text-white font-bold text-sm">Oshkosh '26</div>
+            <div class="text-[10px] text-white/30 uppercase font-black">Wisconsin</div>
+        </div>
+    </div>
+
+    <button onclick="closeMissionDrawer()" class="w-full mt-10 py-5 rounded-2xl bg-white/5 text-white/60 font-black text-sm uppercase tracking-widest border border-white/10 hover:bg-white/10 transition-all">
+        Close Explorer
+    </button>
+</div>
 </div>
 </div>
 

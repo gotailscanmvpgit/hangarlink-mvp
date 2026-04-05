@@ -160,6 +160,59 @@
                 bounds.extend(position);
             });
 
+            // ── Mission Corridor Logic (2026 Strategy) ──
+            const urlParams = new URLSearchParams(window.location.search);
+            const activeMission = urlParams.get('mission');
+            const missions = {
+                'snowbird': {
+                    path: [
+                        { lat: 43.1605, lng: -79.9349 }, // CYHM (Hamilton)
+                        { lat: 40.6413, lng: -73.7781 }, // KJFK (New York)
+                        { lat: 25.7959, lng: -80.2870 }  // KMIA (Miami)
+                    ]
+                },
+                'sunbelt': {
+                    path: [
+                        { lat: 33.6407, lng: -84.4277 }, // KATL (Atlanta)
+                        { lat: 29.9805, lng: -95.3397 }, // KIAH (Houston)
+                        { lat: 33.4342, lng: -112.0081 } // KPHX (Phoenix)
+                    ]
+                },
+                'snf': {
+                    path: [
+                        { lat: 28.0560, lng: -82.0230 }, // KLAL (Lakeland)
+                        { lat: 28.5383, lng: -81.3792 }, // KMCO (Orlando)
+                        { lat: 27.9506, lng: -82.4572 }  // KTPA (Tampa)
+                    ]
+                },
+                'oshkosh': {
+                    path: [
+                        { lat: 43.9844, lng: -88.5570 }, // KOSH (Oshkosh)
+                        { lat: 42.9472, lng: -87.8967 }, // KMKE (Milwaukee)
+                        { lat: 41.9742, lng: -87.9073 }  // KORD (Chicago)
+                    ]
+                }
+            };
+
+            if (activeMission && missions[activeMission]) {
+                const missionPath = missions[activeMission].path;
+                const polyline = new google.maps.Polyline({
+                    path: missionPath,
+                    geodesic: true,
+                    strokeColor: "#10b981", // Emerald Green
+                    strokeOpacity: 0.8,
+                    strokeWeight: 4,
+                    map: map
+                });
+
+                // Auto-fit bounds to the mission path if no listings are present
+                if (!window.mapMarkers || window.mapMarkers.length === 0) {
+                    const missionBounds = new google.maps.LatLngBounds();
+                    missionPath.forEach(pt => missionBounds.extend(pt));
+                    map.fitBounds(missionBounds);
+                }
+            }
+
             // If multiple markers, auto-zoom to fit them. If one, center it.
             if (window.mapMarkers.length > 1) {
                 map.fitBounds(bounds);
