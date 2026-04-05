@@ -321,6 +321,7 @@
     }
 
     /* Adaptive Mission Layout Logic */
+    /* Adaptive Mission Layout Logic - FIX FOR OVERLAYS */
     .mission-ribbon { display: none; }
     .mobile-trigger { 
         display: flex; 
@@ -328,28 +329,48 @@
         bottom: 30px; 
         left: 50%;
         transform: translateX(-50%);
-        z-index: 100;
+        z-index: 90; /* Lower than drawer */
         align-items: center;
         gap: 12px;
         cursor: pointer;
         padding: 4px;
-        background: rgba(26, 31, 43, 0.95); /* Slate Gray */
+        background: rgba(26, 31, 43, 0.98); 
         backdrop-filter: blur(16px);
         border-radius: 100px;
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 20px 60px rgba(0,0,0,0.6);
         animation: triggerFloat 3s ease-in-out infinite;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Hide trigger when drawer is active */
+    #mission-drawer.visible ~ .mobile-trigger,
+    body.drawer-open .mobile-trigger {
+        opacity: 0;
+        pointer-events: none;
+        transform: translate(-50%, 50px);
+    }
+    
+    #mission-drawer {
+        z-index: 1000 !important; /* Maximum Priority */
+    }
+
+    #mission-mega-menu {
+        z-index: 200 !important; /* Above all other form elements */
+        background: #1A1F2B !important;
+        box-shadow: 0 50px 100px -20px rgba(0,0,0,0.9);
     }
     
     #mission-drawer #drawer-sheet {
-        background: #1A1F2B !important; /* Theme: Slate Gray */
+        background: #1A1F2B !important;
+        z-index: 1001;
     }
-    
-    #mission-drawer .bg-\[\#001838\]\/40 {
-        background-color: rgba(26, 31, 43, 0.4) !important;
+
+    #mission-drawer #drawer-backdrop {
+        background: rgba(0,0,0,0.9) !important;
+        backdrop-filter: blur(8px);
+        z-index: 1000;
     }
-    .mobile-trigger:active { transform: translateX(-50%) scale(0.95); }
 
     @keyframes triggerFloat {
         0%, 100% { transform: translate(-50%, 0); }
@@ -358,7 +379,7 @@
 
     @media (min-width: 1024px) {
         .mission-ribbon { display: flex; }
-        .mobile-trigger { display: none; }
+        .mobile-trigger { display: none !important; }
     }
 </style>
 
@@ -423,13 +444,15 @@
     function openMissionDrawer() {
         const drawer = document.getElementById('mission-drawer');
         drawer.classList.add('visible');
-        document.body.style.overflow = 'hidden'; // Prevent scroll
+        document.body.style.overflow = 'hidden'; 
+        document.body.classList.add('drawer-open'); // For CSS hiding
     }
 
     function closeMissionDrawer() {
         const drawer = document.getElementById('mission-drawer');
         drawer.classList.remove('visible');
         document.body.style.overflow = '';
+        document.body.classList.remove('drawer-open');
     }
 
     function setDuration(val, el) {
