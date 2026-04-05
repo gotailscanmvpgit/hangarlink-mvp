@@ -91,10 +91,11 @@ MISSIONS = {
         'center': [34.0, -80.0],
         'zoom': 4
     },
-    'sun_n_fun': {
-        'label': "Sun 'n Fun '26",
-        'airports': ['KLAL', 'KPCM', 'KBOW', 'KORL', 'KTPA'],
-        'surge': 40
+    'oshkosh': {
+        'label': 'Oshkosh (AirVenture)',
+        'airports': ['KOSH', 'KFLD', 'KRYV', 'KATW', 'KMTW'],
+        'hubs': [('KOSH', 43.9844, -88.5570), ('KMDW', 41.7860, -87.7524)],
+        'surge': 50
     },
     'sunbelt': {
         'label': 'Sunbelt Link',
