@@ -86,90 +86,70 @@
         </div>
 
         {% else %}
-        <!-- Guest: Minimized Branding -->
-        <div class="mb-12">
-            <h1 class="text-xs font-black text-emerald-400 uppercase tracking-[0.5em] mb-4 opacity-80">HangarLinks Marketplace</h1>
-        </div>
+        <!-- Guest: Aspirational Emotional Hook -->
+        <h1 class="text-3xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-6 leading-[1.05] tracking-tight animate-fade-in-up flex flex-col drop-shadow-2xl pt-4">
+            <span class="text-white">Find Hangar</span>
+            <span class="bg-gradient-to-r from-blue-400 via-blue-300 to-indigo-400 bg-clip-text text-transparent drop-shadow-lg">Parking Anywhere.</span>
+        </h1>
+        <p class="hidden sm:block text-xl sm:text-2xl text-blue-50/90 mb-12 max-w-3xl mx-auto font-light leading-relaxed animate-fade-in-up drop-shadow" style="animation-delay: 0.1s;">
+            Instant 1–7 night secure hangar parking at airports & airparks across the region.<br class="hidden md:block">
+            <span class="font-semibold text-white">No surprise ramp fees. No weather damage.</span><br class="hidden md:block">
+            Total peace of mind, every time you fly.
+        </p>
         {% endif %}
 
-        <!-- Redesigned Mission-Based Search (Minimal & Premium) -->
-        <div id="search-bar" class="max-w-5xl mx-auto animate-fade-in-up" style="animation-delay: 0.2s;">
-            <div class="text-center mb-8">
-                <h2 class="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">Where are you flying?</h2>
-            </div>
-            
+        <!-- Premium Search Bar -->
+        <div id="search-bar" class="max-w-4xl mx-auto animate-fade-in-up" style="animation-delay: 0.2s;">
             <form action="{{ url_for('main.listings') }}" method="GET" id="homepage-search-form"
-                class="rounded-[3rem] p-8 sm:p-12 shadow-[0_48px_80px_-16px_rgba(0,0,0,0.6)] border border-white/20 transition-all duration-500 overflow-hidden"
-                style="background: rgba(10,18,30,0.9); backdrop-filter: blur(32px); -webkit-backdrop-filter: blur(32px);">
+                class="rounded-3xl p-6 sm:p-10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] border border-white/20 transition-all duration-500 overflow-hidden"
+                style="background: rgba(0,21,48,0.8); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);">
                 
-                <input type="hidden" name="mission" id="mission-input" value="">
-                
-                <div class="relative group mb-10">
-                    <input type="text" id="airport" name="airport"
-                        class="block w-full rounded-2xl p-6 sm:p-8 text-xl sm:text-2xl font-bold focus:outline-none focus:ring-4 focus:ring-emerald-500/30 transition-all uppercase placeholder:normal-case placeholder:text-white/20"
-                        style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: #FAFAFA;"
-                        placeholder="Snowbird Corridor, Oshkosh, Sun ’n Fun, CYHM, 60J, Toronto to Florida, or any airport name" maxlength="100">
-                    <div class="absolute inset-y-0 right-6 flex items-center pointer-events-none group-focus-within:text-emerald-400 text-white/10 transition-colors">
-                        <i class="fas fa-search text-2xl"></i>
-                    </div>
-                </div>
-
-                <!-- Popular Missions Selection Chips -->
-                <div class="mb-10 text-left">
-                    <div class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        Popular Missions
-                    </div>
-                    <div class="flex flex-wrap gap-3">
-                        <div onclick="setMission('snowbird')" class="mission-chip px-5 py-3 rounded-full bg-white/5 border border-white/10 text-white/70 font-black text-xs cursor-pointer hover:bg-emerald-500/10 hover:border-emerald-500/50 hover:text-white transition-all flex items-center gap-2 group" id="chip-snowbird">
-                            <span class="group-hover:rotate-12 transition-transform">❄️</span> Snowbird Corridor (ON → FL)
-                        </div>
-                        <div onclick="setMission('oshkosh')" class="mission-chip px-5 py-3 rounded-full bg-white/5 border border-white/10 text-white/70 font-black text-xs cursor-pointer hover:bg-emerald-500/10 hover:border-emerald-500/50 hover:text-white transition-all flex items-center gap-2 group" id="chip-oshkosh">
-                            <span class="group-hover:scale-125 transition-transform">🛫</span> Oshkosh AirVenture
-                        </div>
-                        <div onclick="setMission('snf')" class="mission-chip px-5 py-3 rounded-full bg-white/5 border border-white/10 text-white/70 font-black text-xs cursor-pointer hover:bg-emerald-500/10 hover:border-emerald-500/50 hover:text-white transition-all flex items-center gap-2 group" id="chip-snf">
-                            <span class="group-hover:scale-125 transition-transform">☀️</span> Sun ’n Fun / Lakeland
-                        </div>
-                        <div onclick="openMissionDrawer()" class="px-5 py-3 rounded-full bg-white/5 border border-white/5 text-white/40 font-black text-xs cursor-pointer hover:bg-white/10 hover:text-white transition-all flex items-center gap-2 group">
-                            <span>✨</span> Other Routes...
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex flex-col lg:flex-row gap-6 items-center justify-between border-t border-white/5 pt-8">
-                    <!-- Secondary Controls: Duration & Radius -->
-                    <div class="flex flex-wrap items-center gap-6">
-                        <div class="flex flex-col">
-                            <label class="text-[9px] font-black uppercase tracking-widest text-white/30 mb-2">Focus Period</label>
-                            <div class="flex gap-1 h-10 bg-white/5 p-1 rounded-xl">
-                                <input type="hidden" name="duration" id="duration-input" value="7">
-                                <button type="button" onclick="setDuration('1', this)" class="px-4 rounded-lg text-[10px] font-black transition-all text-white/40 hover:text-white">NIGHTLY</button>
-                                <button type="button" onclick="setDuration('7', this)" class="px-4 rounded-lg text-[10px] font-black transition-all bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 active-toggle">SHORT-TERM</button>
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 mb-8">
+                    <!-- Location / Airport -->
+                    <div class="md:col-span-12 lg:col-span-8">
+                        <label for="airport" class="block text-xs font-black mb-3 text-left uppercase tracking-[0.2em] text-white/60">
+                            <i class="fas fa-search-location mr-2 text-blue-400"></i>Airport ICAO
+                        </label>
+                        <div class="relative group">
+                            <input type="text" id="airport" name="airport"
+                                class="block w-full rounded-2xl p-5 text-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all uppercase placeholder:normal-case placeholder:text-white/20"
+                                style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #FAFAFA;"
+                                placeholder="Enter Airport Code (e.g. CYHM, 60J)..." maxlength="100" required
+                                value="{{ airport or '' }}">
+                            <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none group-focus-within:text-blue-400 text-white/20">
+                                <i class="fas fa-plane text-xl transition-colors"></i>
                             </div>
                         </div>
 
-                        <div class="flex flex-col">
-                            <label class="text-[9px] font-black uppercase tracking-widest text-white/30 mb-2">Explore Radius</label>
-                            <div class="flex gap-1 h-10 bg-white/5 p-1 rounded-xl">
-                                <input type="hidden" name="radius" id="radius-input" value="250">
-                                <button type="button" onclick="setRadius('100', this)" class="px-4 rounded-lg text-[10px] font-black transition-all text-white/40 hover:text-white">100KM</button>
-                                <button type="button" onclick="setRadius('250', this)" class="px-4 rounded-lg text-[10px] font-black transition-all bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 active-toggle">250KM</button>
-                            </div>
+                        <!-- Search Helper Tip -->
+                        <div class="mt-4 flex items-center gap-2 text-xs font-medium text-white/40">
+                             <span class="px-1.5 py-0.5 rounded-md bg-blue-500/10 text-blue-400 uppercase tracking-widest font-black text-[9px] border border-blue-500/20">Tip</span>
+                             <span>Try <strong class="text-white/60">'60J'</strong> for Riverbend or <strong class="text-white/60">'CYHM'</strong> for Hamilton.</span>
                         </div>
                     </div>
 
-                    <!-- CTA -->
-                    <button type="submit" id="homepage-search-btn"
-                        class="w-full lg:w-auto font-black py-5 px-12 rounded-2xl text-lg transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] flex items-center justify-center gap-3 group"
-                        style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; box-shadow: 0 15px 40px -10px rgba(16,185,129,0.5);">
-                        <span id="homepage-search-text">Find Parking Along My Route</span>
-                        <i class="fas fa-arrow-right group-hover:translate-x-2 transition-transform"></i>
-                    </button>
+                    <!-- Radius Chips -->
+                    <div class="md:col-span-12 lg:col-span-4">
+                        <label class="block text-xs font-black mb-3 text-left uppercase tracking-[0.2em] text-white/60">
+                            <i class="fas fa-bullseye mr-2 text-blue-400"></i>Search Radius (km)
+                        </label>
+                        <div class="flex gap-2">
+                            <input type="hidden" name="radius" id="radius-input" value="{{ radius or '250' }}">
+                            <button type="button" onclick="setRadius('100', this)" class="radius-chip flex-1 rounded-xl text-sm font-bold {{ 'active' if radius=='100' }}">100</button>
+                            <button type="button" onclick="setRadius('250', this)" class="radius-chip flex-1 rounded-xl text-sm font-bold {{ 'active' if radius=='250' or not radius }}">250</button>
+                            <button type="button" onclick="setRadius('500', this)" class="radius-chip flex-1 rounded-xl text-sm font-bold {{ 'active' if radius=='500' }}">500</button>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="search-submit-btn"
+                    class="w-full font-black py-5 px-8 rounded-2xl text-xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.98] flex items-center justify-center gap-3"
+                    style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; box-shadow: 0 10px 40px -10px rgba(37,99,235,0.5);">
+                    <i class="fas fa-search" id="search-icon"></i>
+                    <span id="search-text">Search Available Parking</span>
+                </button>
             </form>
-        </div>
-                <div id="map" style="height: 400px; width: 100%;"></div>
-            </div>
 
             <!-- Search Results Container -->
             <div id="search-results-container" class="mt-8 hidden animate-fade-in-up"></div>
@@ -183,28 +163,6 @@
 </section>
 
 <style>
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-    .mission-card-ribbon.active {
-        border-color: #10b981 !important;
-        background: rgba(16, 185, 129, 0.1) !important;
-        color: white !important;
-        box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
-    }
-
-    .mission-card-pro.active {
-        border-color: #10b981 !important;
-        background: rgba(16,185,129,0.12) !important;
-        transform: scale(1.05);
-        z-index: 10;
-        box-shadow: 0 0 40px rgba(16,185,129,0.2);
-    }
-    .mission-card-pro.active img {
-        opacity: 0.5 !important;
-        filter: grayscale(0%) !important;
-    }
-
     .duration-chip, .radius-chip {
         transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
         border: 1px solid rgba(255,255,255,0.15) !important;
@@ -228,158 +186,9 @@
         box-shadow: 0 8px 20px -5px rgba(37,99,235,0.5) !important;
         font-weight: 900 !important;
     }
-
-    /* Mobile Bottom Sheet Styles */
-    #mission-drawer {
-        visibility: hidden;
-        pointer-events: none;
-    }
-    #mission-drawer.visible {
-        visibility: visible;
-        pointer-events: auto;
-    }
-    #mission-drawer.visible #drawer-backdrop {
-        opacity: 1;
-    }
-    #mission-drawer.visible #drawer-sheet {
-        transform: translateY(0);
-    }
-    
-    .mission-card-mobile {
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 2rem;
-        overflow: hidden;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        min-height: 160px;
-        position: relative;
-    }
-    .mission-card-mobile.active {
-        border-color: #10b981;
-        background: rgba(16,185,129,0.08);
-        box-shadow: 0 10px 40px -10px rgba(16,185,129,0.3);
-    }
-    .mission-card-mobile .thumbnail {
-        height: 70px;
-        width: 100%;
-        object-fit: cover;
-        opacity: 0.6;
-        transition: all 0.3s ease;
-        filter: grayscale(100%);
-    }
-    .mission-card-mobile.active .thumbnail {
-        opacity: 1;
-        filter: grayscale(0%);
-        transform: scale(1.05);
-    }
-    .mission-card-mobile .p-4 {
-        padding: 1.25rem;
-    }
-
-    /* Adaptive Mission Layout Logic */
-    /* Adaptive Mission Layout Logic - INTEGRATED MOBILE SELECTOR */
-    .mission-ribbon { display: none; }
-    
-    #mission-drawer {
-        z-index: 1000 !important; /* Maximum Priority */
-    }
-
-    #mission-mega-menu {
-        z-index: 200 !important; /* Above all other form elements */
-        background: #1A1F2B !important;
-        box-shadow: 0 50px 100px -20px rgba(0,0,0,0.9);
-    }
-    
-    #mission-drawer #drawer-sheet {
-        background: #1A1F2B !important;
-        z-index: 1001;
-    }
-
-    #mission-drawer #drawer-backdrop {
-        background: rgba(0,0,0,0.92) !important;
-        backdrop-filter: blur(12px);
-        z-index: 1000;
-    }
-
-    .btn-apply-mission {
-        background-color: #10b981 !important;
-        color: #000a18 !important;
-        transform: translateZ(0); /* High-perf rendering */
-        box-shadow: 0 15px 35px -5px rgba(16,185,129,0.5) !important;
-    }
-    .btn-apply-mission:active {
-        transform: scale(0.96) !important;
-        background-color: #059669 !important;
-    }
-
-    @keyframes triggerFloat {
-        0%, 100% { transform: translate(-50%, 0); }
-        50% { transform: translate(-50%, -8px); }
-    }
-
-    @media (min-width: 1024px) {
-        .mission-ribbon { display: flex; }
-        .mobile-trigger { display: none !important; }
-    }
 </style>
 
 <script>
-    function setMission(val, el) {
-        if (event) event.preventDefault();
-        document.getElementById('mission-input').value = val;
-        // Haptic Feedback for Pilot Experience
-        if ("vibrate" in navigator) {
-            navigator.vibrate(12);
-        }
-        const desktopLabel = document.getElementById('active-mission-label-desktop');
-        if (desktopLabel) desktopLabel.textContent = titles[val] || 'Wing Mission';
-
-        // Update Mobile UI
-        const mobileLabel = document.getElementById('active-mission-label-mobile');
-        if (mobileLabel) mobileLabel.textContent = titles[val] || 'Select Mission...';
-        
-        document.querySelectorAll('.mission-card-mobile').forEach(c => {
-            if (c.getAttribute('onclick').includes(`'${val}'`)) c.classList.add('active');
-            else c.classList.remove('active');
-        });
-
-        // Indicate filtering active
-        const form = document.getElementById('homepage-search-form');
-        form.style.borderColor = '#10b981';
-        form.classList.add('ring-2', 'ring-emerald-500/20');
-        
-        const titleText = titles[val] || 'Route';
-        document.getElementById('search-text').textContent = `Search ${titleText}`;
-        
-        // Auto-close menu/drawer
-        const menu = document.getElementById('mission-mega-menu');
-        if (menu) {
-            menu.classList.remove('visible');
-            menu.classList.add('hidden');
-        }
-        setTimeout(closeMissionDrawer, 300);
-    }
-
-    function toggleMissionMenu() {
-        const menu = document.getElementById('mission-mega-menu');
-        menu.classList.toggle('visible');
-        menu.classList.toggle('hidden');
-    }
-
-    function openMissionDrawer() {
-        const drawer = document.getElementById('mission-drawer');
-        drawer.classList.add('visible');
-        document.body.style.overflow = 'hidden'; 
-        document.body.classList.add('drawer-open'); // For CSS hiding
-    }
-
-    function closeMissionDrawer() {
-        const drawer = document.getElementById('mission-drawer');
-        drawer.classList.remove('visible');
-        document.body.style.overflow = '';
-        document.body.classList.remove('drawer-open');
-    }
-
     function setDuration(val, el) {
         if (event) event.preventDefault();
         document.getElementById('duration-input').value = val;
@@ -394,6 +203,11 @@
         el.classList.add('active');
     }
 
+    function checkRouteSearch(val) {
+        // Route search disabled for Normal Search
+        return;
+    }
+
     document.getElementById('homepage-search-form').addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -401,7 +215,7 @@
         const icon = document.getElementById('search-icon');
         const text = document.getElementById('search-text');
         const resultsContainer = document.getElementById('search-results-container');
-        const mission = document.getElementById('mission-input').value;
+        const airport = document.getElementById('airport').value;
         const duration = document.getElementById('duration-input').value;
         const radius = document.getElementById('radius-input').value;
         
@@ -409,10 +223,10 @@
         btn.disabled = true;
         btn.classList.add('opacity-80', 'cursor-not-allowed');
         icon.className = 'fas fa-spinner fa-spin';
-        text.textContent = 'Mapping Mission...';
+        text.textContent = 'Searching for parking...';
         
         // AJAX Fetch
-        fetch(`/api/search?mission=${mission}&duration=${duration}&radius=${radius}`)
+        fetch(`/api/search?airport=${encodeURIComponent(airport)}&duration=${duration}&radius=${radius}`)
             .then(res => res.json())
             .then(data => {
                 btn.disabled = false;
@@ -429,8 +243,8 @@
                             <div class="mb-6 w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto border border-amber-500/20">
                                 <i class="fas fa-exclamation-triangle text-amber-500 text-3xl"></i>
                             </div>
-                            <h3 class="text-2xl font-bold text-white mb-3">No Hangar Found for this Mission</h3>
-                            <p class="text-blue-100/70 mb-8 max-w-md mx-auto">Transient spots are in high demand on this route. Be the first to list and gain Founding Host status!</p>
+                            <h3 class="text-2xl font-bold text-white mb-3">No Hangar Found at ${airport.toUpperCase()}</h3>
+                            <p class="text-blue-100/70 mb-8 max-w-md mx-auto">Transient spots are in high demand here. Be the first to list and gain Founding Host status!</p>
                             <a href="/post-listing" class="inline-flex items-center justify-center bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-4 px-10 rounded-2xl shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all transform hover:-translate-y-1">
                                 <i class="fas fa-gem mr-3"></i> List This Space
                             </a>
@@ -438,19 +252,18 @@
                     `;
                 } else {
                     let cardsHtml = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">`;
-                    data.listings.forEach((listing, idx) => {
+                    data.listings.forEach(listing => {
                         cardsHtml += `
                             <a href="${listing.url}" class="block group">
-                                <div class="bg-white dark:bg-dark-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-200 dark:border-gray-700 relative">
-                                    ${idx < 3 ? '<div class="absolute top-3 inset-x-3 z-20"><span class="bg-emerald-500 text-white text-[9px] font-black px-2 py-1 rounded-md shadow-lg flex items-center justify-center gap-1"><i class="fas fa-medal"></i> RECOMMENDED STOPOVER</span></div>' : ''}
+                                <div class="bg-white dark:bg-dark-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-200 dark:border-gray-700">
                                     <div class="relative h-48 overflow-hidden">
                                         <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style="background-image: url('${listing.photo_url || '/static/img/placeholder.jpg'}')"></div>
-                                        <div class="absolute top-3 left-3 z-10 ${idx < 3 ? 'mt-7' : ''}">
+                                        <div class="absolute top-3 left-3 z-10">
                                             <span class="inline-flex items-center bg-green-500 text-white text-[10px] uppercase font-black px-2.5 py-1 rounded-full shadow-lg">
                                                 <span class="w-1.5 h-1.5 bg-white rounded-full mr-1.5 animate-pulse"></span>Available
                                             </span>
                                         </div>
-                                        ${listing.is_premium ? `<div class="absolute top-3 right-3 z-10 ${idx < 3 ? 'mt-7' : ''}"><span class="inline-flex items-center bg-amber-100/90 backdrop-blur text-amber-700 text-[10px] font-black px-2 py-1 rounded-full shadow"><i class="fas fa-star mr-1"></i>PREMIUM</span></div>` : ''}
+                                        ${listing.is_premium ? `<div class="absolute top-3 right-3 z-10"><span class="inline-flex items-center bg-amber-100/90 backdrop-blur text-amber-700 text-[10px] font-black px-2 py-1 rounded-full shadow"><i class="fas fa-star mr-1"></i>PREMIUM</span></div>` : ''}
                                     </div>
                                     <div class="p-5 text-left">
                                         <div class="flex items-center justify-between mb-2">
@@ -466,11 +279,6 @@
                     });
                     cardsHtml += `</div>`;
                     resultsContainer.innerHTML = cardsHtml;
-                    
-                    // Trigger Route Visual Pathing
-                    if (mission) {
-                        showMissionRoute(mission, data.listings);
-                    }
                 }
                 
                 // Smooth scroll to results
@@ -484,102 +292,6 @@
                 text.textContent = 'Search Available Parking';
             });
     });
-    function showMissionRoute(mission, listings) {
-        const container = document.getElementById('mission-map-container');
-        container.classList.remove('hidden');
-        
-        // Route Coordinates Mapping (Simplified for demo)
-        const missionRoutes = {
-            'snowbird': [
-                {lat: 43.6777, lng: -79.6248}, // Toronto
-                {lat: 40.6413, lng: -73.7781}, // NYC
-                {lat: 38.9445, lng: -77.4558}, // DC
-                {lat: 35.2140, lng: -80.9431}, // Charlotte
-                {lat: 32.0835, lng: -81.0998}, // Savannah
-                {lat: 28.5455, lng: -81.3329}, // Orlando
-                {lat: 25.7959, lng: -80.2870}  // Miami
-            ],
-            'sun_n_fun': [
-                {lat: 27.9889, lng: -82.0185}, // Lakeland
-                {lat: 28.1025, lng: -80.6453}, // Melbourne
-                {lat: 28.5455, lng: -81.3329}  // Orlando
-            ],
-            'sunbelt': [
-                {lat: 29.6459, lng: -95.2789}, // Houston
-                {lat: 29.9844, lng: -90.2564}, // New Orleans
-                {lat: 30.4124, lng: -87.1866}, // Pensacola
-                {lat: 28.5455, lng: -81.3329}  // Orlando
-            ],
-            'trans_canada': [
-                {lat: 49.1961, lng: -123.1815}, // Vancouver
-                {lat: 51.1215, lng: -114.0076}, // Calgary
-                {lat: 52.1297, lng: -106.6710}, // Saskatoon
-                {lat: 49.9100, lng: -97.2399},  // Winnipeg
-                {lat: 41.7860, lng: -87.7524}, // Chicago Midway
-                {lat: 43.6777, lng: -79.6248}, // Toronto
-                {lat: 45.4706, lng: -73.7408}   // Montreal
-            ],
-            oshkosh: [
-                {lat: 41.7860, lng: -87.7524}, // Chicago Midway (Hub)
-                {lat: 42.9472, lng: -87.8967}, // Milwaukee
-                {lat: 43.9844, lng: -88.5570}  // Oshkosh (Final)
-            ]
-        };
-
-        const path = missionRoutes[mission] || [];
-        if (path.length === 0) return;
-
-        // Initialize/Update Google Map
-        if (typeof google === 'undefined') return;
-        
-        const map = new google.maps.Map(document.getElementById("map"), {
-            zoom: 4,
-            center: path[Math.floor(path.length/2)],
-            mapTypeId: "roadmap",
-            styles: document.documentElement.classList.contains('dark') ? [
-                { elementType: "geometry", stylers: [{ color: "#000a18" }] },
-                { elementType: "labels.text.stroke", stylers: [{ color: "#000a18" }] },
-                { elementType: "labels.text.fill", stylers: [{ color: "#1e3a8a" }] },
-                { featureType: "water", elementType: "geometry", stylers: [{ color: "#001229" }] },
-                { featureType: "road", elementType: "geometry", stylers: [{ color: "#001f3f" }] }
-            ] : []
-        });
-
-        // Draw Polyline
-        const routePath = new google.maps.Polyline({
-            path: path,
-            geodesic: true,
-            strokeColor: "#10b981",
-            strokeOpacity: 0.8,
-            strokeWeight: 4,
-        });
-        routePath.setMap(map);
-
-        // Add Markers for Listings
-        const bounds = new google.maps.LatLngBounds();
-        path.forEach(p => bounds.extend(p));
-        
-        listings.forEach(l => {
-            if (l.lat && l.lon) {
-                const pos = {lat: l.lat, lng: l.lon};
-                new google.maps.Marker({
-                    position: pos,
-                    map: map,
-                    icon: {
-                        path: google.maps.SymbolPath.CIRCLE,
-                        scale: 8,
-                        fillColor: "#3b82f6",
-                        fillOpacity: 1,
-                        strokeColor: "#ffffff",
-                        strokeWeight: 2,
-                    }
-                });
-                bounds.extend(pos);
-            }
-        });
-        
-        map.fitBounds(bounds);
-    }
 </script>
 
 <!-- Founding Host Banner -->
@@ -1135,55 +847,4 @@
         animation: fadeInUp 0.8s ease-out both;
     }
 </style>
-
-<!-- Mission Drawer (Bottom Sheet) -->
-<div id="mission-drawer" class="fixed inset-0 z-[200] invisible pointer-events-none transition-all duration-300">
-    <!-- Backdrop (Slate Gray) -->
-    <div id="drawer-backdrop" onclick="closeMissionDrawer()" class="absolute inset-0 bg-[#000a18]/85 backdrop-blur-md opacity-0 transition-opacity dura    <!-- Sheet -->
-    <div id="drawer-sheet" class="absolute bottom-0 left-0 right-0 h-[60vh] bg-[#001530] rounded-t-[3.5rem] border-t border-white/10 translate-y-full transition-transform duration-500 overflow-hidden flex flex-col shadow-[0_-20px_50px_rgba(0,0,0,0.6)]">
-        <!-- Handle -->
-        <div class="w-20 h-1.5 bg-white/20 rounded-full mx-auto mt-6 mb-10 cursor-pointer active:bg-white/40" onclick="closeMissionDrawer()"></div>
-        
-        <div class="px-10 pb-6 border-b border-white/5">
-            <h3 class="text-2xl font-black text-white tracking-tighter" style="font-family: 'Inter', sans-serif;">Choose Mission</h3>
-            <p class="text-slate-400 text-sm font-medium tracking-wide">Select your flight corridor to begin exploration.</p>
-        </div>
-        
-        <!-- Grid -->
-        <div class="flex-1 overflow-y-auto px-10 py-10 no-scrollbar bg-[#001838]/40">
-            <div class="grid grid-cols-2 gap-6 pb-40">
-                {% for id, icon, title, desc, img in [
-                    ('snowbird', '❄️', 'Snowbird', 'ON to FL', 'snowbird.png'),
-                    ('sunbelt', '🐂', 'Sunbelt', 'TX to FL', 'sunbelt.png'),
-                    ('trans_canada', '🏔️', 'Trans-Canada', 'All Provinces', 'trans_canada.png'),
-                    ('oshkosh', '🛩️', "Sun 'n Fun", 'Pilgrimage', 'oshkosh.png')
-                ] %}
-                <button type="button" onclick="setMission('{{ id }}', this)" 
-                    class="mission-card-mobile group flex flex-col active:scale-[0.94] p-6 rounded-3xl bg-white/5 border border-white/10 transition-all h-36 justify-between text-left">
-                    <div class="flex items-center justify-between">
-                        <span class="text-3xl">{{ icon }}</span>
-                        <div class="w-8 h-8 rounded-full border-2 border-white/10 flex items-center justify-center group-[.active]:bg-emerald-500 group-[.active]:border-emerald-500 transition-all">
-                            <i class="fas fa-check text-xs text-navy-900 font-black opacity-0 group-[.active]:opacity-100"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="text-white font-black text-base tracking-tight mb-0.5">{{ title }}</div>
-                        <div class="text-[9px] text-white/30 font-black uppercase tracking-[0.2em]">{{ desc }}</div>
-                    </div>
-                </button>
-                {% endfor %}
-            </div>
-        </div>
-
-        <!-- Professional Footer -->
-        <div class="absolute bottom-0 left-0 right-0 p-10 bg-gradient-to-t from-[#001530] via-[#001530] to-transparent pt-12 flex gap-4">
-            <button type="button" onclick="closeMissionDrawer()" class="flex-1 py-5 bg-white/5 border border-white/10 text-white font-black rounded-2xl active:scale-[0.98] transition-all">
-                Close
-            </button>
-            <button type="button" onclick="closeMissionDrawer()" class="flex-[2] py-5 btn-apply-mission text-navy-900 font-black rounded-2xl active:scale-[0.98] transition-all">
-                Apply Mission
-            </button>
-        </div>
-    </div>
-</div>
 {% endblock %}

@@ -82,33 +82,6 @@ EVENTS = {
     'High Sierra Fly-In': {'dates': '2026-10-15 to 2026-10-18', 'airports': ['Dead Cow Lakebed', 'KWMC', 'KRNO'], 'surge': 30}
 }
 
-# --- Mission-Based Routes (2026 Strategy) ---
-MISSIONS = {
-    'snowbird': {
-        'label': 'Snowbird Route',
-        'states': ['ON', 'NY', 'PA', 'VA', 'NC', 'SC', 'GA', 'FL'],
-        'hubs': [('CYYZ', 43.6777, -79.6248), ('KMLB', 28.1025, -80.6453)], # Hub examples
-        'center': [34.0, -80.0],
-        'zoom': 4
-    },
-    'oshkosh': {
-        'label': 'Oshkosh (AirVenture)',
-        'airports': ['KOSH', 'KFLD', 'KRYV', 'KATW', 'KMTW'],
-        'hubs': [('KOSH', 43.9844, -88.5570), ('KMDW', 41.7860, -87.7524)],
-        'surge': 50
-    },
-    'sunbelt': {
-        'label': 'Sunbelt Link',
-        'states': ['TX', 'LA', 'MS', 'AL', 'FL'],
-        'hubs': [('KHOU', 29.6459, -95.2789), ('KORL', 28.5455, -81.3329)]
-    },
-    'trans_canada': {
-        'label': 'Trans-Canada',
-        'states': ['BC', 'AB', 'SK', 'MB', 'ON', 'QC', 'NB', 'NS', 'PE', 'NL'],
-        'hubs': [('CYVR', 49.1961, -123.1815), ('CYYZ', 43.6777, -79.6248)]
-    }
-}
-
 bp = Blueprint('main', __name__)
 
 # --- Social Auth (OAuth2) ---
@@ -335,8 +308,6 @@ def listings():
     electric_doors_only = request.args.get('electric_doors_only')
     nfpa_409_compliant = request.args.get('nfpa_409_compliant')
     gpu_power_available = request.args.get('gpu_power_available')
-    mission = request.args.get('mission', '').lower()
-    corridor_id = request.args.get('corridor_id', '').lower()
 
     # Status: Unlimited search enabled for all users (2026 Strategy)
 
@@ -344,15 +315,6 @@ def listings():
 
     def _run_query():
         q = Listing.query.filter_by(status='Active')
-        if mission and mission in MISSIONS:
-            m = MISSIONS[mission]
-            if 'states' in m:
-                q = q.filter(Listing.state.in_(m['states']))
-            if 'airports' in m:
-                q = q.filter(Listing.airport_icao.in_(m['airports']))
-        if corridor_id:
-            q = q.filter(Listing.corridor_ids.contains(corridor_id))
-
         if airport:
             q = q.filter_by(airport_icao=airport)
         if covered == 'yes':
@@ -375,19 +337,6 @@ def listings():
             q = q.filter_by(nfpa_409_compliant=True)
         if gpu_power_available == '1':
             q = q.filter_by(gpu_power_available=True)
-            
-        # Mission-Based Filtering
-        if mission and mission in MISSIONS:
-            m = MISSIONS[mission]
-            if 'states' in m:
-                q = q.filter(Listing.state.in_(m['states']))
-            if 'airports' in m:
-                q = q.filter(Listing.airport_icao.in_(m['airports']))
-        
-        # Explicit Corridor ID Filter
-        if corridor_id:
-            q = q.filter(Listing.corridor_ids.contains(corridor_id))
-            
         return q.order_by(
             Listing.min_stay_nights.asc(),
             Listing.is_featured.desc(),
@@ -446,27 +395,14 @@ def listings():
 
 @bp.route('/api/search')
 def api_search():
+    """AJAX search endpoint for homepage instant results"""
     airport = request.args.get('airport', '').strip().upper()
     duration = request.args.get('duration', '7')
-    mission = request.args.get('mission', '').lower()
-    corridor_id = request.args.get('corridor_id', '').lower()
     
     # We follow the same core query logic as the main listings page
     q = Listing.query.filter_by(status='Active')
     if airport:
         q = q.filter_by(airport_icao=airport)
-    
-    # Mission-Based Filtering
-    if mission and mission in MISSIONS:
-        m = MISSIONS[mission]
-        if 'states' in m:
-            q = q.filter(Listing.state.in_(m['states']))
-        if 'airports' in m:
-            q = q.filter(Listing.airport_icao.in_(m['airports']))
-    
-    # Explicit Corridor ID Filter
-    if corridor_id:
-        q = q.filter(Listing.corridor_ids.contains(corridor_id))
     
     # Simple limit for instant search
     listings = q.order_by(
@@ -504,9 +440,7 @@ def api_search():
             'min_stay': l.min_stay_nights,
             'url': url_for('main.listing_detail', id=l.id),
             'condition_verified': getattr(l, 'condition_verified', False),
-            'virtual_tour_url': getattr(l, 'virtual_tour_url', None),
-            'lat': l.lat,
-            'lon': l.lon
+            'virtual_tour_url': getattr(l, 'virtual_tour_url', None)
         })
     
     return jsonify({
@@ -670,10 +604,10 @@ def post_listing():
                  except ValueError:
                     pass
     
-            # ── Auto-resolve lat/lon and state from identifier (ICAO, FAA LID, or custom) ─
+            # ── Auto-resolve lat/lon from identifier (ICAO, FAA LID, or custom) ─
             from airport_coords import get_coords
             icao_upper = request.form.get('airport_icao', '').strip().upper()
-            lat, lon, state, coord_found = get_coords(icao_upper)
+            lat, lon, coord_found = get_coords(icao_upper)
 
             if not coord_found:
                 # Try user-supplied manual coordinates (for private/unknown strips)
@@ -738,8 +672,6 @@ def post_listing():
                 virtual_tour_url=request.form.get('virtual_tour_url'), # Feature 2
                 lat=lat,
                 lon=lon,
-                state=state,
-                corridor_ids=request.form.get('corridor_ids', '').strip() or None,
                 door_type=door_type,
                 access_24_7=access_24_7,
                 is_heated=is_heated,

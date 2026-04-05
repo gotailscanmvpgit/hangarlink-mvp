@@ -233,10 +233,6 @@ def create_app(config_class=Config):
                     missing.append("availability_start DATE")
                 if 'availability_end' not in columns:
                     missing.append("availability_end DATE")
-                if 'state' not in columns:
-                    missing.append("state VARCHAR(50)")
-                if 'corridor_ids' not in columns:
-                    missing.append("corridor_ids TEXT")
                     
                 # Drop NOT NULL constraint if it exists (2026 Strategy: price_month is optional)
                 try:
@@ -324,23 +320,7 @@ def create_app(config_class=Config):
                             print(f"✅ [DB-REPAIR] Added user column: {col_name}")
                         except Exception as e:
                             db.session.rollback()
-                            print(f"⚠️ [DB-REPAIR] Added column failed: {col_def} - {e}")
-
-                # ── Auto-Backfill Listing Metadata (2026 Strategy) ──
-                from airport_coords import get_coords
-                listings_to_update = Listing.query.filter((Listing.state == None) | (Listing.state == '') | (Listing.lat == None)).all()
-                if listings_to_update:
-                    print(f"📦 [BACKFILL] Processing {len(listings_to_update)} listings for geo-metadata...")
-                    updated_count = 0
-                    for l in listings_to_update:
-                        lat, lon, state, found = get_coords(l.airport_icao)
-                        if found:
-                            if not l.state: l.state = state
-                            if l.lat is None: l.lat = lat
-                            if l.lon is None: l.lon = lon
-                            updated_count += 1
-                    db.session.commit()
-                    print(f"✅ [BACKFILL] Completed. Geo-tagged {updated_count} listings.")
+                            print(f"⚠️ [DB-REPAIR] Failed to add user column {col_name}: {e}")
                 
             db.create_all()
             print("✅ [DB] Schema check & db.create_all() completed.")
