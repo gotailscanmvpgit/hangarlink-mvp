@@ -86,74 +86,48 @@
         </div>
 
         {% else %}
-        <!-- Guest: Aspirational Emotional Hook -->
-        <h1 class="text-3xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-6 leading-[1.05] tracking-tight animate-fade-in-up flex flex-col drop-shadow-2xl pt-4">
-            <span class="text-white">Find Hangar</span>
-            <span class="bg-gradient-to-r from-blue-400 via-blue-300 to-indigo-400 bg-clip-text text-transparent drop-shadow-lg">Parking Anywhere.</span>
-        </h1>
-        <p class="hidden sm:block text-xl sm:text-2xl text-blue-50/90 mb-12 max-w-3xl mx-auto font-light leading-relaxed animate-fade-in-up drop-shadow" style="animation-delay: 0.1s;">
-            Instant 1–7 night secure hangar parking at airports & airparks across the region.<br class="hidden md:block">
-            <span class="font-semibold text-white">No surprise ramp fees. No weather damage.</span><br class="hidden md:block">
-            Total peace of mind, every time you fly.
-        </p>
-        {% endif %}
+        <!-- Hero 2026: G1000-Optimized Aesthetic (Split CTA Focus) -->
+        <div class="hero-2026-content relative z-20 py-12 md:py-24">
+            <!-- G1000 Glass Cockpit Aesthetic Badge -->
+            <div class="inline-flex items-center bg-black/40 backdrop-blur-md border border-[#00ff41]/20 rounded-full px-5 py-2 mb-8 animate-fade-in shadow-[0_0_15px_rgba(0,255,65,0.1)]">
+                <span class="relative flex h-2 w-2 mr-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00ff41] opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-[#00ff41]"></span>
+                </span>
+                <span class="text-[#00ff41]/80 text-[10px] uppercase font-black tracking-[0.2em]">System Status: Online | 2026 Network</span>
+            </div>
 
-        <!-- Premium Search Bar -->
-        <div id="search-bar" class="max-w-4xl mx-auto animate-fade-in-up" style="animation-delay: 0.2s;">
-            <form action="{{ url_for('main.listings') }}" method="GET" id="homepage-search-form"
-                class="rounded-3xl p-6 sm:p-10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] border border-white/20 transition-all duration-500 overflow-hidden"
-                style="background: rgba(0,21,48,0.8); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);">
-                
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 mb-8">
-                    <!-- Location / Airport -->
-                    <div class="md:col-span-12 lg:col-span-8">
-                        <label for="airport" class="block text-xs font-black mb-3 text-left uppercase tracking-[0.2em] text-white/60">
-                            <i class="fas fa-search-location mr-2 text-blue-400"></i>Airport ICAO
-                        </label>
-                        <div class="relative group">
-                            <input type="text" id="airport" name="airport"
-                                class="block w-full rounded-2xl p-5 text-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all uppercase placeholder:normal-case placeholder:text-white/20"
-                                style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #FAFAFA;"
-                                placeholder="Enter Airport Code (e.g. CYHM, 60J)..." maxlength="100" required
-                                value="{{ airport or '' }}">
-                            <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none group-focus-within:text-blue-400 text-white/20">
-                                <i class="fas fa-plane text-xl transition-colors"></i>
-                            </div>
-                        </div>
-
-                        <!-- Search Helper Tip -->
-                        <div class="mt-4 flex items-center gap-2 text-xs font-medium text-white/40">
-                             <span class="px-1.5 py-0.5 rounded-md bg-blue-500/10 text-blue-400 uppercase tracking-widest font-black text-[9px] border border-blue-500/20">Tip</span>
-                             <span>Try <strong class="text-white/60">'60J'</strong> for Riverbend or <strong class="text-white/60">'CYHM'</strong> for Hamilton.</span>
-                        </div>
-                    </div>
-
-                    <!-- Radius Chips -->
-                    <div class="md:col-span-12 lg:col-span-4">
-                        <label class="block text-xs font-black mb-3 text-left uppercase tracking-[0.2em] text-white/60">
-                            <i class="fas fa-bullseye mr-2 text-blue-400"></i>Search Radius (km)
-                        </label>
-                        <div class="flex gap-2">
-                            <input type="hidden" name="radius" id="radius-input" value="{{ radius or '250' }}">
-                            <button type="button" onclick="setRadius('100', this)" class="radius-chip flex-1 rounded-xl text-sm font-bold {{ 'active' if radius=='100' }}">100</button>
-                            <button type="button" onclick="setRadius('250', this)" class="radius-chip flex-1 rounded-xl text-sm font-bold {{ 'active' if radius=='250' or not radius }}">250</button>
-                            <button type="button" onclick="setRadius('500', this)" class="radius-chip flex-1 rounded-xl text-sm font-bold {{ 'active' if radius=='500' }}">500</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Submit Button -->
-                <button type="submit" id="search-submit-btn"
-                    class="w-full font-black py-5 px-8 rounded-2xl text-xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.98] flex items-center justify-center gap-3"
-                    style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; box-shadow: 0 10px 40px -10px rgba(37,99,235,0.5);">
-                    <i class="fas fa-search" id="search-icon"></i>
-                    <span id="search-text">Search Available Parking</span>
+            <h1 class="g1000-glow font-black leading-[1.05] tracking-tight animate-fade-in-up">
+                YOUR HANGAR. <br class="hidden md:block">
+                <span class="text-white">YOUR REVENUE.</span>
+            </h1>
+            
+            <p class="hero-subtext text-xl md:text-2xl text-blue-50/80 mb-12 max-w-2xl mx-auto font-light leading-relaxed animate-fade-in-up" 
+               style="animation-delay: 0.1s;">
+                Join the 2026 network of private hangar owners. 
+                Turn your empty floor into passive income with <b class="text-white font-bold">9.5% flat-fee</b> bookings.
+            </p>
+            
+            <div class="hero-buttons flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 animate-fade-in-up" style="animation-delay: 0.2s;">
+                <button class="btn-emerald w-full sm:w-auto" onclick="window.location.href='{{ url_for('main.post_listing') }}'">
+                    <i class="fas fa-plus-circle mr-2 opacity-80"></i>LIST MY HANGAR
                 </button>
-            </form>
+                <button class="btn-ghost w-full sm:w-auto" onclick="window.location.href='{{ url_for('main.listings') }}'">
+                    FIND PARKING <i class="fas fa-search ml-2 opacity-60"></i>
+                </button>
+            </div>
 
-            <!-- Search Results Container -->
-            <div id="search-results-container" class="mt-8 hidden animate-fade-in-up"></div>
+            <div class="hero-stats flex flex-wrap justify-center gap-6 md:gap-12 text-[10px] md:text-xs font-black text-white/40 uppercase tracking-[0.3em] animate-fade-in" style="animation-delay: 0.4s;">
+                <span class="flex items-center gap-3"><i class="fas fa-shield-check text-[#00ff41]/50"></i> VERIFIED PILOTS</span>
+                <span class="flex items-center gap-3"><i class="fas fa-money-check-dollar text-[#00ff41]/50"></i> SECURE PAYOUTS</span>
+                <span class="flex items-center gap-3"><i class="fas fa-location-dot text-[#00ff41]/50"></i> 50+ LOCATIONS</span>
+            </div>
         </div>
+
+        <!-- Hidden Search Bar Anchor for API -->
+        <div id="search-bar" class="hidden"></div>
+        {% endif %}
+    </div>
     </div>
 
     <!-- Scroll Indicator -->
@@ -163,6 +137,47 @@
 </section>
 
 <style>
+    .g1000-glow {
+        color: #00ff41;
+        font-size: clamp(2.5rem, 8vw, 6rem);
+        text-shadow: 0 0 30px rgba(0, 255, 65, 0.4);
+        margin-bottom: 20px;
+    }
+    .btn-emerald {
+        background: #10b981;
+        color: white;
+        padding: 18px 48px;
+        border-radius: 16px;
+        font-weight: 900;
+        letter-spacing: 0.1em;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-emerald:hover {
+        background: #059669;
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(16, 185, 129, 0.6);
+    }
+    .btn-ghost {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        color: white;
+        padding: 18px 48px;
+        border-radius: 16px;
+        font-weight: 900;
+        letter-spacing: 0.1em;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .btn-ghost:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: white;
+        transform: translateY(-2px);
+    }
     .duration-chip, .radius-chip {
         transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
         border: 1px solid rgba(255,255,255,0.15) !important;
