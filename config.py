@@ -57,6 +57,12 @@ class Config:
     
     # Application
     DEBUG = os.environ.get('FLASK_DEBUG', '0') == '1'
+    
+    # Social Auth
+    GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '').strip()
+    GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '').strip()
+    APPLE_CLIENT_ID = os.environ.get('APPLE_CLIENT_ID', '').strip()
+    APPLE_CLIENT_SECRET = os.environ.get('APPLE_CLIENT_SECRET', '').strip()
 
     # Airport Data (Loaded on startup in app.py)
     # Accessible via current_app.config['AIRPORT_COORDS']
