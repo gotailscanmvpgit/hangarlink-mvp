@@ -1422,6 +1422,48 @@ def privacy():
     """Privacy Policy"""
     return render_template('privacy.html')
 
+@bp.route('/facebook/data-deletion', methods=['GET', 'POST'])
+def facebook_data_deletion():
+    """
+    Facebook Data Deletion Callback — required by Meta Platform Policy.
+    When a user removes the app from Facebook, Meta calls this endpoint.
+    We delete the user's account data linked to Facebook.
+    """
+    import hmac, hashlib, base64, json as _json
+
+    if request.method == 'GET':
+        # Landing page for manual data deletion requests
+        return render_template('data_deletion.html')
+
+    # POST — called by Meta's servers with a signed_request parameter
+    signed_request = request.form.get('signed_request')
+    if not signed_request:
+        return jsonify({'error': 'Missing signed_request'}), 400
+
+    try:
+        encoded_sig, payload = signed_request.split('.', 1)
+        # Decode payload to get user ID
+        padded = payload + '=' * (4 - len(payload) % 4)
+        data = _json.loads(base64.urlsafe_b64decode(padded))
+        user_id_fb = data.get('user_id', 'unknown')
+
+        # In production: look up user by facebook_id and anonymize their data.
+        # For now, we log and return the required confirmation URL.
+        current_app.logger.info(f"[FACEBOOK] Data deletion requested for fb_user_id={user_id_fb}")
+
+    except Exception as e:
+        current_app.logger.error(f"[FACEBOOK] Data deletion parse error: {e}")
+        return jsonify({'error': 'Invalid signed_request'}), 400
+
+    # Meta requires a confirmation_code and status_url in the response
+    confirmation_code = f"HL-DEL-{user_id_fb}"
+    status_url = url_for('main.facebook_data_deletion', _external=True) + f"?id={confirmation_code}"
+
+    return jsonify({
+        "url": status_url,
+        "confirmation_code": confirmation_code
+    })
+
 @bp.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Data Deletion | HangarLinks{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center px-6 py-16">
+    <div class="w-full max-w-lg">
+        <div class="rounded-3xl overflow-hidden shadow-2xl border border-white/10"
+            style="background: rgba(13,17,23,0.95); backdrop-filter: blur(20px);">
+
+            <div class="px-8 pt-10 pb-6 text-center border-b border-white/8"
+                style="background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(16,185,129,0.05));">
+                <div class="text-4xl mb-3">🗑️</div>
+                <h1 class="text-2xl font-black text-white mb-2">Data Deletion Request</h1>
+                <p class="text-slate-400 text-sm">HangarLinks — Facebook Data Removal</p>
+            </div>
+
+            <div class="px-8 py-8 space-y-5 text-slate-300 text-sm leading-relaxed">
+                <p>
+                    If you signed in to HangarLinks using Facebook and would like your data removed from our platform, you have two options:
+                </p>
+
+                <div class="rounded-2xl p-5 space-y-2" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);">
+                    <p class="text-white font-black text-sm uppercase tracking-widest">Option 1 — Email Us</p>
+                    <p>Send a deletion request to <a href="mailto:privacy@hangarlinks.com" class="text-emerald-400 hover:underline">privacy@hangarlinks.com</a> with the subject line <strong>"Facebook Data Deletion Request"</strong> and include the email address associated with your account.</p>
+                    <p class="text-slate-500 text-xs">We will process your request within 30 days.</p>
+                </div>
+
+                <div class="rounded-2xl p-5 space-y-2" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);">
+                    <p class="text-white font-black text-sm uppercase tracking-widest">Option 2 — Delete Your Account</p>
+                    <p>If you are logged in, you can delete your account directly from your <a href="{{ url_for('main.profile') }}" class="text-emerald-400 hover:underline">Profile Settings</a> page.</p>
+                </div>
+
+                <p class="text-slate-500 text-xs border-t border-white/8 pt-4">
+                    Alternatively, you can remove HangarLinks from your Facebook apps at
+                    <a href="https://www.facebook.com/settings?tab=applications" target="_blank" class="text-emerald-400 hover:underline">facebook.com/settings → Apps and Websites</a>.
+                    This will trigger an automatic deletion request to our servers.
+                </p>
+            </div>
+
+            <div class="px-8 pb-8 text-center">
+                <a href="{{ url_for('main.index') }}"
+                   class="inline-flex items-center justify-center px-8 py-3 rounded-2xl text-white text-sm font-black transition-all hover:scale-[1.02]"
+                   style="background: linear-gradient(135deg,#10b981,#059669);">
+                    Return to HangarLinks
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
