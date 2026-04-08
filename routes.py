@@ -141,6 +141,18 @@ def google_callback():
     login_user(user)
     return redirect(url_for('main.index'))
 
+@bp.route('/auth-status')
+def auth_status():
+    """Securely check if OAuth keys are loaded in production."""
+    google_id = current_app.config.get('GOOGLE_CLIENT_ID')
+    google_secret = current_app.config.get('GOOGLE_CLIENT_SECRET')
+    
+    return jsonify({
+        "google_client_id": "LOADED (Starts with " + google_id[:5] + ")" if google_id and len(google_id) > 5 else "MISSING/EMPTY",
+        "google_client_secret": "LOADED" if google_secret else "MISSING/EMPTY",
+        "instructions": "If MISSING, add GOOGLE_CLIENT_ID/SECRET to your Railway/Render Environment Variables."
+    })
+
 @bp.route('/login/apple')
 def apple_login():
     redirect_uri = url_for('main.apple_authorize', _external=True)
