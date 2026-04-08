@@ -63,6 +63,8 @@ class Config:
     GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '').strip()
     APPLE_CLIENT_ID = os.environ.get('APPLE_CLIENT_ID', '').strip()
     APPLE_CLIENT_SECRET = os.environ.get('APPLE_CLIENT_SECRET', '').strip()
+    FACEBOOK_APP_ID = os.environ.get('FACEBOOK_APP_ID', '').strip()
+    FACEBOOK_APP_SECRET = os.environ.get('FACEBOOK_APP_SECRET', '').strip()
 
     # Airport Data (Loaded on startup in app.py)
     # Accessible via current_app.config['AIRPORT_COORDS']

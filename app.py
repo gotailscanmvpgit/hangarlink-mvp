@@ -169,7 +169,20 @@ def create_app(config_class=Config):
         }
     )
     
-    print("[OAUTH] Google & Apple clients registered.")
+    # Facebook OAuth Client
+    oauth.register(
+        name='facebook',
+        client_id=app.config.get('FACEBOOK_APP_ID'),
+        client_secret=app.config.get('FACEBOOK_APP_SECRET'),
+        access_token_url='https://graph.facebook.com/oauth/access_token',
+        access_token_params=None,
+        authorize_url='https://www.facebook.com/dialog/oauth',
+        authorize_params=None,
+        api_base_url='https://graph.facebook.com/',
+        client_kwargs={'scope': 'email public_profile'},
+    )
+    
+    print("[OAUTH] Google, Apple & Facebook clients registered.")
 
     # ── Self-Heal Database Schema (Railway/Postgres Strategy) ──
     with app.app_context():

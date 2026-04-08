@@ -146,12 +146,76 @@ def auth_status():
     """Securely check if OAuth keys are loaded in production."""
     google_id = current_app.config.get('GOOGLE_CLIENT_ID')
     google_secret = current_app.config.get('GOOGLE_CLIENT_SECRET')
+    facebook_id = current_app.config.get('FACEBOOK_APP_ID')
     
     return jsonify({
         "google_client_id": "LOADED (Starts with " + google_id[:5] + ")" if google_id and len(google_id) > 5 else "MISSING/EMPTY",
         "google_client_secret": "LOADED" if google_secret else "MISSING/EMPTY",
-        "instructions": "If MISSING, add GOOGLE_CLIENT_ID/SECRET to your Railway/Render Environment Variables."
+        "facebook_app_id": "LOADED (Starts with " + facebook_id[:5] + ")" if facebook_id and len(facebook_id) > 5 else "MISSING/EMPTY",
+        "instructions": "If MISSING, add the relevant keys to your Railway/Render Environment Variables."
     })
+
+# --- Facebook OAuth ---
+
+@bp.route('/login/facebook')
+def facebook_login():
+    redirect_uri = url_for('main.facebook_callback', _external=True)
+    return oauth.facebook.authorize_redirect(redirect_uri)
+
+@bp.route('/auth/facebook/callback')
+def facebook_callback():
+    token = oauth.facebook.authorize_access_token()
+    # Fetch user profile from Graph API
+    resp = oauth.facebook.get(
+        'me',
+        token=token,
+        params={'fields': 'id,name,email,first_name,last_name,picture.type(large)'}
+    )
+    user_info = resp.json()
+
+    email = user_info.get('email')
+    if not email:
+        flash("Facebook did not provide an email address. Please use a different sign-in method.", "error")
+        return redirect(url_for('main.login'))
+
+    username = user_info.get('name') or email.split('@')[0]
+    first_name = user_info.get('first_name')
+    last_name = user_info.get('last_name')
+    picture_data = user_info.get('picture', {}).get('data', {})
+    profile_pic = picture_data.get('url') if picture_data else None
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        user = User(
+            email=email,
+            username=username,
+            first_name=first_name,
+            last_name=last_name,
+            profile_pic=profile_pic,
+            role='renter',
+            is_verified=True  # Facebook verified
+        )
+        user.set_password(secrets.token_urlsafe(16))
+        db.session.add(user)
+        db.session.commit()
+        flash(f"Welcome to HangarLinks, {username}!", "success")
+    else:
+        # Sync profile details if missing
+        changed = False
+        if not user.profile_pic and profile_pic:
+            user.profile_pic = profile_pic
+            changed = True
+        if not user.first_name and first_name:
+            user.first_name = first_name
+            changed = True
+        if not user.last_name and last_name:
+            user.last_name = last_name
+            changed = True
+        if changed:
+            db.session.commit()
+
+    login_user(user)
+    return redirect(url_for('main.index'))
 
 @bp.route('/login/apple')
 def apple_login():
