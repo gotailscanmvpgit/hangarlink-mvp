@@ -367,6 +367,7 @@ def create_app(config_class=Config):
 
     # Global Context Processors
     import datetime
+    from werkzeug.middleware.proxy_fix import ProxyFix
     @app.context_processor
     def inject_global_data():
         return {
@@ -413,6 +414,9 @@ def create_app(config_class=Config):
         except Exception:
             return '<h2>500 — Internal Server Error</h2><a href="/">Home</a>', 500
 
+    # Secure for Proxies (Railway/Render SSL)
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+    
     return app
 
 # Module-level app instance
