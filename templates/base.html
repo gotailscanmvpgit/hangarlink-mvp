@@ -30,12 +30,12 @@
     {% block map_logic %}{% endblock %}
     {% block extra_head %}{% endblock %}
 
-    <!-- Google One-Tap (2026 Strategy) -->
+    <!-- Google Identity Services (One-Tap disabled, used for OAuth only) -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <div id="g_id_onload"
          data-client_id="{{ config.GOOGLE_CLIENT_ID or '' }}"
          data-login_uri="{{ url_for('main.google_callback', _external=True) }}"
-         data-auto_prompt="true">
+         data-auto_prompt="false">
     </div>
 </head>
 
