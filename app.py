@@ -179,7 +179,7 @@ def create_app(config_class=Config):
         authorize_url='https://www.facebook.com/dialog/oauth',
         authorize_params=None,
         api_base_url='https://graph.facebook.com/',
-        client_kwargs={'scope': 'email public_profile'},
+        client_kwargs={'scope': 'email,public_profile'},
     )
     
     print("[OAUTH] Google, Apple & Facebook clients registered.")
