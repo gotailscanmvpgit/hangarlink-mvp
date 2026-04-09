@@ -1116,9 +1116,10 @@ def _get_reset_serializer():
     return URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
 
 
-
 def _send_reset_email(user):
-    """Send a password-reset email (falls back to console print if mail not configured)."""
+    """Generate reset token & fire email in a background thread (non-blocking)."""
+    import threading
+
     s = _get_reset_serializer()
     token = s.dumps(user.email, salt='password-reset-salt')
     reset_url = url_for('main.reset_password', token=token, _external=True)
@@ -1155,33 +1156,42 @@ If you did not request this, you can safely ignore this email.
     """
 
     mail_configured = bool(current_app.config.get('MAIL_USERNAME'))
-    if mail_configured:
-        try:
-            print(f"[RESET-FLOW] Attempting to send reset email to {user.email} via {current_app.config['MAIL_SERVER']}")
-            sender = current_app.config.get('MAIL_DEFAULT_SENDER', 'no-reply@tryhangarlinks.com')
-            msg = MailMessage(subject=subject,
-                              sender=sender,
-                              recipients=[user.email],
-                              body=body,
-                              html=html_body)
-            mail.send(msg)
-            current_app.logger.info(f"[RESET] Email sent to {user.email}")
-            print(f"✅ Success: Reset email sent to {user.email}")
-            return True
-        except Exception as e:
-            error_msg = str(e)
-            current_app.logger.error(f"[RESET] Mail send FAILED: {error_msg}")
-            print(f"❌ Error: Mail send FAILED for {user.email}: {error_msg}")
-            print(f"DEBUG LINK: {reset_url}")
-            return False
-    else:
+
+    if not mail_configured:
         # Dev fallback — print to console / Railway logs
         print(f"\n{'='*60}")
         print(f"PASSWORD RESET LINK (SMTP NOT CONFIGURED)")
         print(f"User:  {user.email}")
         print(f"URL:   {reset_url}")
         print(f"{'='*60}\n")
-        return False
+        return True  # Return True so the route doesn't show an error
+
+    # Capture app context for background thread
+    app = current_app._get_current_object()
+    sender = app.config.get('MAIL_DEFAULT_SENDER', 'no-reply@tryhangarlinks.com')
+    recipient = user.email
+    username = user.username
+
+    def _send_in_background():
+        with app.app_context():
+            try:
+                print(f"[RESET-BG] Sending reset email to {recipient}...")
+                msg = MailMessage(
+                    subject=subject,
+                    sender=sender,
+                    recipients=[recipient],
+                    body=body,
+                    html=html_body
+                )
+                mail.send(msg)
+                print(f"[RESET-BG] ✅ Email sent to {recipient}")
+            except Exception as e:
+                print(f"[RESET-BG] ❌ FAILED for {recipient}: {e}")
+                print(f"[RESET-BG] DEBUG LINK: {reset_url}")
+
+    thread = threading.Thread(target=_send_in_background, daemon=True)
+    thread.start()
+    return True  # Always return True — we respond before the email finishes
 
 
 @bp.route('/forgot-password', methods=['GET', 'POST'])
@@ -1191,18 +1201,10 @@ def forgot_password():
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
         user = User.query.filter_by(email=email).first()
-        
-        # Always show success initially to prevent email enumeration,
-        # but if we try to send and it fails due to SMTP, notify the admin.
+        # Always flash success immediately (security: no email enumeration)
+        # Email is sent in background thread — response is instant
         if user:
-            send_success = _send_reset_email(user)
-            if not send_success:
-                if not current_app.config.get('MAIL_USERNAME'):
-                    flash('App SMTP is not configured. The reset link was printed to the server logs.', 'warning')
-                else:
-                    flash('Failed to dispatch email due to an SMTP authentication/configuration error. Please check server logs.', 'danger')
-                return redirect(url_for('main.forgot_password'))
-                
+            _send_reset_email(user)
         flash('If that email is registered, a reset link has been sent. Check your inbox (and spam folder).', 'info')
         return redirect(url_for('main.forgot_password'))
     return render_template('forgot_password.html')
