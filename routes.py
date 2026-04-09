@@ -169,35 +169,34 @@ def auth_status():
 
 @bp.route('/test-mail')
 def test_mail():
-    """Send a test SMTP email and return success/error details. Remove in production."""
-    import smtplib
-    server = current_app.config.get('MAIL_SERVER', '')
-    port = int(current_app.config.get('MAIL_PORT', 587))
-    username = current_app.config.get('MAIL_USERNAME', '')
-    password = current_app.config.get('MAIL_PASSWORD', '')
-    sender = current_app.config.get('MAIL_DEFAULT_SENDER', username)
-    recipient = username  # Send test to self
+    """Test Resend HTTP API and return success/error. Remove before major production launch."""
+    import requests as req
+    resend_key = current_app.config.get('RESEND_API_KEY', '')
+    from_addr = current_app.config.get('RESEND_FROM', 'HangarLinks <onboarding@resend.dev>')
+    test_to = current_app.config.get('MAIL_USERNAME', 'felipeortizmartinez13@gmail.com')
 
-    if not username or not password:
-        return jsonify({"status": "error", "message": "MAIL_USERNAME or MAIL_PASSWORD not set in Railway variables."})
+    if not resend_key:
+        return jsonify({"status": "error", "message": "RESEND_API_KEY not set in Railway variables."})
 
     try:
-        with smtplib.SMTP(server, port, timeout=15) as smtp:
-            smtp.ehlo()
-            smtp.starttls()
-            smtp.login(username, password)
-            test_msg = f"Subject: HangarLinks SMTP Test\n\nSMTP is working correctly. Server: {server}:{port}, User: {username}"
-            smtp.sendmail(username, recipient, test_msg)
-        return jsonify({
-            "status": "SUCCESS ✅",
-            "message": f"Test email sent to {recipient}. Check your inbox.",
-            "server": f"{server}:{port}",
-            "user": username
-        })
-    except smtplib.SMTPAuthenticationError as e:
-        return jsonify({"status": "AUTH FAILED ❌", "error": str(e), "hint": "Wrong password or App Password not enabled. Check Google Workspace account has 2FA + App Passwords."})
-    except smtplib.SMTPConnectError as e:
-        return jsonify({"status": "CONNECT FAILED ❌", "error": str(e), "hint": "Cannot reach SMTP server. Check MAIL_SERVER and MAIL_PORT."})
+        resp = req.post(
+            'https://api.resend.com/emails',
+            headers={
+                'Authorization': f'Bearer {resend_key}',
+                'Content-Type': 'application/json'
+            },
+            json={
+                'from': from_addr,
+                'to': [test_to],
+                'subject': 'HangarLinks Email Test ✅',
+                'html': '<h2>HangarLinks SMTP Test</h2><p>Email delivery via Resend is working correctly!</p>'
+            },
+            timeout=15
+        )
+        if resp.status_code in (200, 201):
+            return jsonify({"status": "SUCCESS ✅", "message": f"Test email sent to {test_to}", "resend_response": resp.json()})
+        else:
+            return jsonify({"status": "FAILED ❌", "code": resp.status_code, "error": resp.text})
     except Exception as e:
         return jsonify({"status": "ERROR ❌", "error": str(e)})
 
@@ -1163,26 +1162,14 @@ def _get_reset_serializer():
 
 
 def _send_reset_email(user):
-    """Generate reset token & fire email in a background thread (non-blocking)."""
-    import threading
+    """Generate reset token & fire email via Resend HTTP API in a background thread."""
+    import threading, requests as req
 
     s = _get_reset_serializer()
     token = s.dumps(user.email, salt='password-reset-salt')
     reset_url = url_for('main.reset_password', token=token, _external=True)
 
     subject = '🔒 Reset Your HangarLinks Password'
-    body = f"""Hi {user.username},
-
-You requested a password reset for your HangarLinks account.
-
-Click the link below to reset your password (valid for 1 hour):
-
-{reset_url}
-
-If you did not request this, you can safely ignore this email.
-
-– The HangarLinks Team"""
-
     html_body = f"""
     <div style="font-family:sans-serif;max-width:520px;margin:0 auto;">
       <div style="background:linear-gradient(135deg,#001F3F,#002952);padding:32px;border-radius:16px 16px 0 0;text-align:center;">
@@ -1201,43 +1188,51 @@ If you did not request this, you can safely ignore this email.
     </div>
     """
 
-    mail_configured = bool(current_app.config.get('MAIL_USERNAME'))
+    resend_key = current_app.config.get('RESEND_API_KEY', '')
+    from_addr = current_app.config.get('RESEND_FROM', 'HangarLinks <onboarding@resend.dev>')
 
-    if not mail_configured:
-        # Dev fallback — print to console / Railway logs
+    if not resend_key:
+        # Dev fallback — print reset link to Railway logs
         print(f"\n{'='*60}")
-        print(f"PASSWORD RESET LINK (SMTP NOT CONFIGURED)")
+        print(f"PASSWORD RESET LINK (RESEND_API_KEY NOT SET)")
         print(f"User:  {user.email}")
         print(f"URL:   {reset_url}")
         print(f"{'='*60}\n")
-        return True  # Return True so the route doesn't show an error
+        return True
 
-    # Capture app context for background thread
     app = current_app._get_current_object()
-    sender = app.config.get('MAIL_DEFAULT_SENDER', 'no-reply@tryhangarlinks.com')
     recipient = user.email
-    username = user.username
 
     def _send_in_background():
         with app.app_context():
             try:
-                print(f"[RESET-BG] Sending reset email to {recipient}...")
-                msg = MailMessage(
-                    subject=subject,
-                    sender=sender,
-                    recipients=[recipient],
-                    body=body,
-                    html=html_body
+                print(f"[RESET-BG] Sending via Resend to {recipient}...")
+                resp = req.post(
+                    'https://api.resend.com/emails',
+                    headers={
+                        'Authorization': f'Bearer {resend_key}',
+                        'Content-Type': 'application/json'
+                    },
+                    json={
+                        'from': from_addr,
+                        'to': [recipient],
+                        'subject': subject,
+                        'html': html_body
+                    },
+                    timeout=15
                 )
-                mail.send(msg)
-                print(f"[RESET-BG] ✅ Email sent to {recipient}")
+                if resp.status_code == 200 or resp.status_code == 201:
+                    print(f"[RESET-BG] ✅ Email sent to {recipient} via Resend")
+                else:
+                    print(f"[RESET-BG] ❌ Resend error {resp.status_code}: {resp.text}")
+                    print(f"[RESET-BG] DEBUG LINK: {reset_url}")
             except Exception as e:
-                print(f"[RESET-BG] ❌ FAILED for {recipient}: {e}")
+                print(f"[RESET-BG] ❌ Exception: {e}")
                 print(f"[RESET-BG] DEBUG LINK: {reset_url}")
 
     thread = threading.Thread(target=_send_in_background, daemon=True)
     thread.start()
-    return True  # Always return True — we respond before the email finishes
+    return True
 
 
 @bp.route('/forgot-password', methods=['GET', 'POST'])

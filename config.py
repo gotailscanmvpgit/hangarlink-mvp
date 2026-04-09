@@ -65,6 +65,9 @@ class Config:
     APPLE_CLIENT_SECRET = os.environ.get('APPLE_CLIENT_SECRET', '').strip()
     FACEBOOK_APP_ID = os.environ.get('FACEBOOK_APP_ID', '').strip()
     FACEBOOK_APP_SECRET = os.environ.get('FACEBOOK_APP_SECRET', '').strip()
+    # Resend.com email API (replaces SMTP — Railway blocks outbound SMTP)
+    RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '').strip()
+    RESEND_FROM = os.environ.get('RESEND_FROM', 'HangarLinks <onboarding@resend.dev>').strip()
 
     # Airport Data (Loaded on startup in app.py)
     # Accessible via current_app.config['AIRPORT_COORDS']
