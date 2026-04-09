@@ -143,17 +143,63 @@ def google_callback():
 
 @bp.route('/auth-status')
 def auth_status():
-    """Securely check if OAuth keys are loaded in production."""
+    """Securely check if OAuth + SMTP keys are loaded in production."""
     google_id = current_app.config.get('GOOGLE_CLIENT_ID')
     google_secret = current_app.config.get('GOOGLE_CLIENT_SECRET')
     facebook_id = current_app.config.get('FACEBOOK_APP_ID')
-    
+    mail_user = current_app.config.get('MAIL_USERNAME')
+    mail_pass = current_app.config.get('MAIL_PASSWORD')
+    mail_server = current_app.config.get('MAIL_SERVER')
+    mail_port = current_app.config.get('MAIL_PORT')
+
     return jsonify({
-        "google_client_id": "LOADED (Starts with " + google_id[:5] + ")" if google_id and len(google_id) > 5 else "MISSING/EMPTY",
-        "google_client_secret": "LOADED" if google_secret else "MISSING/EMPTY",
-        "facebook_app_id": "LOADED (Starts with " + facebook_id[:5] + ")" if facebook_id and len(facebook_id) > 5 else "MISSING/EMPTY",
-        "instructions": "If MISSING, add the relevant keys to your Railway/Render Environment Variables."
+        "oauth": {
+            "google_client_id": "LOADED (Starts with " + google_id[:8] + ")" if google_id and len(google_id) > 8 else "MISSING/EMPTY",
+            "google_client_secret": "LOADED" if google_secret else "MISSING/EMPTY",
+            "facebook_app_id": "LOADED (Starts with " + facebook_id[:5] + ")" if facebook_id and len(facebook_id) > 5 else "MISSING/EMPTY",
+        },
+        "smtp": {
+            "MAIL_SERVER": mail_server or "MISSING",
+            "MAIL_PORT": mail_port or "MISSING",
+            "MAIL_USERNAME": mail_user or "MISSING/EMPTY",
+            "MAIL_PASSWORD": "LOADED" if mail_pass else "MISSING/EMPTY",
+        },
+        "instructions": "Visit /test-mail to send a live SMTP test email."
     })
+
+@bp.route('/test-mail')
+def test_mail():
+    """Send a test SMTP email and return success/error details. Remove in production."""
+    import smtplib
+    server = current_app.config.get('MAIL_SERVER', '')
+    port = int(current_app.config.get('MAIL_PORT', 587))
+    username = current_app.config.get('MAIL_USERNAME', '')
+    password = current_app.config.get('MAIL_PASSWORD', '')
+    sender = current_app.config.get('MAIL_DEFAULT_SENDER', username)
+    recipient = username  # Send test to self
+
+    if not username or not password:
+        return jsonify({"status": "error", "message": "MAIL_USERNAME or MAIL_PASSWORD not set in Railway variables."})
+
+    try:
+        with smtplib.SMTP(server, port, timeout=15) as smtp:
+            smtp.ehlo()
+            smtp.starttls()
+            smtp.login(username, password)
+            test_msg = f"Subject: HangarLinks SMTP Test\n\nSMTP is working correctly. Server: {server}:{port}, User: {username}"
+            smtp.sendmail(username, recipient, test_msg)
+        return jsonify({
+            "status": "SUCCESS ✅",
+            "message": f"Test email sent to {recipient}. Check your inbox.",
+            "server": f"{server}:{port}",
+            "user": username
+        })
+    except smtplib.SMTPAuthenticationError as e:
+        return jsonify({"status": "AUTH FAILED ❌", "error": str(e), "hint": "Wrong password or App Password not enabled. Check Google Workspace account has 2FA + App Passwords."})
+    except smtplib.SMTPConnectError as e:
+        return jsonify({"status": "CONNECT FAILED ❌", "error": str(e), "hint": "Cannot reach SMTP server. Check MAIL_SERVER and MAIL_PORT."})
+    except Exception as e:
+        return jsonify({"status": "ERROR ❌", "error": str(e)})
 
 # --- Facebook OAuth ---
 
