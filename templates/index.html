@@ -262,7 +262,7 @@
                     data.listings.forEach(listing => {
                         cardsHtml += `
                             <a href="${listing.url}" class="block group">
-                                <div class="bg-white dark:bg-dark-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-200 dark:border-gray-700">
+                                <div class="bg-white dark:bg-dark-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-slate-200 dark:border-dark-700">
                                     <div class="relative h-48 overflow-hidden">
                                         <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style="background-image: url('${listing.photo_url || '/static/img/placeholder.jpg'}')"></div>
                                         <div class="absolute top-3 left-3 z-10">
@@ -417,7 +417,7 @@
 {% if current_user.is_authenticated and show_onboarding %}
 <div id="onboarding-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm">
     <div
-        class="bg-white dark:bg-dark-800 rounded-3xl shadow-2xl max-w-lg w-full mx-4 overflow-hidden border border-gray-200 dark:border-gray-700">
+        class="bg-white dark:bg-dark-800 rounded-3xl shadow-2xl max-w-lg w-full mx-4 overflow-hidden border border-slate-200 dark:border-dark-700">
         <!-- Tour Content -->
         <div id="tour-carousel" class="relative">
             <!-- Slide 1 -->
@@ -553,7 +553,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {% if featured_listings %}
                 {% for listing in featured_listings %}
-                <div class="bg-white dark:bg-dark-900 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] border border-gray-200 dark:border-white/5 group relative">
+                <div class="bg-white dark:bg-dark-900 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] border border-slate-200 dark:border-white/5 group relative">
                     <!-- Photo Container -->
                     <div class="h-56 relative overflow-hidden">
                         {% set photos = (listing.photos or '').split(',') if listing.photos and listing.photos.strip() else [] %}
