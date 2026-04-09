@@ -173,7 +173,7 @@ def test_mail():
     import requests as req
     resend_key = current_app.config.get('RESEND_API_KEY', '')
     from_addr = current_app.config.get('RESEND_FROM', 'HangarLinks <onboarding@resend.dev>')
-    test_to = current_app.config.get('MAIL_USERNAME', 'felipeortizmartinez13@gmail.com')
+    test_to = 'felipeortizmartinez13@gmail.com'  # Must be Resend account email until domain is verified
 
     if not resend_key:
         return jsonify({"status": "error", "message": "RESEND_API_KEY not set in Railway variables."})
