@@ -58,13 +58,7 @@
                 <!-- Right Controls (User Menu + Mobile Toggle) -->
                 <div class="flex items-center md:order-2 space-x-3 md:space-x-4 rtl:space-x-reverse">
 
-                    <!-- Dark Mode Toggle -->
-                    <button id="theme-toggle" type="button"
-                        class="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm">
-                        <i class="fas fa-moon text-lg" id="theme-toggle-dark-icon"></i>
-                        <i class="fas fa-sun text-lg hidden" id="theme-toggle-light-icon"></i>
-                    </button>
-
+                    <!-- Dark Mode is permanently enforced -->
                     {% if current_user.is_authenticated %}
                     <!-- User Profile Dropdown -->
                     <button type="button"
@@ -352,32 +346,11 @@
         </div>
     </footer>
 
-    <!-- Dark Mode Toggle Script -->
+    <!-- Dark Mode permanently enforced -->
     <script>
-        const themeToggleBtn = document.getElementById('theme-toggle');
-        const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
-        const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
-
-        // Check for saved theme preference or default to 'dark'
-        const theme = localStorage.getItem('theme') || 'dark';
-        if (theme === 'light') {
-            document.documentElement.classList.remove('dark');
-            themeToggleDarkIcon.classList.add('hidden');
-            themeToggleLightIcon.classList.remove('hidden');
-        }
-
-        themeToggleBtn.addEventListener('click', function () {
-            themeToggleDarkIcon.classList.toggle('hidden');
-            themeToggleLightIcon.classList.toggle('hidden');
-
-            if (document.documentElement.classList.contains('dark')) {
-                document.documentElement.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-            } else {
-                document.documentElement.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-            }
-        });
+        // Force dark mode for all users, overriding any past preference for light mode
+        localStorage.setItem('theme', 'dark');
+        document.documentElement.classList.add('dark');
     </script>
 
     {% block extra_scripts %}{% endblock %}
