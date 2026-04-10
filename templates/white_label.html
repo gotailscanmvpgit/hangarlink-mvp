@@ -1,116 +1,295 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
+
+{% block title %}B2B Enterprise & White-Label | HangarLinks{% endblock %}
+
+{% block extra_head %}
+<!-- Prism.js for syntax highlighting of the mock integration snippet -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+<style>
+    .glass-card {
+        background: rgba(19, 24, 36, 0.6);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .grid-bg {
+        background-image: 
+            linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+        background-size: 50px 50px;
+    }
+    .neon-glow {
+        box-shadow: 0 0 40px rgba(56, 189, 248, 0.15);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<section class="bg-white dark:bg-gray-900">
-    <div class="py-16 px-4 mx-auto max-w-screen-xl text-center lg:py-24 lg:px-12">
-        <h1
-            class="mb-4 text-4xl font-extrabold tracking-tight leading-none text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
-            Your Brand, Our Technology.
-        </h1>
-        <p class="mb-8 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 xl:px-48 dark:text-gray-400">
-            Empower your FBO with a fully branded hangar management marketplace. Streamline rentals, manage waiting
-            lists, and boost revenue with HangarLinks White-Label.
-        </p>
-        <div class="flex flex-col mb-8 lg:mb-16 space-y-4 sm:flex-row sm:justify-center sm:space-y-0 sm:space-x-4">
-            <a href="#demo-form"
-                class="inline-flex justify-center items-center py-3 px-5 text-base font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900">
-                Request Demo
-                <svg class="ml-2 -mr-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd"
-                        d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-                        clip-rule="evenodd"></path>
-                </svg>
-            </a>
-            <a href="#"
-                class="inline-flex justify-center items-center py-3 px-5 text-base font-medium text-center text-gray-900 rounded-lg border border-gray-300 hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
-                Watch Video
-            </a>
+<!-- Hero Section -->
+<section class="relative pt-24 pb-32 overflow-hidden">
+    <!-- Abstract Background -->
+    <div class="absolute inset-0 bg-dark-900 grid-bg z-0 pointer-events-none"></div>
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none z-0"></div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center max-w-4xl mx-auto">
+            <div class="inline-flex items-center px-4 py-2 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-400 font-medium text-sm mb-8 animate-fade-in-up">
+                <i class="fas fa-rocket mr-2"></i> For FBOs & Airport Management
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-extrabold text-white mb-8 tracking-tight leading-tight animate-fade-in-up" style="animation-delay: 0.1s;">
+                Your Brand.<br>
+                <span class="bg-gradient-to-r from-blue-400 via-sky-300 to-indigo-400 bg-clip-text text-transparent">Our Technology.</span>
+            </h1>
+            
+            <p class="text-xl text-slate-300 mb-12 font-light leading-relaxed animate-fade-in-up" style="animation-delay: 0.2s;">
+                Deploy a fully integrated, turnkey hangar management and booking portal directly on your own domain. Power your FBO with the industry's #1 rental engine.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-6 animate-fade-in-up" style="animation-delay: 0.3s;">
+                <a href="#request-deployment" class="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-lg transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(37,99,235,0.4)]">
+                    Secure Deployment Slot
+                </a>
+                <a href="#interactive-demo" class="px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold text-lg transition-all backdrop-blur-sm">
+                    View Live Integration
+                </a>
+            </div>
         </div>
     </div>
 </section>
 
-<section class="bg-gray-50 dark:bg-gray-800 py-16">
-    <div class="max-w-screen-xl px-4 py-8 mx-auto lg:py-16 lg:px-6">
-        <div class="max-w-screen-md mx-auto mb-8 text-center lg:mb-12">
-            <h2 class="mb-4 text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">Why White-Label?</h2>
-            <p class="mb-5 font-light text-gray-500 sm:text-xl dark:text-gray-400">Transform your hangar operations with
-                a dedicated platform.</p>
+<!-- Interactive B2B Demo Section -->
+<section id="interactive-demo" class="py-24 bg-dark-800 relative shadow-2xl border-y border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-16 text-center">
+            <h2 class="text-3xl md:text-5xl font-bold text-white mb-4">Seamless Integration Demo</h2>
+            <p class="text-slate-400 text-lg">See exactly what your clients will experience on your website.</p>
         </div>
-        <div class="space-y-8 lg:grid lg:grid-cols-3 lg:gap-10 lg:space-y-0">
+
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+            <!-- Simulated Client Website (The Widget) -->
+            <div class="glass-card rounded-2xl p-2 md:p-4 neon-glow relative transform transition-transform duration-500 hover:scale-[1.02]">
+                <!-- Browser Header -->
+                <div class="flex items-center gap-2 px-4 py-3 border-b border-white/10 mb-4 bg-black/20 rounded-t-xl">
+                    <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+                    <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
+                    <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+                    <div class="mx-auto bg-dark-900 rounded-md px-4 py-1 flex items-center text-xs text-slate-400 border border-white/5 min-w-[200px] justify-center">
+                        <i class="fas fa-lock mr-2 text-emerald-400"></i> www.your-fbo.com/parking
+                    </div>
+                </div>
+                
+                <!-- Client Content Area -->
+                <div class="px-4 pb-6 pt-2">
+                    <div class="flex justify-between items-center mb-8 pb-4 border-b border-white/10">
+                        <div class="text-2xl font-black text-white italic tracking-tighter">
+                            YOUR<span class="text-amber-500">FBO</span>
+                        </div>
+                        <div class="flex gap-4 text-sm font-medium text-slate-400">
+                            <span class="hover:text-white cursor-pointer">Services</span>
+                            <span class="hover:text-white cursor-pointer">Fuel</span>
+                            <span class="text-blue-400 cursor-pointer">Reserve Hangar</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Embedded HangarLinks Widget Mock -->
+                    <div class="bg-dark-900 rounded-xl border border-blue-500/30 overflow-hidden shadow-xl">
+                        <div class="bg-blue-600/10 px-4 py-2 border-b border-blue-500/20 text-xs font-bold text-blue-400 tracking-wider flex justify-between items-center">
+                            <span>ONLINE RESERVATION PORTAL</span>
+                            <span class="opacity-50 font-normal">Powered by HangarLinks</span>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">Check-in</label>
+                                    <div class="bg-dark-800 border border-white/10 rounded-lg px-3 py-2 text-sm text-white">Oct 14, 2026</div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">Check-out</label>
+                                    <div class="bg-dark-800 border border-white/10 rounded-lg px-3 py-2 text-sm text-white">Oct 18, 2026</div>
+                                </div>
+                            </div>
+                            <div class="mb-6">
+                                <label class="block text-xs text-slate-400 mb-1">Aircraft Type</label>
+                                <div class="bg-dark-800 border border-white/10 rounded-lg px-3 py-2 text-sm text-white flex justify-between">
+                                    <span>Single Engine Piston</span>
+                                    <i class="fas fa-chevron-down opacity-50"></i>
+                                </div>
+                            </div>
+                            <button class="w-full py-3 bg-white text-dark-900 hover:bg-slate-200 rounded-lg font-bold transition-all hover:scale-[1.02]">
+                                Find Available Space
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Code Integration Side -->
+            <div>
+                <h3 class="text-2xl font-bold text-white mb-6">Drop-in deployment in minutes.</h3>
+                <p class="text-slate-400 leading-relaxed mb-8">
+                    Skip the 6-month development cycle. Our white-label suite integrates directly into your existing infrastructure via a secure, unbranded widget or strict REST API.
+                </p>
+                
+                <div class="bg-dark-900 rounded-xl border border-white/10 overflow-hidden">
+                    <div class="flex items-center justify-between px-4 py-2 bg-black/40 border-b border-white/10 text-xs text-slate-400">
+                        <span class="flex items-center gap-2">
+                            <i class="fab fa-html5 text-orange-500"></i> index.html
+                        </span>
+                        <button class="hover:text-white transition-colors" onclick="alert('Code copied to clipboard!')">
+                            <i class="far fa-copy"></i>
+                        </button>
+                    </div>
+<pre class="m-0 p-4 text-sm font-mono overflow-x-auto"><code class="language-html">&lt;!-- 1. Include the HangarLinks SDK --&gt;
+&lt;script src="https://cdn.hangarlinks.com/widget.js"&gt;&lt;/script&gt;
+
+&lt;!-- 2. Mount your reservation portal --&gt;
+&lt;div id="hangar-booking-portal"&gt;&lt;/div&gt;
+
+&lt;!-- 3. Initialize with your FBO key --&gt;
+&lt;script&gt;
+  HangarLinks.init({
+    mountId: 'hangar-booking-portal',
+    apiKey: 'fbo_live_29f84b...',
+    theme: {
+      primaryColor: '#F59E0B',     // Match your brand
+      backgroundColor: '#121212'   // Seamless blending
+    }
+  });
+&lt;/script&gt;</code></pre>
+                </div>
+                
+                <div class="mt-8 flex gap-4">
+                    <div class="flex items-center gap-2 text-sm text-emerald-400">
+                        <i class="fas fa-check-circle"></i> Stripe Connect Embedded
+                    </div>
+                    <div class="flex items-center gap-2 text-sm text-blue-400">
+                        <i class="fas fa-check-circle"></i> White-glove setup included
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Grid -->
+<section class="py-24 bg-dark-900 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-bold text-white mb-4">Enterprise-Grade Architecture</h2>
+            <p class="text-slate-400">Everything you need to modernize your hangar operations.</p>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-8">
             <!-- Feature 1 -->
-            <div
-                class="flex flex-col p-6 mx-auto max-w-lg text-center text-gray-900 bg-white rounded-lg border border-gray-100 shadow dark:border-gray-600 xl:p-8 dark:bg-gray-900 dark:text-white">
-                <div
-                    class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-blue-100 lg:h-12 lg:w-12 dark:bg-blue-900">
-                    <i class="fas fa-paint-brush text-blue-600 dark:text-blue-300 text-lg"></i>
+            <div class="glass-card p-8 rounded-2xl hover:-translate-y-2 transition-all duration-300">
+                <div class="w-14 h-14 bg-blue-500/20 rounded-xl flex items-center justify-center mb-6">
+                    <i class="fas fa-chart-line text-2xl text-blue-400"></i>
                 </div>
-                <h3 class="mb-2 text-xl font-bold">Custom Branding</h3>
-                <p class="font-light text-gray-500 dark:text-gray-400">Your logo, your colors, your domain. Seamlessly
-                    integrated into your existing website.</p>
+                <h3 class="text-xl font-bold text-white mb-3">Live Revenue Analytics</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">
+                    Access a master dashboard mapping every square foot of your hangars to active revenue. Predict seasonal demand and optimize pricing automatically.
+                </p>
             </div>
+            
             <!-- Feature 2 -->
-            <div
-                class="flex flex-col p-6 mx-auto max-w-lg text-center text-gray-900 bg-white rounded-lg border border-gray-100 shadow dark:border-gray-600 xl:p-8 dark:bg-gray-900 dark:text-white">
-                <div
-                    class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-green-100 lg:h-12 lg:w-12 dark:bg-green-900">
-                    <i class="fas fa-chart-line text-green-600 dark:text-green-300 text-lg"></i>
+            <div class="glass-card p-8 rounded-2xl hover:-translate-y-2 transition-all duration-300">
+                <div class="w-14 h-14 bg-emerald-500/20 rounded-xl flex items-center justify-center mb-6">
+                    <i class="fas fa-shield-alt text-2xl text-emerald-400"></i>
                 </div>
-                <h3 class="mb-2 text-xl font-bold">Revenue Dashboard</h3>
-                <p class="font-light text-gray-500 dark:text-gray-400">Track occupancy, rental income, and lease
-                    expirations in real-time.</p>
+                <h3 class="text-xl font-bold text-white mb-3">Compliance Automation</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">
+                    Built-in digital waivers, TSA background integration options, and mandatory short-term liability insurance collection through our SkyWatch partnership.
+                </p>
             </div>
+            
             <!-- Feature 3 -->
-            <div
-                class="flex flex-col p-6 mx-auto max-w-lg text-center text-gray-900 bg-white rounded-lg border border-gray-100 shadow dark:border-gray-600 xl:p-8 dark:bg-gray-900 dark:text-white">
-                <div
-                    class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-purple-100 lg:h-12 lg:w-12 dark:bg-purple-900">
-                    <i class="fas fa-users text-purple-600 dark:text-purple-300 text-lg"></i>
+            <div class="glass-card p-8 rounded-2xl hover:-translate-y-2 transition-all duration-300">
+                <div class="w-14 h-14 bg-purple-500/20 rounded-xl flex items-center justify-center mb-6">
+                    <i class="fas fa-users-cog text-2xl text-purple-400"></i>
                 </div>
-                <h3 class="mb-2 text-xl font-bold">Tenant Portal</h3>
-                <p class="font-light text-gray-500 dark:text-gray-400">Tenants can pay rent, submit maintenance
-                    requests, and manage documents online.</p>
+                <h3 class="text-xl font-bold text-white mb-3">Waitlist Management</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">
+                    Never lose a lead. Automated waiting lists natively capture aircraft types and automatically notify matched pilots when space frees up.
+                </p>
             </div>
         </div>
     </div>
 </section>
 
-<section id="demo-form" class="bg-white dark:bg-gray-900 py-16">
-    <div class="py-8 px-4 mx-auto max-w-2xl lg:py-16">
-        <h2 class="mb-4 text-3xl font-bold text-gray-900 dark:text-white text-center">Get Started Today</h2>
-        <p class="mb-8 text-gray-500 dark:text-gray-400 text-center">Submit your information to schedule a demo and
-            receive a custom quote. A $499 reservation fee applies to secure your deployment slot.</p>
-        <form action="{{ url_for('main.white_label_submit') }}" method="POST">
-            <div class="grid gap-4 sm:grid-cols-2 sm:gap-6">
-                <div class="sm:col-span-2">
-                    <label for="fbo_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">FBO /
-                        Airport Name</label>
-                    <input type="text" name="fbo_name" id="fbo_name"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        required>
-                </div>
-                <div class="w-full">
-                    <label for="contact_name"
-                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Contact Name</label>
-                    <input type="text" name="contact_name" id="contact_name"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                        required>
-                </div>
-                <div class="w-full">
-                    <label for="contact_email"
-                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email Address</label>
-                    <input type="email" name="contact_email" id="contact_email"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                        required>
-                </div>
+<!-- Payment/Scheduling Form -->
+<section id="request-deployment" class="py-24 bg-dark-800 border-t border-white/5 relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="glass-card rounded-3xl p-8 md:p-12 shadow-2xl">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-extrabold text-white mb-4">Reserve Your Deployment</h2>
+                <p class="text-slate-400">
+                    A refundable $499 deposit secures your position in our 2026 deployment queue and schedules your dedicated integration engineer.
+                </p>
             </div>
-            <button type="submit"
-                class="inline-flex items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900 hover:bg-blue-800 w-full justify-center">
-                Secure Slot - $499
-            </button>
-            <p class="mt-2 text-xs text-center text-gray-500">Secure payment via Stripe. Fully refundable if
-                implementation does not proceed.</p>
-        </form>
+
+            <form action="{{ url_for('main.white_label_submit') }}" method="POST" class="space-y-6">
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <div class="sm:col-span-2">
+                        <label for="fbo_name" class="block text-sm font-semibold text-slate-300 mb-2">FBO / Airport Name</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-building text-slate-500"></i>
+                            </div>
+                            <input type="text" name="fbo_name" id="fbo_name" required
+                                class="pl-11 w-full bg-dark-900 border border-white/10 text-white rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3 transition-colors">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="contact_name" class="block text-sm font-semibold text-slate-300 mb-2">Primary Contact</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-user text-slate-500"></i>
+                            </div>
+                            <input type="text" name="contact_name" id="contact_name" required
+                                class="pl-11 w-full bg-dark-900 border border-white/10 text-white rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3 transition-colors">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="contact_email" class="block text-sm font-semibold text-slate-300 mb-2">Work Email</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-envelope text-slate-500"></i>
+                            </div>
+                            <input type="email" name="contact_email" id="contact_email" required
+                                class="pl-11 w-full bg-dark-900 border border-white/10 text-white rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3 transition-colors">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 flex gap-4">
+                    <i class="fas fa-info-circle text-blue-400 mt-0.5 text-lg flex-shrink-0"></i>
+                    <p class="text-sm text-blue-200">
+                        Upon submission, you will securely pay the $499 deposit via Stripe Checkout. If we determine HangarLinks is not the right fit for your facility during our first call, this is 100% instantly refundable.
+                    </p>
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold text-lg rounded-xl px-8 py-4 transition-all hover:shadow-[0_0_20px_rgba(37,99,235,0.4)] flex justify-center items-center group">
+                    Proceed to Secure Checkout
+                    <i class="fas fa-arrow-right ml-3 group-hover:translate-x-1 transition-transform"></i>
+                </button>
+            </form>
+            
+            <div class="mt-6 flex justify-center items-center gap-6 opacity-40 grayscale">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" class="h-6">
+                <!-- Trust badge text instead of broken image links -->
+                <span class="text-white text-xs font-bold tracking-widest uppercase"><i class="fas fa-lock mr-1"></i> SECURE ENCRYPTED</span>
+            </div>
+        </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-xml-doc.min.js"></script>
 {% endblock %}
